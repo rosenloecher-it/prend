@@ -1,0 +1,160 @@
+import datetime
+import logging
+import requests
+import typing
+from requests.auth import HTTPBasicAuth
+from typing import Optional
+from prend.config import Config
+from prend.channel import Channel, ChannelType
+from prend.oh.oh_event import OhEvent, OhIllegalEventException
+from prend.state import State
+
+
+_logger = logging.getLogger(__name__)
+
+
+class OhRestException(Exception):
+    pass
+
+
+class OhRest:
+    def __init__(self, config: Config):
+        self._rest_base_url = config.oh_rest_base_url
+        self._username = config.oh_username
+        self._password = config.oh_password
+        self._timeout = config.timeout or None
+
+        self._session = None
+
+    def __enter__(self):
+        self.open()
+        return self
+
+    def __exit__(self, *args):
+        self.close()
+
+    def open(self):
+        self._session = requests.Session()
+        self._session.headers['accept'] = 'application/json'
+        if self._username:
+            self._session.auth = HTTPBasicAuth(self._username, self._password)
+
+    def close(self):
+        if self._session:
+            self._session.close()
+            self._session = None
+
+    def fetch_all(self):
+        events = []
+        self.fetch_items(events)
+        self.fetch_things(events)
+        return events
+
+    def fetch_items(self, events: list) -> None:
+        time_start_loading = datetime.datetime.now()
+        res = self._req_get('/items/')
+        for json_data in res:
+            event = self._fetch_item(time_start_loading, json_data)
+            if event:
+                events.append(event)
+
+    @staticmethod
+    def _fetch_item(time_start_loading, json_data) -> Optional[OhEvent]:
+        try:
+            # _logger.info(json_data)
+            channel_type = None
+            type_string = json_data['type']
+            if type_string:
+                type_string = type_string.strip().upper()
+                channel_type = ChannelType.ITEM
+                if type_string == 'GROUP':
+                    channel_type = ChannelType.GROUP
+
+            if channel_type in [ChannelType.ITEM, ChannelType.GROUP]:
+                event = OhEvent.create_from_state_json(json_data, channel_type)
+            else:
+                raise OhRestException('unknown item type({})!'.format(type_string))
+
+            if not event.is_valid():
+                raise OhIllegalEventException(event)
+
+            event.state.last_change = time_start_loading
+            return event
+
+        except Exception as ex:
+            _logger.exception(ex)
+            _logger.error('faulty item/group json:\n%s', json_data)
+            return None
+
+    def fetch_things(self, events: list) -> None:
+        time_start_loading = datetime.datetime.now()
+        res = self._req_get('/things/')
+        for json_data in res:
+            event = self._fetch_thing(time_start_loading, json_data)
+            if event:
+                events.append(event)
+
+    @staticmethod
+    def _fetch_thing(time_start_loading, json_data) -> Optional[OhEvent]:
+        try:
+            # _logger.info(json_data)
+            event = OhEvent.create_from_thing_json(json_data)
+            if not event.is_valid():
+                raise OhIllegalEventException(event)
+
+            event.state.last_change = time_start_loading
+            return event
+        except Exception as ex:
+            _logger.exception(ex)
+            _logger.error('faulty thing json:\n%s', json_data)
+            return None
+
+    @staticmethod
+    def _check_req_return(req: requests.Response) -> None:
+        if not req or req.status_code == 0:
+            # raise_for_status won't raise an exception
+            raise ValueError('invalid request object is None!')
+        if not (200 <= req.status_code < 300):
+            req.raise_for_status()
+
+    def send(self, send_command: bool, oh_channel: Channel, state_in):
+        if not oh_channel or not oh_channel.is_valid():
+            raise ValueError()
+        if oh_channel.type not in [ChannelType.ITEM, ChannelType.GROUP]:
+            raise ValueError()
+
+        if type(state_in) is State:
+            value_state = state_in.value
+        else:
+            value_state = state_in
+
+        if send_command and value_state is None:
+            _logger.warning('cannot send None/UNDEF via COMMAND => use UPDATE instead!')
+            # noinspection PyUnusedLocal
+            send_command = False
+            return
+
+        item_name = oh_channel.name
+        value_json = State.convert_to_json(value_state)
+
+        if send_command:
+            url = '/items/{}'.format(item_name)
+            _logger.info('send POST COMMAND: "%s" => %s', value_json, url)
+            self._req_post(url, data=value_json)
+        else:
+            url = '/items/{}/state'.format(item_name)
+            _logger.info('send PUT UPDATE: "%s" => %s', value_json, url)
+            self._req_put(url, data=value_json)
+
+    def _req_get(self, uri_path: str) -> typing.Any:
+        req = self._session.get(self._rest_base_url + uri_path, timeout=self._timeout)
+        self._check_req_return(req)
+        return req.json()
+
+    def _req_post(self, uri_path: str, data: typing.Optional[dict] = None) -> None:
+        req = self._session.post(self._rest_base_url + uri_path, data=data, timeout=self._timeout)
+        self._check_req_return(req)
+
+    def _req_put(self, uri_path: str, data: typing.Optional[dict] = None) -> None:
+        req = self._session.put(self._rest_base_url + uri_path, data=data, timeout=self._timeout)
+        self._check_req_return(req)
