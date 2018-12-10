@@ -11,7 +11,7 @@ from prend.action import Action, OhIllegalActionException
 _logger = logging.getLogger(__name__)
 
 
-class OhDispatcherException(Exception):
+class DispatcherException(Exception):
     pass
 
 
@@ -40,7 +40,7 @@ class Dispatcher(DispatcherActionSink):
         if not channel or not channel.is_valid():
             raise OhIllegalChannelException(channel)
         if not listeners:
-            raise OhDispatcherException('invalid listener (None)!')
+            raise DispatcherException('invalid listener (None)!')
 
         listener = ActionListener()
         listener.channel = channel
@@ -73,8 +73,8 @@ class Dispatcher(DispatcherActionSink):
         max_queued_actions = 1000
         count_queued_actions = self._action_queue.qsize()
         if count_queued_actions > max_queued_actions:
-            raise OhDispatcherException('max queued actions exceeded ({} > {})!'
-                                        .format(count_queued_actions, max_queued_actions))
+            raise DispatcherException('max queued actions exceeded ({} > {})!'
+                                      .format(count_queued_actions, max_queued_actions))
 
         with self._lock_channel_listeners:
             listeners = self._channel_listeners.get(root_action.channel)
