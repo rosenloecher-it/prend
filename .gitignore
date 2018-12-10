@@ -81,6 +81,7 @@ celerybeat-schedule
 .env
 .venv
 __test__/
+__work__/
 env.bak/
 env/
 ENV/
