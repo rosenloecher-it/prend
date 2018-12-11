@@ -1,4 +1,5 @@
 import prend
+from prend.constants import Constants
 from setuptools import setup
 
 setup(name='prend',

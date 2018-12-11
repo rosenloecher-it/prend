@@ -70,12 +70,6 @@ class SetupTest:
         return out
 
     @classmethod
-    def get_config_file(cls):
-        project_dir = cls.get_project_dir()
-        out = os.path.join(project_dir, '{}{}'.format(ConfigLoader.app_name, Constants.config_ext))
-        return out
-
-    @classmethod
     def get_config(cls):
         config_file = SetupTest.get_def_config_file()
         args_in = '--config {} --foreground'.format(config_file)

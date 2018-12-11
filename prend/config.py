@@ -220,11 +220,11 @@ class ConfigLoader:
         return Convert.convert_to_bool(cls._read_from_config_parser(parser, section, key), default_value)
 
     @staticmethod
-    def add_to_rule_config(dict, section_name, value_name, value):
-        section = dict.get(section_name)
+    def add_to_rule_config(ruleconf, section_name, value_name, value):
+        section = ruleconf.get(section_name)
         if not section:
             section = {}
-            dict[section_name] = section
+            ruleconf[section_name] = section
         section[value_name] = value
 
     @classmethod
@@ -244,7 +244,8 @@ class ConfigLoader:
             section_logging = 'logging'
             config.logfile = cls._read_from_config_parser(file_reader, section_logging, 'logfile')
             config.loglevel = cls._read_from_config_parser(file_reader, section_logging, 'loglevel')
-            config.log_delete_at_start = cls._read_bool_config_parser(file_reader, section_logging, 'delete_at_start', False)
+            config.log_delete_at_start = \
+                cls._read_bool_config_parser(file_reader, section_logging, 'delete_at_start', False)
 
             section = 'openhab'
             config.oh_rest_base_url = cls._read_from_config_parser(file_reader, section, 'rest_base_url')
@@ -284,7 +285,6 @@ class ConfigLoader:
             cls.add_to_rule_config(config.rule_config, section_system, 'work_dir', config.work_dir)
             cls.add_to_rule_config(config.rule_config, section_system, 'pid_file', config.pid_file)
             cls.add_to_rule_config(config.rule_config, section_system, 'config_file', config.config_file)
-
 
         except Exception as ex:
             if init_app_do_not_raise:

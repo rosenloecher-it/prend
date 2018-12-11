@@ -1,7 +1,6 @@
-import os
 import unittest
 from prend.channel import Channel, ChannelType
-from prend.config import Config, ConfigLoader
+from prend.config import ConfigLoader
 from prend.rule import Rule
 from prend.state import State, StateType
 from typing import Optional
@@ -44,7 +43,6 @@ class MockRule(Rule):
 class TestRule(unittest.TestCase):
 
     def test_get_config(self):
-
 
         rule = MockRule()
         section_name = 'section'

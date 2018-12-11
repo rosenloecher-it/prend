@@ -1,4 +1,3 @@
-import sys
 import unittest
 from test.setup_test import SetupTest
 from prend.config import Config, ConfigLoader
@@ -82,7 +81,6 @@ class TestCliArgs(unittest.TestCase):
         args_out = ConfigLoader.parse_cli(args_in.split())
         print('args_out=', args_out)
         self.assertTrue(args_out.exit_code is not None)
-
 
         options = ['--start', '--stop', '--toogle', '--foreground', '--status', '--ensure']
 

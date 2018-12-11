@@ -15,7 +15,7 @@ class SampleRule(Rule):
     def register_actions(self) -> None:
         _logger.info('register_actions')
 
-        #_logger.info('show config: {}'.format(self._config))
+        # _logger.info('show config: {}'.format(self._config))
         # better access confif via self.get_config*
 
         # create cron job - syntax see https://github.com/dbader/schedule

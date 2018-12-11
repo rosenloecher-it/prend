@@ -113,7 +113,8 @@ class Daemon:
     def write_pidfile(self):
         atexit.register(self.delete_pidfile)  # Make sure pid file is removed if we quit
         pid = str(os.getpid())
-        open(self.pidfile, 'w+').write("%s\n" % pid)  # the pid has to stay open! it is closed automatically at end of daemon.
+        # the pid has to stay open! it is closed automatically at end of daemon.
+        open(self.pidfile, 'w+').write("%s\n" % pid)
         _logger.info('deamon started (pid=%s)', pid)
 
     def shutdown(self):

@@ -1,10 +1,8 @@
-import sys
 import unittest
 from prend.tools.convert import Convert
 
 
 class TestConvert(unittest.TestCase):
-
 
     def test_convert_to_bool(self):
 
