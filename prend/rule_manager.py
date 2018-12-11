@@ -106,7 +106,7 @@ class RuleManager(Daemon):
             self._rest.open()
             self.open_rules()
 
-            wait_check_observer_sec = 10
+            wait_check_observer_sec = 15
             last_check_observer = datetime.datetime.now()
 
             wait_alive_message_sec = 60
