@@ -15,13 +15,21 @@ class Rule(ABC):
     def __init__(self):
         self._dispatcher = None
         self._oh_gateway = None
+        self._config = None
 
     def __repr__(self) -> str:
         return '{}()'.format(self.__class__.__name__)
 
-    def open(self, oh_gateway: OhGateway, dispatcher: Dispatcher) -> None:
+    def set_config(self, config):
+        self._config = config
+
+    def set_dispatcher(self, dispatcher):
         self._dispatcher = dispatcher
+
+    def set_oh_gateway(self, oh_gateway):
         self._oh_gateway = oh_gateway
+
+    def open(self) -> None:
         self.register_actions()
 
     def is_open(self) -> bool:
