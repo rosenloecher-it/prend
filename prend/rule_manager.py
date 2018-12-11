@@ -109,7 +109,7 @@ class RuleManager(Daemon):
             wait_check_observer_sec = 15
             last_check_observer = datetime.datetime.now()
 
-            wait_alive_message_sec = 60
+            wait_alive_message_sec = 600
             last_alive_message = datetime.datetime.now()
 
             while True:
