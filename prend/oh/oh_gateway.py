@@ -4,6 +4,7 @@ import threading
 import logging
 import datetime
 from prend.action import Action
+from prend.constants import Constants
 from prend.channel import Channel, OhIllegalChannelException
 from prend.oh.oh_event import OhEvent, OhIllegalEventException, OhNotificationType
 from prend.state import State
@@ -25,9 +26,7 @@ class OhGatewayEventSink:
 
 
 class OhGateway(OhGatewayEventSink):
-    TIME_FORCE_RELOAD_SEC = 15 * 60
     TIME_WAIT_ANOTHER_RELOAD_SEC = 15
-    TIME_WAIT_AFTER_ERROR_SEC = 10
     TIME_WAIT_LAST_RELOAD_SEC = 60
 
     def __init__(self, dispatcher, rest):
@@ -39,7 +38,7 @@ class OhGateway(OhGatewayEventSink):
         self._rest = rest
         self._cache_states_notified_reload = None
         self._cache_states_last_fetch = None
-        self._cache_states_last_error = None
+        self._last_connection_error = None
         self._rest = rest
 
     def send(self, send_command: bool, channel: Channel, state):
@@ -48,7 +47,7 @@ class OhGateway(OhGatewayEventSink):
         except Exception as ex:
             _logger.error('send failed (%s: %s)!', ex.__class__.__name__, ex)
             self._cache_states_last_fetch = None
-            self._cache_states_last_error = datetime.datetime.now()
+            self._last_connection_error = datetime.datetime.now()
             raise
 
     def get_states(self):
@@ -66,7 +65,10 @@ class OhGateway(OhGatewayEventSink):
         return state_out
 
     def is_connected(self):
-        return self._cache_states_last_fetch and not self._cache_states_last_error
+        return self._cache_states_last_fetch and not self._last_connection_error
+
+    def get_last_connection_error(self):
+        return self._last_connection_error
 
     def reset_cache_status(self):
         self._cache_states_last_fetch = None
@@ -75,15 +77,15 @@ class OhGateway(OhGatewayEventSink):
         do_reload = False
         while True:
 
-            if self._cache_states_last_error:
-                diff_error = (datetime.datetime.now() - self._cache_states_last_error).total_seconds()
-                if diff_error < self.TIME_WAIT_AFTER_ERROR_SEC:
+            if self._last_connection_error:
+                diff_error = (datetime.datetime.now() - self._last_connection_error).total_seconds()
+                if diff_error < Constants.WAIT_AFTER_CONNECTION_ERROR_SEC:
                     break
             if not self._cache_states_last_fetch:
                 do_reload = True
                 break
             diff_force = (datetime.datetime.now() - self._cache_states_last_fetch).total_seconds()
-            if diff_force > self.TIME_FORCE_RELOAD_SEC:
+            if diff_force > Constants.WAIT_FORCE_FULL_RELOAD_SEC:
                 do_reload = True
                 break
             if not self._cache_states_notified_reload:
@@ -118,13 +120,13 @@ class OhGateway(OhGatewayEventSink):
                             del self._states[channel]
 
                 self._cache_states_notified_reload = None
-                self._cache_states_last_error = None
+                self._last_connection_error = None
                 self._cache_states_last_fetch = datetime.datetime.now()
                 _logger.debug('item cache loaded')
         except Exception as ex:
             _logger.error('_cache_states failed (%s: %s)!', ex.__class__.__name__, ex)
             self._cache_states_last_fetch = None
-            self._cache_states_last_error = datetime.datetime.now()
+            self._last_connection_error = datetime.datetime.now()
 
     def _import_newer_state(self, channel: Channel, state_new: State) -> bool:
         if not channel or not channel.is_valid():
