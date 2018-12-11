@@ -18,6 +18,8 @@ class StateType(Enum):
     ROLLERSHUTTER = 10
     GROUP = 11  # value type undefined => string
     THING = 12
+    PERCENT = 13
+    HSB = 14  # color
 
     def __str__(self):
         return self.__repr__()
@@ -117,6 +119,8 @@ class State:
                 value_out = float(value_in)
             elif state_type in [StateType.CONTACT, StateType.ONOFF, StateType.SWITCH]:
                 value_out = OnOffValue.parse(value_in)
+            elif state_type == StateType.PERCENT:
+                value_out = int(value_in)
             elif state_type == StateType.THING:
                 value_out = OnlineOfflineValue.parse(value_in)
             elif state_type == StateType.DATETIME:

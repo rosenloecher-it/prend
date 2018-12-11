@@ -85,6 +85,34 @@ class TestOhEventNotify(unittest.TestCase):
         ev_cmp = OhEvent.create(OhNotificationType.ITEM_COMMAND, oh_channel, oh_state)
         self.check_notify_event(str_in, ev_cmp)
 
+    def test_create_notify_onoff_group(self):
+        str_in = '{"topic":"smarthome/items/gsLightsKids/valLiMarcCeil/statechanged","payload":"{\\\"type\\\":\\\"OnOff\\\",\\\"value\\\":\\\"ON\\\",\\\"oldType\\\":\\\"OnOff\\\",\\\"oldValue\\\":\\\"OFF\\\"}","type":"GroupItemStateChangedEvent"}'
+        oh_channel = Channel.create(ChannelType.GROUP, 'gsLightsKids')
+        oh_state = State.create(StateType.ONOFF, OnOffValue.ON)
+        ev_cmp = OhEvent.create(OhNotificationType.GROUP_CHANGE, oh_channel, oh_state)
+        self.check_notify_event(str_in, ev_cmp)
+
+    def test_create_notify_percent(self):
+        str_in = '{"topic":"smarthome/items/valLiMarcCeil/statechanged","payload":"{\\\"type\\\":\\\"Percent\\\",\\\"value\\\":\\\"50\\\",\\\"oldType\\\":\\\"Percent\\\",\\\"oldValue\\\":\\\"0\\\"}","type":"ItemStateChangedEvent"}'
+        oh_channel = Channel.create(ChannelType.ITEM, 'valLiMarcCeil')
+        oh_state = State.create(StateType.PERCENT, 50)
+        ev_cmp = OhEvent.create(OhNotificationType.ITEM_CHANGE, oh_channel, oh_state)
+        self.check_notify_event(str_in, ev_cmp)
+
+    def test_create_notify_thing(self):
+        str_in = '{"topic":"smarthome/things/hue:0200:1:hueOfficeIris/status","payload":"{\\\"status\\\":\\\"ONLINE\\\",\\\"statusDetail\\\":\\\"NONE\\\"}","type":"ThingStatusInfoEvent"}'
+        oh_channel = Channel.create(ChannelType.THING, 'hue:0200:1:hueOfficeIris')
+        oh_state = State.create(StateType.THING, OnlineOfflineValue.ONLINE)
+        ev_cmp = OhEvent.create(OhNotificationType.THING_CHANGE, oh_channel, oh_state)
+        self.check_notify_event(str_in, ev_cmp)
+
+    def test_create_notify_hsb(self):
+        str_in = '{"topic":"smarthome/items/valLiOfficeIris/statechanged","payload":"{\\\"type\\\":\\\"HSB\\\",\\\"value\\\":\\\"66,56,0\\\",\\\"oldType\\\":\\\"HSB\\\",\\\"oldValue\\\":\\\"66,56,56\\\"}","type":"ItemStateChangedEvent"}'
+        oh_channel = Channel.create(ChannelType.ITEM, 'valLiOfficeIris')
+        oh_state = State.create(StateType.HSB, '66,56,0')
+        ev_cmp = OhEvent.create(OhNotificationType.ITEM_CHANGE, oh_channel, oh_state)
+        self.check_notify_event(str_in, ev_cmp)
+
 
 # noinspection PyPep8,Pylint
 class TestOhEventItemState(unittest.TestCase):

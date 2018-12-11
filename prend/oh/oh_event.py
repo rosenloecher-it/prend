@@ -55,6 +55,7 @@ class OhNotificationType(Enum):
                 result = OhNotificationType.IGNORE
         return result
 
+
 class OhEvent:
     def __init__(self):
         self.notification_type = None
@@ -114,6 +115,15 @@ class OhEvent:
         return output
 
     @staticmethod
+    def extract_group_name(path: Optional[str]) -> Optional[str]:
+        output = None
+        if path:
+            items = path.split('/')
+            if len(items) == 5:
+                output = items[2]
+        return output
+
+    @staticmethod
     def create_from_notify_json(text: str):
         # pylint: disable=line-too-long
         # {"topic":"smarthome/items/valPvModVoltage/state","payload":"{"type":"Decimal","value":"542.20"}","type":"ItemStateEvent"}
@@ -121,7 +131,6 @@ class OhEvent:
         json_data = json.loads(text)
 
         event.notification_type = OhNotificationType.parse(json_data.get('type'))
-
 
         if event.notification_type in [OhNotificationType.ITEM_CHANGE, OhNotificationType.ITEM_COMMAND]:
 
@@ -133,13 +142,38 @@ class OhEvent:
             payload_text = json_data.get('payload')
             if payload_text:
                 payload = json.loads(payload_text)
-                state_type = StateType.parse(payload.get('type'))
+                state_text = payload.get('type')
+                state_type = StateType.parse(state_text)
                 state_value = State.convert_to_value(state_type, payload.get('value'))
                 event.state = State.create(state_type, state_value)
 
-        elif event.notification_type in [OhNotificationType.GROUP_CHANGE, OhNotificationType.THING_CHANGE]:
-            # todo implement
-            raise NotImplementedError
+        elif event.notification_type == OhNotificationType.GROUP_CHANGE:
+            channel_type = OhEvent.get_channel_type(event.notification_type)
+            channel_name = OhEvent.extract_group_name(json_data.get('topic'))
+            event.channel = Channel.create(channel_type, channel_name)
+
+            # embedded structure as string!
+            payload_text = json_data.get('payload')
+            if payload_text:
+                payload = json.loads(payload_text)
+                state_text = payload.get('type')
+                state_type = StateType.parse(state_text)
+                state_value = State.convert_to_value(state_type, payload.get('value'))
+                event.state = State.create(state_type, state_value)
+
+        elif event.notification_type in [OhNotificationType.THING_CHANGE]:
+            channel_type = OhEvent.get_channel_type(event.notification_type)
+            channel_name = OhEvent.extract_item_name(json_data.get('topic'))
+            event.channel = Channel.create(channel_type, channel_name)
+
+            # embedded structure as string!
+            payload_text = json_data.get('payload')
+            if payload_text:
+                payload = json.loads(payload_text)
+                state_type = StateType.THING
+                state_value = State.convert_to_value(state_type, payload.get('status'))
+                event.state = State.create(state_type, state_value)
+
         elif event.notification_type in [OhNotificationType.RELOAD, OhNotificationType.IGNORE]:
             pass  # do nothing
         else:
@@ -190,7 +224,6 @@ class OhEvent:
         event.state.last_change = datetime.datetime.now()
 
         return event
-
 
     @staticmethod
     def get_channel_type(event_type: Optional[OhNotificationType]) -> Optional[ChannelType]:
