@@ -30,12 +30,7 @@ class RuleManager(Daemon):
         self._observer = None
 
     def status(self):
-
-        def print_func(text):
-            print(text)
-
-        self.is_running(print_func)
-
+        super().status()
         self._config.print(True)
 
     def register_rule(self, rule):

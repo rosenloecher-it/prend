@@ -190,6 +190,11 @@ class Daemon:
             else:
                 raise ex
 
+    def status(self):
+        def print_func(text):
+            print(text)
+        self.is_running(print_func)
+
     def toogle(self):
         """
         toogle deamon state
