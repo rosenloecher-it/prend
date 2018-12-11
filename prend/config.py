@@ -259,7 +259,7 @@ class ConfigLoader:
             app_name = cls.get_app_name()
 
             if not config.loglevel:
-                config.loglevel = Constants.default_loglevel
+                config.loglevel = 'info'
 
             if not config.logfile:
                 config.logfile = '/var/log/{}.log'.format(app_name)
