@@ -28,7 +28,7 @@ class LoggingHelper:
                         os.remove(config.logfile)
 
                 logging.basicConfig(
-                    format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
+                    format='%(asctime)s [%(levelname)8s] <%(process)5d> %(name)s: %(message)s',
                     level=cls.get_loglevel(config.loglevel),
                     handlers=[
                         logging.handlers.RotatingFileHandler(config.logfile, maxBytes=(1048576 * 10), backupCount=5),
