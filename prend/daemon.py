@@ -29,6 +29,7 @@ class Daemon:
         self.is_deamon = False
 
     def _do_exit(self, exit_code):
+        # _logger.debug('_do_exit - {}'.format(exit_code))
         sys.exit(exit_code)
 
     def daemonize(self):
@@ -158,16 +159,32 @@ class Daemon:
 
         # Try killing the daemon process
         try:
-            i = 0
+            time_sleep = 0.3
+            time_wait_for_gracefully_shutdown = 3  # seconds
+
+            _logger.debug('os.kill(%s, %s)', pid, signal.SIGTERM)
+            os.kill(pid, signal.SIGTERM)
+            time.sleep(0.3)
+
+            time_to_wait = time_wait_for_gracefully_shutdown
             while 1:
-                os.kill(pid, signal.SIGTERM)
-                time.sleep(0.1)
-                i = i + 1
-                if i % 10 == 0:
-                    os.kill(pid, signal.SIGHUP)
+                if not os.path.exists('/proc/%d' % pid):
+                    break
+                if time_to_wait < 0:  # more than x seconds
+                    break
+                time.sleep(time_sleep)
+                time_to_wait = time_to_wait - time_sleep
+
+            while 1:
+                if not os.path.exists('/proc/%d' % pid):
+                    break
+                _logger.debug('os.kill(%s, %s)', pid, signal.SIGHUP)
+                os.kill(pid, signal.SIGHUP)
+                time.sleep(time_sleep)
 
         except OSError as ex:
             if ex.errno == errno.ESRCH:
+                _logger.debug('ESRCH - no such process (%d) => OK', pid)
                 if os.path.exists(self.pidfile):
                     os.remove(self.pidfile)
             else:
@@ -181,6 +198,15 @@ class Daemon:
             self.stop()
         else:
             self.start()
+
+    def ensure_started(self):
+        if self.is_running():
+            return
+
+        def notify_func(text):
+            _logger.error(text)
+        self.is_running(notify_func)  # show output
+        self.start()
 
     def restart(self):
         """
@@ -200,21 +226,21 @@ class Daemon:
             pid = None
         return pid
 
-    def is_running(self, print_func=None):
+    def is_running(self, notify_func=None):
         pid = self.get_pid()
 
         if pid is None:
-            if print_func:
-                print_func('daemon is stopped')
+            if notify_func:
+                notify_func('daemon is stopped')
             return False
 
         if os.path.exists('/proc/%d' % pid):
-            if print_func:
-                print_func('daemon (pid={}) is running...'.format(pid))
+            if notify_func:
+                notify_func('daemon (pid={}) is running...'.format(pid))
             return True
 
-        if print_func:
-            print_func('daemon (pid=%s) is killed', pid)
+        if notify_func:
+            notify_func('daemon (pid=%s) is killed'.format(pid))
         return False
 
     def run(self):

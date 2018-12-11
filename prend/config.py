@@ -60,6 +60,11 @@ class CliParser(argparse.ArgumentParser):
             help='mode: show deamon status'
         )
         parser.add_argument(
+            '--ensure', '-e',
+            action='store_true',
+            help='mode: ensures that the daemon is running, start if necessary'
+        )
+        parser.add_argument(
             '--toogle',
             action='store_true',
             help='mode: toogle deamon'
@@ -308,6 +313,8 @@ class ConfigLoader:
             if config.parsed.status:
                 counter += 1
             if config.parsed.foreground:
+                counter += 1
+            if config.parsed.ensure:
                 counter += 1
 
         if counter > 1:

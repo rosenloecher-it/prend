@@ -4,9 +4,8 @@ import traceback
 from prend.config import ConfigLoader
 from prend.logging_helper import LoggingHelper
 
+
 # pylint: disable=broad-except
-
-
 class Process:
     _config = None
     _rule_manager = None
@@ -64,6 +63,9 @@ class Process:
             elif self._config.parsed.foreground:
                 logger.debug('run(foreground)')
                 self._rule_manager.start_foreground()
+            elif self._config.parsed.ensure:
+                logger.debug('run(ensure)')
+                self._rule_manager.ensure_started()
 
             return 0
         except Exception as ex:
