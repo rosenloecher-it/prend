@@ -106,8 +106,8 @@ class RuleManager(Daemon):
             self._rest.open()
             self.open_rules()
 
-            wait_check_observer_sec = 15
-            last_check_observer = datetime.datetime.now()
+            wait_check_connection_sec = 15
+            last_check_connection = datetime.datetime.now()
 
             wait_alive_message_sec = 600
             last_alive_message = datetime.datetime.now()
@@ -116,13 +116,13 @@ class RuleManager(Daemon):
                 something_processed = False
 
                 # check observer if running
-                diff = datetime.datetime.now() - last_check_observer
-                if diff.seconds >= wait_check_observer_sec:
-                    last_check_observer = datetime.datetime.now()
+                diff = datetime.datetime.now() - last_check_connection
+                if diff.seconds >= wait_check_connection_sec:
+                    last_check_connection = datetime.datetime.now()
                     self._check_and_start_observer()
 
-                if self._oh_gateway.cache_states_if_needed():
-                    something_processed = True
+                    if self._oh_gateway.cache_states_if_needed():
+                        something_processed = True
 
                 if self._dispatcher.dispatch():
                     something_processed = True
