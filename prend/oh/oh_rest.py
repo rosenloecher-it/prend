@@ -111,9 +111,6 @@ class OhRest:
 
     @staticmethod
     def _check_req_return(req: requests.Response) -> None:
-        if not req or req.status_code == 0:
-            # raise_for_status won't raise an exception
-            raise ValueError('invalid request object is None!')
         if not (200 <= req.status_code < 300):
             req.raise_for_status()
 

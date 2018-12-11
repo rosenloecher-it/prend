@@ -64,8 +64,6 @@ class TestOhRest(unittest.TestCase):
         req.status_code = 299
         self.check_check_req_return(True, req)
 
-        req.status_code = 0
-        self.check_check_req_return(False, req)
         req.status_code = 400
         self.check_check_req_return(False, req)
 
