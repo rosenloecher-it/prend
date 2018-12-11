@@ -9,7 +9,7 @@ _logger = logging.getLogger(__name__)
 
 
 # inherit for Rule to get all
-class TestRule(Rule):
+class SampleRule(Rule):
 
     # (overwriten) register your notifications and do some initialisation
     def register_actions(self) -> None:

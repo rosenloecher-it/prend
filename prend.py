@@ -1,6 +1,6 @@
 import sys
 from prend.process import Process
-from prend_app.test_rule import TestRule
+from prend_app.sample_rule import SampleRule
 
 
 def main():
@@ -11,7 +11,7 @@ def main():
         sys.exit(exit_code)
 
     # todo - register your rule classes
-    process.register_rule(TestRule())
+    process.register_rule(SampleRule())
 
     # run endless loop
     return process.run()
