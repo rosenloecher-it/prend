@@ -46,6 +46,11 @@ class SampleRule(Rule):
 
             # get item state
             dummy_number = self.get_item_state_value('dummy_number')
+
+            if dummy_number is None:
+                dummy_number = 1
+                self.send_item_command('dummy_number', dummy_number)
+
             # send command to another item (there is also a "send_item_update")
             self.send_item_command('dummy_number_2', dummy_number)
 
