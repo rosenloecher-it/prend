@@ -60,12 +60,6 @@ class LoggingHelper:
             return logging.CRITICAL
         return loglevel_def
 
-    # @classmethod
-    # def update_level(cls, config):
-    #     root_logger = logging.getLogger()
-    #     if root_logger:
-    #         root_logger.setLevel(config.loglevel)
-
     @staticmethod
     def remove_logger_console_output():
         # StreamHandler was added to log to console (additional to file)
@@ -87,3 +81,8 @@ class LoggingHelper:
         logger_temp = logging.getLogger("asyncio")
         if logger_temp:
             logger_temp.setLevel(logging.WARNING)
+
+    @staticmethod
+    def disable_output():
+        sys.stdout = os.devnull
+        sys.stderr = os.devnull

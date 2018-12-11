@@ -41,7 +41,7 @@ class TestDaemon(unittest.TestCase):
 
         self.assertTrue(daemon.is_running())
 
-        written_pid = daemon.get_pid()
+        written_pid = daemon.get_pid_from_file()
         self.assertEqual(written_pid, os.getpid())
 
         daemon.delete_pidfile()

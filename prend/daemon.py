@@ -29,6 +29,7 @@ class Daemon:
         self.is_deamon = False
 
     def _do_exit(self, exit_code):
+        LoggingHelper.disable_output()
         # _logger.debug('_do_exit - {}'.format(exit_code))
         sys.exit(exit_code)
 
@@ -106,6 +107,10 @@ class Daemon:
         except SystemExit:
             pid = None
 
+        if pid is not None:
+            if not os.path.exists('/proc/%d' % pid):
+                pid = None
+
         if pid:
             _logger.error('pidfile (%s) already exist. daemon is already running!? => exit', self.pidfile)
             self._do_exit(1)
@@ -147,7 +152,7 @@ class Daemon:
         Stop the daemon
         """
         _logger.debug('stopping...')
-        pid = self.get_pid()
+        pid = self.get_pid_from_file()
 
         if not pid:
             _logger.warning('pidfile (%s) does not exist. daemon is not running!?', self.pidfile)
@@ -160,21 +165,19 @@ class Daemon:
 
         # Try killing the daemon process
         try:
-            time_sleep = 0.3
-            time_wait_for_gracefully_shutdown = 3  # seconds
-
-            _logger.debug('os.kill(%s, %s)', pid, signal.SIGTERM)
-            os.kill(pid, signal.SIGTERM)
-            time.sleep(0.3)
+            time_sleep = 0.5
+            time_wait_for_gracefully_shutdown = 5  # seconds
 
             time_to_wait = time_wait_for_gracefully_shutdown
             while 1:
-                if not os.path.exists('/proc/%d' % pid):
-                    break
+                _logger.debug('os.kill(%s, %s)', pid, signal.SIGTERM)
+                os.kill(pid, signal.SIGTERM)
                 if time_to_wait < 0:  # more than x seconds
                     break
                 time.sleep(time_sleep)
                 time_to_wait = time_to_wait - time_sleep
+                if not os.path.exists('/proc/%d' % pid):
+                    break
 
             while 1:
                 if not os.path.exists('/proc/%d' % pid):
@@ -222,7 +225,7 @@ class Daemon:
             self.stop()
         return self.start()
 
-    def get_pid(self):
+    def get_pid_from_file(self):
         try:
             with open(self.pidfile, 'r') as pidhandle:
                 pid = int(pidhandle.read().strip())
@@ -233,7 +236,7 @@ class Daemon:
         return pid
 
     def is_running(self, notify_func=None):
-        pid = self.get_pid()
+        pid = self.get_pid_from_file()
 
         if pid is None:
             if notify_func:
