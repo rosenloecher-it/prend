@@ -46,9 +46,12 @@ class Action:
         return True
 
     def __repr__(self) -> str:
-        return '{}({} | {} => {}; | {} (old: {}))'\
-            .format(self.__class__.__name__, self.notification_type, self.channel
-                    , self.listener, self.state_new, self.state_old)
+        if self.channel and self.channel.type == ChannelType.CRON:
+            return '{}({})'.format(self.__class__.__name__, self.channel)
+        else:
+            return '{}({} | {} => {}; | {} (old: {}))'\
+                .format(self.__class__.__name__, self.notification_type, self.channel
+                        , self.listener, self.state_new, self.state_old)
 
     def is_valid(self) -> bool:
         if not self.channel:

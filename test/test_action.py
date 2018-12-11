@@ -13,6 +13,9 @@ class TestOhAction(unittest.TestCase):
         action = Action()
         print(action)
 
+        action = Action.create_cron_action('cron1')
+        print(action)
+
     def test_eq(self):
         orig = Action()
         orig.channel = Channel.create(ChannelType.ITEM, 'channel')
