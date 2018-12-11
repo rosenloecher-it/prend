@@ -1,42 +1,7 @@
 import sys
 import unittest
 from test.setup_test import SetupTest
-from prend.config import ConfigLoader
-
-
-class TestConfigLoader(unittest.TestCase):
-
-    def test_get_app_name(self):
-
-        app_name = ConfigLoader.get_app_name()
-        print('app_name =', app_name)
-
-        self.assertTrue(len(app_name) > 0)
-        self.assertTrue(app_name.find('/') < 0)
-        self.assertTrue(app_name.find('\\') < 0)
-
-    def test_get_def_config_file(self):
-        app_name = ConfigLoader.get_app_name()
-        print('app_name =', app_name)
-
-        config_file = ConfigLoader.get_def_config_file1()
-        print('config_file1 =', config_file)
-
-        config_file = ConfigLoader.get_def_config_file2()
-        print('config_file2 =', config_file)
-
-    def test_convert_to_bool(self):
-
-        self.assertEqual(ConfigLoader.convert_to_bool(' trUe ', False), True)
-        self.assertEqual(ConfigLoader.convert_to_bool(' Yes ', False), True)
-        self.assertEqual(ConfigLoader.convert_to_bool(' 1 ', False), True)
-
-        self.assertEqual(ConfigLoader.convert_to_bool(' fAlse ', False), False)
-        self.assertEqual(ConfigLoader.convert_to_bool(' no ', False), False)
-        self.assertEqual(ConfigLoader.convert_to_bool(' 0 ', False), False)
-
-        self.assertEqual(ConfigLoader.convert_to_bool(' ddddd ', False), False)
-        self.assertEqual(ConfigLoader.convert_to_bool(' ddddd ', True), True)
+from prend.config import Config, ConfigLoader
 
 
 class TestCliArgs(unittest.TestCase):
@@ -105,7 +70,21 @@ class TestCliArgs(unittest.TestCase):
         args_out = ConfigLoader.parse_cli('-f'.split())
         self.assertTrue(args_out.parsed.foreground)
 
-        options = ['--start', '--stop', '--toogle', '--foreground', '--status']
+        args_out = ConfigLoader.parse_cli('--ensure'.split())
+        self.assertTrue(args_out.parsed.ensure)
+        args_out = ConfigLoader.parse_cli('-e'.split())
+        self.assertTrue(args_out.parsed.ensure)
+
+        # check no mode
+        config_file = SetupTest.get_def_config_file()
+        args_in = '--config {}'.format(config_file)
+        print('args_in=', args_in)
+        args_out = ConfigLoader.parse_cli(args_in.split())
+        print('args_out=', args_out)
+        self.assertTrue(args_out.exit_code is not None)
+
+
+        options = ['--start', '--stop', '--toogle', '--foreground', '--status', '--ensure']
 
         for i in range(0, len(options) - 1):
             option1 = options[i]
@@ -121,6 +100,47 @@ class TestCliArgs(unittest.TestCase):
     def test_ensure_abs_path_to_config(self):
         out = ConfigLoader._ensure_abs_path_to_config('/home/xxx/prend/prend.conf', './__test__')
         self.assertEqual('/home/xxx/prend/__test__', out)
+
+
+class TestConfig(unittest.TestCase):
+
+    def test_print(self):
+        config = Config()
+
+        # no crah
+        config.print()
+        config.print(True)
+
+        config.config_file = 'test'
+        config.oh_rest_base_url = 'test'
+        config.oh_username = 'test'
+        config.pid_file = 'test'
+        config.work_dir = 'test'
+
+        config.print()
+        config.print(True)
+
+
+class TestConfigLoader(unittest.TestCase):
+
+    def test_get_app_name(self):
+
+        app_name = ConfigLoader.get_app_name()
+        print('app_name =', app_name)
+
+        self.assertTrue(len(app_name) > 0)
+        self.assertTrue(app_name.find('/') < 0)
+        self.assertTrue(app_name.find('\\') < 0)
+
+    def test_get_def_config_file(self):
+        app_name = ConfigLoader.get_app_name()
+        print('app_name =', app_name)
+
+        config_file = ConfigLoader.get_def_config_file1()
+        print('config_file1 =', config_file)
+
+        config_file = ConfigLoader.get_def_config_file2()
+        print('config_file2 =', config_file)
 
 
 if __name__ == '__main__':

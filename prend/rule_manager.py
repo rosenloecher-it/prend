@@ -94,7 +94,7 @@ class RuleManager(Daemon):
 
     def open_rules(self):
         for rule in self._rules:
-            rule.set_config(self._config)
+            rule.set_config(self._config.rule_config)
             rule.set_dispatcher(self._dispatcher)
             rule.set_oh_gateway(self._oh_gateway)
             rule.open()

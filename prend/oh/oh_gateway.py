@@ -42,9 +42,9 @@ class OhGateway(OhGatewayEventSink):
         self._cache_states_last_error = None
         self._rest = rest
 
-    def send(self, send_command: bool, oh_channel: Channel, state):
+    def send(self, send_command: bool, channel: Channel, state):
         try:
-            self._rest.send(send_command, oh_channel, state)
+            self._rest.send(send_command, channel, state)
         except Exception as ex:
             _logger.error('send failed (%s: %s)!', ex.__class__.__name__, ex)
             self._cache_states_last_fetch = None

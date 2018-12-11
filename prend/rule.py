@@ -1,9 +1,11 @@
 import schedule
 from abc import ABC, abstractmethod
-from prend.dispatcher import Dispatcher
 from prend.channel import Channel, ChannelType
+from prend.dispatcher import Dispatcher
 from prend.oh.oh_gateway import OhGateway
 from prend.state import State
+from prend.tools.convert import Convert
+from typing import Optional
 
 
 class RuleException(Exception):
@@ -48,6 +50,30 @@ class Rule(ABC):
 
     def subscribe_cron_actions(self, cron_key: str, job: schedule.Job) -> None:
         self._dispatcher.register_cron_listener(cron_key, job, self)
+
+    def get_config(self, section_name:str, value_name:str, fallback:Optional[str]=None):
+        section = self._config.get(section_name)
+        if not section:
+            return fallback
+        value = section.get(value_name)
+        if value is None:
+            return fallback
+        return value
+
+    def get_config_bool(self, section_name:str, value_name:str, fallback:Optional[bool]=None):
+        value_str = self.get_config(section_name, value_name, None)
+        value = Convert.convert_to_bool(value_str, fallback)
+        return value
+
+    def get_config_int(self, section_name:str, value_name:str, fallback:Optional[int]=None):
+        value_str = self.get_config(section_name, value_name, None)
+        value = Convert.convert_to_int(value_str, fallback)
+        return value
+
+    def get_config_float(self, section_name:str, value_name:str, fallback:Optional[float]=None):
+        value_str = self.get_config(section_name, value_name, None)
+        value = Convert.convert_to_float(value_str, fallback)
+        return value
 
     def get_channels(self):
         states = self.get_states()

@@ -3,6 +3,7 @@ import configparser
 import os
 import sys
 from prend.constants import Constants
+from prend.tools.convert import Convert
 
 
 # https://docs.python.org/3/library/argparse.html
@@ -99,6 +100,7 @@ class Config:
         self.pid_file = None
         self.work_dir = None
         self.timeout = None
+        self.rule_config = None  # just a dict
 
     def __repr__(self) -> str:
         return '{}(exit={}; conffile={}; rest={}; log={}:{}; parsed=<{}>)'\
@@ -209,24 +211,21 @@ class ConfigLoader:
     @classmethod
     def _read_from_config_parser(cls, parser, section, key):
         try:
-            return parser[section][key]
+            return parser[section].get(key, fallback=None)
         except KeyError:
             return None
 
     @classmethod
     def _read_bool_config_parser(cls, parser, section, key, default_value) -> bool:
-        return cls.convert_to_bool(cls._read_from_config_parser(parser, section, key), default_value)
+        return Convert.convert_to_bool(cls._read_from_config_parser(parser, section, key), default_value)
 
     @staticmethod
-    def convert_to_bool(text_in: str, default_value: bool) -> bool:
-        if not text_in:
-            return default_value
-        text_in = text_in.strip().lower()
-        if text_in == 'false' or text_in == '0' or text_in == 'no':
-            return False
-        if text_in == 'true' or text_in == '1' or text_in == 'yes':
-            return True
-        return default_value
+    def add_to_rule_config(dict, section_name, value_name, value):
+        section = dict.get(section_name)
+        if not section:
+            section = {}
+            dict[section_name] = section
+        section[value_name] = value
 
     @classmethod
     def update_config_from_file(cls, config, init_app_do_not_raise=False):
@@ -242,19 +241,19 @@ class ConfigLoader:
             file_reader = configparser.ConfigParser()
             file_reader.read(config.config_file)
 
-            section = 'logging'
-            config.logfile = cls._read_from_config_parser(file_reader, section, 'logfile')
-            config.loglevel = cls._read_from_config_parser(file_reader, section, 'loglevel')
-            config.log_delete_at_start = cls._read_bool_config_parser(file_reader, section, 'delete_at_start', False)
+            section_logging = 'logging'
+            config.logfile = cls._read_from_config_parser(file_reader, section_logging, 'logfile')
+            config.loglevel = cls._read_from_config_parser(file_reader, section_logging, 'loglevel')
+            config.log_delete_at_start = cls._read_bool_config_parser(file_reader, section_logging, 'delete_at_start', False)
 
             section = 'openhab'
             config.oh_rest_base_url = cls._read_from_config_parser(file_reader, section, 'rest_base_url')
             config.oh_username = cls._read_from_config_parser(file_reader, section, 'username')
             config.oh_password = cls._read_from_config_parser(file_reader, section, 'password')
 
-            section = 'system'
-            config.pid_file = cls._read_from_config_parser(file_reader, section, 'pid_file')
-            config.work_dir = cls._read_from_config_parser(file_reader, section, 'work_dir')
+            section_system = 'system'
+            config.pid_file = cls._read_from_config_parser(file_reader, section_system, 'pid_file')
+            config.work_dir = cls._read_from_config_parser(file_reader, section_system, 'work_dir')
 
             app_name = cls.get_app_name()
 
@@ -278,6 +277,14 @@ class ConfigLoader:
 
             if not os.path.isdir(config.work_dir):
                 raise FileNotFoundError('error: work dir does not exists! ({})'.format(config.work_dir))
+
+            config.rule_config = {s: dict(file_reader.items(s)) for s in file_reader.sections()}
+            cls.add_to_rule_config(config.rule_config, section_logging, 'logfile', config.logfile)
+            cls.add_to_rule_config(config.rule_config, section_logging, 'loglevel', config.loglevel)
+            cls.add_to_rule_config(config.rule_config, section_system, 'work_dir', config.work_dir)
+            cls.add_to_rule_config(config.rule_config, section_system, 'pid_file', config.pid_file)
+            cls.add_to_rule_config(config.rule_config, section_system, 'config_file', config.config_file)
+
 
         except Exception as ex:
             if init_app_do_not_raise:
