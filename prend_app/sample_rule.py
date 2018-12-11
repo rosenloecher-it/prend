@@ -60,5 +60,3 @@ class SampleRule(Rule):
 
         # in general: see "State" for values and "Channel" for channels of items + things
 
-
-

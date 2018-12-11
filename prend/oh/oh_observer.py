@@ -106,7 +106,8 @@ class OhObserver(threading.Thread):
             async for event in self._aiosseclient(url, last_id):
                 self._handle_event(event)
 
-            _logger.error('_loop - exiting "normally", but expected to run forever!')
+            # normally there was an exception in another thread
+            _logger.debug('_loop - exiting "normally", but expected to run forever!')
 
         except (
                 aiohttp.client_exceptions.ClientError,
@@ -122,6 +123,9 @@ class OhObserver(threading.Thread):
     def shutdown(self) -> None:
         pass
 
+    def is_connected(self):
+        return self.is_alive()
+
     def run(self):
 
         event_loop = None
@@ -129,7 +133,8 @@ class OhObserver(threading.Thread):
             event_loop = asyncio.new_event_loop()
             event_loop.run_until_complete(self._loop())
 
-            _logger.error('run - exiting "normally", but expected to run forever!')
+            # normally there was an exception in another thread
+            _logger.debug('run - exiting "normally", but expected to run forever!')
 
         except (
                 aiohttp.client_exceptions.ClientError,

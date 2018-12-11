@@ -1,6 +1,7 @@
 import copy
 import datetime
 import logging
+import requests
 import schedule
 import threading
 from queue import Queue, Empty
@@ -118,8 +119,9 @@ class Dispatcher(DispatcherActionSink):
                 action.listener.notify_action(action)
                 # _logger.debug('dispatch_action(%s)', action_ident)
             except Exception as ex:
-                _logger.error('error - dispatch_action(%s) failed!', action_ident)
-                _logger.exception(ex)
+                _logger.error('error - dispatch_action(%s) failed! - (%s: %s)', action_ident, ex.__class__.__name__, ex)
+                if not isinstance(ex, requests.exceptions.RequestException):
+                    _logger.exception(ex)
             return True
 
         return False

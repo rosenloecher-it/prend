@@ -9,6 +9,6 @@ class Constants:
     config_ext = ".conf"
 
     # OhGateway
-    WAIT_AFTER_CONNECTION_ERROR_SEC = 10
+    WAIT_AFTER_CONNECTION_ERROR_SEC = 20
     WAIT_FORCE_FULL_RELOAD_SEC = 15 * 60
 

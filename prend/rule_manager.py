@@ -6,6 +6,7 @@ from prend.oh.oh_rest import OhRest
 from prend.daemon import Daemon
 from prend.oh.oh_gateway import OhGateway
 from .dispatcher import Dispatcher
+from .connection_checker import ConnectionChecker
 
 
 # https://github.com/serverdensity/python-daemon
@@ -28,6 +29,7 @@ class RuleManager(Daemon):
         self._rest = OhRest(config)
         self._oh_gateway = OhGateway(self._dispatcher, self._rest)
         self._observer = None
+        self._con_checker = ConnectionChecker(self._oh_gateway)
 
     def status(self):
         super().status()
@@ -78,21 +80,15 @@ class RuleManager(Daemon):
 
         super().shutdown()
 
-    def _check_and_start_observer(self):
-        do_create = False
+    def _restart_observer(self):
+        _logger.debug('_restart_observer')
         if self._observer:
-            if not self._observer.is_alive():
-                do_create = True
-                self.shutdown_observer()
-                if self._oh_gateway:
-                    self._oh_gateway.reset_cache_status()  # likely connection error => force reload
-        else:
-            do_create = True
-        if do_create:
-            self._observer = OhObserver(self._config, self._oh_gateway)
-            self._observer.start()
+            self.shutdown_observer()
+        self._observer = OhObserver(self._config, self._oh_gateway)
+        self._observer.start()
+        self._con_checker.set_observer(self._observer)
 
-    def open_rules(self):
+    def _open_rules(self):
         for rule in self._rules:
             rule.set_config(self._config.rule_config)
             rule.set_dispatcher(self._dispatcher)
@@ -102,11 +98,13 @@ class RuleManager(Daemon):
     def run(self):
 
         try:
-            self._check_and_start_observer()
             self._rest.open()
-            self.open_rules()
+            self._restart_observer()
+            self._oh_gateway.cache_states()
 
-            wait_check_connection_sec = 15
+            self._open_rules()
+
+            wait_check_connection_sec = 3
             last_check_connection = datetime.datetime.now()
 
             wait_alive_message_sec = 600
@@ -119,9 +117,13 @@ class RuleManager(Daemon):
                 diff = datetime.datetime.now() - last_check_connection
                 if diff.seconds >= wait_check_connection_sec:
                     last_check_connection = datetime.datetime.now()
-                    self._check_and_start_observer()
 
-                    if self._oh_gateway.cache_states_if_needed():
+                    self._con_checker.check_connection_state()
+                    if self._con_checker.should_reconnect_observer():
+                        self._restart_observer()
+                        something_processed = True
+                    if self._con_checker.should_reconnect_oh_gateway():
+                        self._oh_gateway.cache_states()
                         something_processed = True
 
                 if self._dispatcher.dispatch():
