@@ -51,3 +51,29 @@ class OnlineOfflineValue(Enum):
                     break
 
         return result
+
+
+class UpDownValue(Enum):
+    UP = 1
+    DOWN = 2
+
+    def __str__(self):
+        return self.__repr__()
+
+    def __repr__(self) -> str:
+        return '{}.{}'.format(self.__class__.__name__, self.name)
+
+    @staticmethod
+    def parse(text):
+        result = None
+
+        if text:
+            text = text.strip().upper()
+            for e in UpDownValue:
+                if e.name == text:
+                    result = e
+                    break
+
+        return result
+
+

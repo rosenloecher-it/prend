@@ -2,7 +2,7 @@ from enum import Enum
 import datetime
 import dateutil.parser
 import typing
-from prend.values import OnOffValue, OnlineOfflineValue
+from prend.values import OnOffValue, OnlineOfflineValue, UpDownValue
 
 
 class StateType(Enum):
@@ -20,6 +20,7 @@ class StateType(Enum):
     THING = 12
     PERCENT = 13
     HSB = 14  # color
+    UPDOWN = 15
 
     def __str__(self):
         return self.__repr__()
@@ -121,6 +122,8 @@ class State:
                 value_out = OnOffValue.parse(value_in)
             elif state_type == StateType.PERCENT:
                 value_out = int(value_in)
+            elif state_type == StateType.UPDOWN:
+                value_out = UpDownValue.parse(value_in)
             elif state_type == StateType.THING:
                 value_out = OnlineOfflineValue.parse(value_in)
             elif state_type == StateType.DATETIME:

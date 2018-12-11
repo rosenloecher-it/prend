@@ -3,7 +3,7 @@ import datetime
 from dateutil.tz import tzoffset
 from prend.oh.oh_event import OhEvent, OhNotificationType
 from prend.state import StateType
-from prend.values import OnOffValue, OnlineOfflineValue
+from prend.values import OnOffValue, OnlineOfflineValue, UpDownValue
 from prend.state import State
 from prend.channel import Channel, ChannelType
 
@@ -114,6 +114,14 @@ class TestOhEventNotify(unittest.TestCase):
         self.check_notify_event(str_in, ev_cmp)
 
 
+    def test_create_notify_hsb(self):
+        str_in = '{"topic":"smarthome/items/valShutterOfficeEast/state","payload":"{\\\"type\\\":\\\"UpDown\\\",\\\"value\\\":\\\"DOWN\\\"}","type":"ItemStateEvent"}'
+        oh_channel = Channel.create(ChannelType.ITEM, 'valShutterOfficeEast')
+        oh_state = State.create(StateType.UPDOWN, UpDownValue.DOWN)
+        ev_cmp = OhEvent.create(OhNotificationType.ITEM_CHANGE, oh_channel, oh_state)
+        self.check_notify_event(str_in, ev_cmp)
+
+
 # noinspection PyPep8,Pylint
 class TestOhEventItemState(unittest.TestCase):
 
@@ -126,46 +134,46 @@ class TestOhEventItemState(unittest.TestCase):
         self.assertTrue(result)
 
     def test_create_state_string(self):
-        json_data = {'link': 'http://192.168.178.45:8080/rest/items/dummyString', 'state': 'NULL', 'editable': False, 'type': 'String', 'name': 'dummyString', 'category': 'settings', 'tags': [], 'groupNames': []}
+        json_data = {'link': 'http://127.0.0.1:8080/rest/items/dummyString', 'state': 'NULL', 'editable': False, 'type': 'String', 'name': 'dummyString', 'category': 'settings', 'tags': [], 'groupNames': []}
         oh_channel = Channel.create(ChannelType.ITEM, 'dummyString')
         oh_state = State.create(StateType.STRING, None)
         ev_cmp = OhEvent.create(OhNotificationType.ITEM_CHANGE, oh_channel, oh_state)
         self.check_event(json_data, ev_cmp)
 
-        json_data = {'link': 'http://192.168.178.45:8080/rest/items/wfcCondId', 'state': 'UNDEF', 'stateDescription': {'pattern': '%s', 'readOnly': False, 'options': []}, 'editable': False, 'type': 'String', 'name': 'wfcCondId', 'label': '(FCIO) CondId', 'category': 'sun_clouds', 'tags': [], 'groupNames': ['gForecast', 'gPersChange', 'gPersMapDb']}
+        json_data = {'link': 'http://127.0.0.1:8080/rest/items/wfcCondId', 'state': 'UNDEF', 'stateDescription': {'pattern': '%s', 'readOnly': False, 'options': []}, 'editable': False, 'type': 'String', 'name': 'wfcCondId', 'label': '(FCIO) CondId', 'category': 'sun_clouds', 'tags': [], 'groupNames': ['gForecast', 'gPersChange', 'gPersMapDb']}
         oh_channel = Channel.create(ChannelType.ITEM, 'wfcCondId')
         oh_state = State.create(StateType.STRING, None)
         ev_cmp = OhEvent.create(OhNotificationType.ITEM_CHANGE, oh_channel, oh_state)
         self.check_event(json_data, ev_cmp)
 
-        json_data = {'link': 'http://192.168.178.45:8080/rest/items/rawWinLara', 'state': 'CLOSED', 'stateDescription': {'pattern': '%s', 'readOnly': True, 'options': [{'value': 'CLOSED', 'label': 'Fensterzustand: verriegelt'}, {'value': 'TILTED', 'label': 'Fensterzustand: gekippt'}, {'value': 'OPEN', 'label': 'Fensterzustand: offen'}]}, 'editable': False, 'type': 'String', 'name': 'rawWinLara', 'label': 'rawWinLara', 'category': 'window', 'tags': [], 'groupNames': ['gRawWinDorsUp']}
+        json_data = {'link': 'http://127.0.0.1:8080/rest/items/rawWinLara', 'state': 'CLOSED', 'stateDescription': {'pattern': '%s', 'readOnly': True, 'options': [{'value': 'CLOSED', 'label': 'Fensterzustand: verriegelt'}, {'value': 'TILTED', 'label': 'Fensterzustand: gekippt'}, {'value': 'OPEN', 'label': 'Fensterzustand: offen'}]}, 'editable': False, 'type': 'String', 'name': 'rawWinLara', 'label': 'rawWinLara', 'category': 'window', 'tags': [], 'groupNames': ['gRawWinDorsUp']}
         oh_channel = Channel.create(ChannelType.ITEM, 'rawWinLara')
         oh_state = State.create(StateType.STRING, 'CLOSED')
         ev_cmp = OhEvent.create(OhNotificationType.ITEM_CHANGE, oh_channel, oh_state)
         self.check_event(json_data, ev_cmp)
 
     def test_create_state_switch(self):
-        json_data = {'link': 'http://192.168.178.45:8080/rest/items/dummySwitch', 'state': 'NULL', 'editable': False, 'type': 'Switch', 'name': 'dummySwitch', 'category': 'settings', 'tags': [], 'groupNames': []}
+        json_data = {'link': 'http://127.0.0.1:8080/rest/items/dummySwitch', 'state': 'NULL', 'editable': False, 'type': 'Switch', 'name': 'dummySwitch', 'category': 'settings', 'tags': [], 'groupNames': []}
         oh_channel = Channel.create(ChannelType.ITEM, 'dummySwitch')
         oh_state = State.create(StateType.SWITCH, None)
         ev_cmp = OhEvent.create(OhNotificationType.ITEM_CHANGE, oh_channel, oh_state)
         self.check_event(json_data, ev_cmp)
 
-        json_data = {'link': 'http://192.168.178.45:8080/rest/items/valBattWinLara', 'state': 'OFF', 'transformedState': 'OK', 'stateDescription': {'pattern': '', 'readOnly': True, 'options': []}, 'editable': False, 'type': 'Switch', 'name': 'valBattWinLara', 'label': 'Batterie Fenster Lara', 'category': 'battery', 'tags': [], 'groupNames': ['gRawWinDorsUp', 'gBattery', 'gsBatteryLow']}
+        json_data = {'link': 'http://127.0.0.1:8080/rest/items/valBattWinLara', 'state': 'OFF', 'transformedState': 'OK', 'stateDescription': {'pattern': '', 'readOnly': True, 'options': []}, 'editable': False, 'type': 'Switch', 'name': 'valBattWinLara', 'label': 'Batterie Fenster Lara', 'category': 'battery', 'tags': [], 'groupNames': ['gRawWinDorsUp', 'gBattery', 'gsBatteryLow']}
         oh_channel = Channel.create(ChannelType.ITEM, 'valBattWinLara')
         oh_state = State.create(StateType.SWITCH, OnOffValue.OFF)
         ev_cmp = OhEvent.create(OhNotificationType.ITEM_CHANGE, oh_channel, oh_state)
         self.check_event(json_data, ev_cmp)
 
     def test_create_state_color(self):
-        json_data = {'link': 'http://192.168.178.45:8080/rest/items/valLiLivingIris', 'state': '61,63,0', 'editable': False, 'type': 'Color', 'name': 'valLiLivingIris', 'label': 'Hue Iris - Wohnzimmer', 'tags': [], 'groupNames': ['gLiving', 'gsHueLiving', 'gsLightsLivKit']}
+        json_data = {'link': 'http://127.0.0.1:8080/rest/items/valLiLivingIris', 'state': '61,63,0', 'editable': False, 'type': 'Color', 'name': 'valLiLivingIris', 'label': 'Hue Iris - Wohnzimmer', 'tags': [], 'groupNames': ['gLiving', 'gsHueLiving', 'gsLightsLivKit']}
         oh_channel = Channel.create(ChannelType.ITEM, 'valLiLivingIris')
         oh_state = State.create(StateType.COLOR, '61,63,0')
         ev_cmp = OhEvent.create(OhNotificationType.ITEM_CHANGE, oh_channel, oh_state)
         self.check_event(json_data, ev_cmp)
 
     def test_create_state_datetime(self):
-        json_data = {'link': 'http://192.168.178.45:8080/rest/items/wfcCondObsTime', 'state': '2018-12-03T13:07:45.000+0100', 'stateDescription': {'pattern': '%1$td.%1$tm. %1$tH:%1$tM', 'readOnly': False, 'options': []}, 'editable': False, 'type': 'DateTime', 'name': 'wfcCondObsTime', 'label': '(FCIO) Beobachtungszeit', 'category': 'clock', 'tags': [], 'groupNames': ['gForecast', 'gPersChange', 'gPersMapDb']}
+        json_data = {'link': 'http://127.0.0.1:8080/rest/items/wfcCondObsTime', 'state': '2018-12-03T13:07:45.000+0100', 'stateDescription': {'pattern': '%1$td.%1$tm. %1$tH:%1$tM', 'readOnly': False, 'options': []}, 'editable': False, 'type': 'DateTime', 'name': 'wfcCondObsTime', 'label': '(FCIO) Beobachtungszeit', 'category': 'clock', 'tags': [], 'groupNames': ['gForecast', 'gPersChange', 'gPersMapDb']}
         oh_channel = Channel.create(ChannelType.ITEM, 'wfcCondObsTime')
         value_date = datetime.datetime(2018, 12, 3, 13, 7, 45, tzinfo=tzoffset(None, 3600))
         oh_state = State.create(StateType.DATETIME, value_date)
@@ -173,33 +181,33 @@ class TestOhEventItemState(unittest.TestCase):
         self.check_event(json_data, ev_cmp)
 
     def test_create_state_dimmer(self):
-        json_data = {'link': 'http://192.168.178.45:8080/rest/items/valLiMarcCeil', 'state': '0', 'stateDescription': {'minimum': 0.0, 'maximum': 1.0, 'step': 0.1, 'pattern': '%.2f %%', 'readOnly': False, 'options': []}, 'editable': False, 'type': 'Dimmer', 'name': 'valLiMarcCeil', 'label': 'Licht Marc', 'category': 'light', 'tags': [], 'groupNames': ['gLightsAll', 'gsLightsKids', 'gMarc']}
+        json_data = {'link': 'http://127.0.0.1:8080/rest/items/valLiMarcCeil', 'state': '0', 'stateDescription': {'minimum': 0.0, 'maximum': 1.0, 'step': 0.1, 'pattern': '%.2f %%', 'readOnly': False, 'options': []}, 'editable': False, 'type': 'Dimmer', 'name': 'valLiMarcCeil', 'label': 'Licht Marc', 'category': 'light', 'tags': [], 'groupNames': ['gLightsAll', 'gsLightsKids', 'gMarc']}
         oh_channel = Channel.create(ChannelType.ITEM, 'valLiMarcCeil')
         oh_state = State.create(StateType.DIMMER, 0)
         ev_cmp = OhEvent.create(OhNotificationType.ITEM_CHANGE, oh_channel, oh_state)
         self.check_event(json_data, ev_cmp)
 
     def test_create_state_number(self):
-        json_data = {'link': 'http://192.168.178.45:8080/rest/items/dummyNumber', 'state': 'NULL', 'editable': False, 'type': 'Number', 'name': 'dummyNumber', 'category': 'settings', 'tags': [], 'groupNames': []}
+        json_data = {'link': 'http://127.0.0.1:8080/rest/items/dummyNumber', 'state': 'NULL', 'editable': False, 'type': 'Number', 'name': 'dummyNumber', 'category': 'settings', 'tags': [], 'groupNames': []}
         oh_channel = Channel.create(ChannelType.ITEM, 'dummyNumber')
         oh_state = State.create(StateType.DECIMAL, None)
         ev_cmp = OhEvent.create(OhNotificationType.ITEM_CHANGE, oh_channel, oh_state)
         self.check_event(json_data, ev_cmp)
 
-        json_data = {'link': 'http://192.168.178.45:8080/rest/items/lastWinLara', 'state': '1542635665441', 'stateDescription': {'pattern': '%d ms (sys)', 'readOnly': False, 'options': []}, 'editable': False, 'type': 'Number', 'name': 'lastWinLara', 'label': 'lastWinLara', 'category': 'window', 'tags': [], 'groupNames': ['gRawWinDorsUp', 'gPersMapDb']}
+        json_data = {'link': 'http://127.0.0.1:8080/rest/items/lastWinLara', 'state': '1542635665441', 'stateDescription': {'pattern': '%d ms (sys)', 'readOnly': False, 'options': []}, 'editable': False, 'type': 'Number', 'name': 'lastWinLara', 'label': 'lastWinLara', 'category': 'window', 'tags': [], 'groupNames': ['gRawWinDorsUp', 'gPersMapDb']}
         oh_channel = Channel.create(ChannelType.ITEM, 'lastWinLara')
         oh_state = State.create(StateType.DECIMAL, 1542635665441)
         ev_cmp = OhEvent.create(OhNotificationType.ITEM_CHANGE, oh_channel, oh_state)
         self.check_event(json_data, ev_cmp)
 
-        json_data = {'link': 'http://192.168.178.45:8080/rest/items/wfcTempMaxDay1', 'state': '9.49', 'stateDescription': {'pattern': '%.1f °C', 'readOnly': False, 'options': []}, 'editable': False, 'type': 'Number', 'name': 'wfcTempMaxDay1', 'label': '(FCIO) Max-Temperatur', 'category': 'temperature', 'tags': [], 'groupNames': ['gForecast', 'gPersChange', 'gPersMapDb']}
+        json_data = {'link': 'http://127.0.0.1:8080/rest/items/wfcTempMaxDay1', 'state': '9.49', 'stateDescription': {'pattern': '%.1f °C', 'readOnly': False, 'options': []}, 'editable': False, 'type': 'Number', 'name': 'wfcTempMaxDay1', 'label': '(FCIO) Max-Temperatur', 'category': 'temperature', 'tags': [], 'groupNames': ['gForecast', 'gPersChange', 'gPersMapDb']}
         oh_channel = Channel.create(ChannelType.ITEM, 'wfcTempMaxDay1')
         oh_state = State.create(StateType.DECIMAL, 9.49)
         ev_cmp = OhEvent.create(OhNotificationType.ITEM_CHANGE, oh_channel, oh_state)
         self.check_event(json_data, ev_cmp)
 
     def test_create_state_rollershutter(self):
-        json_data = {'link': 'http://192.168.178.45:8080/rest/items/valShutterOfficeNorth', 'state': '0', 'stateDescription': {'minimum': 0.0, 'maximum': 1.0, 'step': 0.1, 'pattern': '%d %%', 'readOnly': False, 'options': []}, 'editable': False, 'type': 'Rollershutter', 'name': 'valShutterOfficeNorth', 'label': 'Rollladen AZ-Nord', 'category': 'rollershutter', 'tags': [], 'groupNames': ['gShutter', 'gShutterOffice', 'gOffice', 'gPersChange']}
+        json_data = {'link': 'http://127.0.0.1:8080/rest/items/valShutterOfficeNorth', 'state': '0', 'stateDescription': {'minimum': 0.0, 'maximum': 1.0, 'step': 0.1, 'pattern': '%d %%', 'readOnly': False, 'options': []}, 'editable': False, 'type': 'Rollershutter', 'name': 'valShutterOfficeNorth', 'label': 'Rollladen AZ-Nord', 'category': 'rollershutter', 'tags': [], 'groupNames': ['gShutter', 'gShutterOffice', 'gOffice', 'gPersChange']}
         oh_channel = Channel.create(ChannelType.ITEM, 'valShutterOfficeNorth')
         oh_state = State.create(StateType.ROLLERSHUTTER, 0)
         ev_cmp = OhEvent.create(OhNotificationType.ITEM_CHANGE, oh_channel, oh_state)
@@ -218,21 +226,21 @@ class TestOhEventGroupState(unittest.TestCase):
         self.assertTrue(result)
 
     def test_create_state_null(self):
-        json_data = {'members': [], 'link': 'http://192.168.178.45:8080/rest/items/gPers5Minutes', 'state': 'NULL', 'editable': False, 'type': 'Group', 'name': 'gPers5Minutes', 'tags': [], 'groupNames': []}
+        json_data = {'members': [], 'link': 'http://127.0.0.1:8080/rest/items/gPers5Minutes', 'state': 'NULL', 'editable': False, 'type': 'Group', 'name': 'gPers5Minutes', 'tags': [], 'groupNames': []}
         oh_channel = Channel.create(ChannelType.GROUP, 'gPers5Minutes')
         oh_state = State.create(StateType.GROUP, None)
         ev_cmp = OhEvent.create(OhNotificationType.GROUP_CHANGE, oh_channel, oh_state)
         self.check_event(json_data, ev_cmp)
 
     def test_create_state_0(self):
-        json_data = {'members': [], 'groupType': 'Rollershutter', 'function': {'name': 'EQUALITY'}, 'link': 'http://192.168.178.45:8080/rest/items/gShutter', 'state': '0', 'editable': False, 'type': 'Group', 'name': 'gShutter', 'label': 'Alle Rollläden', 'category': 'rollershutter-50', 'tags': [], 'groupNames': []}
+        json_data = {'members': [], 'groupType': 'Rollershutter', 'function': {'name': 'EQUALITY'}, 'link': 'http://127.0.0.1:8080/rest/items/gShutter', 'state': '0', 'editable': False, 'type': 'Group', 'name': 'gShutter', 'label': 'Alle Rollläden', 'category': 'rollershutter-50', 'tags': [], 'groupNames': []}
         oh_channel = Channel.create(ChannelType.GROUP, 'gShutter')
         oh_state = State.create(StateType.GROUP, '0')
         ev_cmp = OhEvent.create(OhNotificationType.GROUP_CHANGE, oh_channel, oh_state)
         self.check_event(json_data, ev_cmp)
 
     def test_create_state_on(self):
-        json_data = {'members': [], 'groupType': 'Switch', 'function': {'name': 'OR', 'params': ['ON', 'OFF']}, 'link': 'http://192.168.178.45:8080/rest/items/gsLightsOffice', 'state': 'ON', 'editable': False, 'type': 'Group', 'name': 'gsLightsOffice', 'label': 'LightsOffice', 'category': 'light', 'tags': ['gsLightsAll'], 'groupNames': []}
+        json_data = {'members': [], 'groupType': 'Switch', 'function': {'name': 'OR', 'params': ['ON', 'OFF']}, 'link': 'http://127.0.0.1:8080/rest/items/gsLightsOffice', 'state': 'ON', 'editable': False, 'type': 'Group', 'name': 'gsLightsOffice', 'label': 'LightsOffice', 'category': 'light', 'tags': ['gsLightsAll'], 'groupNames': []}
         oh_channel = Channel.create(ChannelType.GROUP, 'gsLightsOffice')
         oh_state = State.create(StateType.GROUP, 'ON')
         ev_cmp = OhEvent.create(OhNotificationType.GROUP_CHANGE, oh_channel, oh_state)
