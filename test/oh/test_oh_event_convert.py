@@ -106,6 +106,14 @@ class TestOhEventNotify(unittest.TestCase):
         ev_cmp = OhEvent.create(OhNotificationType.THING_CHANGE, oh_channel, oh_state)
         self.check_notify_event(str_in, ev_cmp)
 
+    # todo - paylod is list but opposite states !?
+    # def test_create_notify_thing2(self):
+    #     str_in = '{"topic":"smarthome/things/hue:0210:1:hueOfficeStripeUpper/statuschanged","payload":"[{\\\"status\\\":\\\"ONLINE\\\",\\\"statusDetail\\\":\\\"NONE\\\"},{\\\"status\\\":\\\"OFFLINE\\\",\\\"statusDetail\\\":\\\"NONE\\\",\\\"description\\\":\\\"Die Hue Bridge meldet, dass die Lampe nicht erreichbar ist.\\\"}]","type":"ThingStatusInfoChangedEvent"}'
+    #     oh_channel = Channel.create(ChannelType.THING, 'hue:0200:1:hueOfficeIris')
+    #     oh_state = State.create(StateType.THING, OnlineOfflineValue.ONLINE)
+    #     ev_cmp = OhEvent.create(OhNotificationType.THING_CHANGE, oh_channel, oh_state)
+    #     self.check_notify_event(str_in, ev_cmp)
+
     def test_create_notify_hsb(self):
         str_in = '{"topic":"smarthome/items/valLiOfficeIris/statechanged","payload":"{\\\"type\\\":\\\"HSB\\\",\\\"value\\\":\\\"66,56,0\\\",\\\"oldType\\\":\\\"HSB\\\",\\\"oldValue\\\":\\\"66,56,56\\\"}","type":"ItemStateChangedEvent"}'
         oh_channel = Channel.create(ChannelType.ITEM, 'valLiOfficeIris')

@@ -171,7 +171,8 @@ class OhEvent:
             if payload_text:
                 payload = json.loads(payload_text)
                 state_type = StateType.THING
-                state_value = State.convert_to_value(state_type, payload.get('status'))
+                state_text = payload.get('status')
+                state_value = State.convert_to_value(state_type, state_text)
                 event.state = State.create(state_type, state_value)
 
         elif event.notification_type in [OhNotificationType.RELOAD, OhNotificationType.IGNORE]:
