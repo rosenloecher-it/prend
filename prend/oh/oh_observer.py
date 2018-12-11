@@ -4,7 +4,7 @@ import json
 import logging
 import threading
 import concurrent
-from aiosseclient import aiosseclient, Event
+from aiosseclient import Event
 from prend.config import Config
 from prend.oh.oh_event import OhEvent, OhNotificationType
 from random import randint
@@ -46,7 +46,7 @@ class OhObserver(threading.Thread):
             _logger.error('cannot parse faulty json: %s', event_in.data)
         except Exception as ex:
             _logger.exception(ex)
-            _logger.error('faulty json: %s', event_in.data)
+            _logger.error('faulty event json: %s', event_in.data)
 
     # copied from aiosseclient.aiosseclient - to set timeout
     @staticmethod
@@ -64,7 +64,6 @@ class OhObserver(threading.Thread):
             kwargs['headers']['Last-Event-ID'] = last_id
 
         one_year_in_seconds = 365*24*60*60
-        #seconds = 30
 
         try:
             async with aiohttp.ClientSession(read_timeout=one_year_in_seconds) as session:
@@ -82,6 +81,15 @@ class OhObserver(threading.Thread):
                         lines = []
                     else:
                         lines.append(line)
+
+
+        except (
+                aiohttp.client_exceptions.ClientError,
+                asyncio.TimeoutError,
+                concurrent.futures._base.TimeoutError,
+                ConnectionError
+        ) as ex:
+            _logger.error('exception _aiosseclient - %s: %s', ex.__class__.__name__, ex)
         except Exception as ex:
             _logger.error('exception _aiosseclient')
             _logger.exception(ex)
