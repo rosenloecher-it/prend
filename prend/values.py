@@ -17,16 +17,12 @@ class OnOffValue(Enum):
 
     @staticmethod
     def parse(text):
-        result = None
-
         if text:
             text = text.strip().upper()
             for e in OnOffValue:
                 if e.name == text:
-                    result = e
-                    break
-
-        return result
+                    return e
+        raise ValueError()
 
 
 class ThingStatusValue(Enum):
@@ -42,16 +38,13 @@ class ThingStatusValue(Enum):
 
     @staticmethod
     def parse(text):
-        result = None
-
         if text:
             text = text.strip().upper()
             for e in ThingStatusValue:
                 if e.name == text:
-                    result = e
-                    break
+                    return e
 
-        return result
+        raise ValueError()
 
 
 class UpDownValue(Enum):
@@ -66,15 +59,12 @@ class UpDownValue(Enum):
 
     @staticmethod
     def parse(text):
-        result = None
-
         if text:
             text = text.strip().upper()
             for e in UpDownValue:
                 if e.name == text:
-                    result = e
-                    break
+                    return e
 
-        return result
+        raise ValueError()
 
 

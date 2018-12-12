@@ -1,13 +1,17 @@
-from enum import Enum
 import datetime
 import dateutil.parser
-import typing
+import logging
+from enum import Enum
 from prend.values import OnOffValue, ThingStatusValue, UpDownValue
+from typing import Optional
+
+
+_logger = logging.getLogger(__name__)
 
 
 class StateType(Enum):
     UNDEF = 1  # NOT undefined AND NOT None - will be delivered by openhab!
-    # UNKNOWN = 2
+    UNKNOWN = 2  # types not listed here, will be collected as unknown
     COLOR = 3
     CONTACT = 4
     DATETIME = 5
@@ -30,7 +34,7 @@ class StateType(Enum):
         return self.name
 
     @staticmethod
-    def parse(text) -> typing.Optional['StateType']:
+    def parse(text) -> Optional['StateType']:
         result = None
 
         if text:
@@ -41,6 +45,11 @@ class StateType(Enum):
                     break
             if not result and text == 'NUMBER':
                 result = StateType.DECIMAL
+            elif not result and text == 'THING':
+                result = StateType.THING_STATUS
+
+        if not result:
+            result = StateType.UNKNOWN
 
         return result
 
@@ -109,30 +118,43 @@ class State:
         return state
 
     @staticmethod
-    def convert_to_value(state_type, value_in):
-        value_out = value_in
+    def convert(state_type: Optional[str], state_text: Optional[str]) -> 'State':
 
-        if value_in:
-            if value_in in ['NULL', 'UNDEF']:
-                value_out = None
-            elif state_type in [StateType.STRING, StateType.GROUP, StateType.COLOR]:
-                value_out = str(value_in)
-            elif state_type in [StateType.DECIMAL, StateType.DIMMER, StateType.ROLLERSHUTTER]:
-                value_out = float(value_in)
-            elif state_type in [StateType.CONTACT, StateType.ONOFF, StateType.SWITCH]:
-                value_out = OnOffValue.parse(value_in)
-            elif state_type == StateType.PERCENT:
-                value_out = int(value_in)
-            elif state_type == StateType.UPDOWN:
-                value_out = UpDownValue.parse(value_in)
-            elif state_type == StateType.THING_STATUS:
-                value_out = ThingStatusValue.parse(value_in)
-            elif state_type == StateType.DATETIME:
-                value_out = dateutil.parser.parse(value_in)
-            elif state_type == StateType.UNDEF:
-                value_out = None
+        state = State()
 
-        return value_out
+        try:
+            state.type = StateType.parse(state_type)
+
+            if state_text:
+                if state_text in ['NULL', 'UNDEF']:
+                    state.value = None
+                elif state.type in [StateType.STRING, StateType.GROUP, StateType.COLOR, StateType.HSB, StateType.UNKNOWN]:
+                    state.value = str(state_text)
+                elif state.type in [StateType.DECIMAL, StateType.DIMMER, StateType.ROLLERSHUTTER]:
+                    state.value = float(state_text)
+                elif state.type in [StateType.CONTACT, StateType.ONOFF, StateType.SWITCH]:
+                    state.value = OnOffValue.parse(state_text)
+                elif state.type == StateType.PERCENT:
+                    state.value = int(state_text)
+                elif state.type == StateType.UPDOWN:
+                    state.value = UpDownValue.parse(state_text)
+                elif state.type == StateType.THING_STATUS:
+                    state.value = ThingStatusValue.parse(state_text)
+                elif state.type == StateType.DATETIME:
+                    state.value = dateutil.parser.parse(state_text)
+                elif state.type == StateType.UNDEF:
+                    state.value = None
+                else:
+                    _logger.error('cannot convert - unknown state type: ', state_type)
+                    raise ValueError()
+
+        except ValueError:
+            state.type = StateType.UNKNOWN
+            state.value = str(state_text)
+
+        state.update_last_change()
+
+        return state
 
     # noinspection PyUnusedLocal
     @staticmethod
@@ -141,11 +163,13 @@ class State:
 
         if value_in is None:
             value_out = 'UNDEF'
-        elif type(value_in) == datetime.datetime:
+        elif isinstance(value_in, datetime.datetime):
             value_out = value_in.isoformat()
-        elif type(value_in) is OnOffValue:
+        elif isinstance(value_in, OnOffValue):
             value_out = value_in.name
-        elif type(value_in) is ThingStatusValue:
+        elif isinstance(value_in, ThingStatusValue):
+            value_out = value_in.name
+        elif isinstance(value_in, UpDownValue):
             value_out = value_in.name
 
         else:

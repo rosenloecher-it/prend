@@ -11,10 +11,13 @@ class TestStateType(unittest.TestCase):
     def test_parse_type(self):
 
         out = StateType.parse('???')
-        self.assertEqual(out, None)
+        self.assertEqual(out, StateType.UNKNOWN)
 
         out = StateType.parse(None)
-        self.assertEqual(out, None)
+        self.assertEqual(out, StateType.UNKNOWN)
+
+        out = StateType.parse(' Number ')
+        self.assertEqual(out, StateType.DECIMAL)
 
         out = StateType.parse('decimal')
         self.assertEqual(out, StateType.DECIMAL)
@@ -74,6 +77,42 @@ class TestState(unittest.TestCase):
 
     def test_import_state(self):
         # todo
+        pass
+
+    def check_convert_roundabout(self, state_type, state_value):
+
+        state = State.convert(state_type, state_value)
+        json_out = State.convert_to_json(state.value)
+
+        if not json_out or json_out != state_value:
+            print('check_convert_roundabout - {}\n    in  = {}\n    out = {}'.format(state_type, state_value, json_out))
+            self.assertTrue(False)
+
+    def test_convert_roundabout(self):
+
+        # wrong type/value combination
+        self.check_convert_roundabout(' onoff ', 'abc')
+        self.check_convert_roundabout(' upDown ', 'abc')
+        self.check_convert_roundabout(' decimAl ', 'abc')
+        self.check_convert_roundabout(' decimAl ', 'abc')
+        self.check_convert_roundabout(' thing ', 'abc')
+
+        self.check_convert_roundabout(' unknown_type_XGH ', '66,56,0')
+        self.check_convert_roundabout(' hsb ', '66,56,0')
+
+        self.check_convert_roundabout(' decimAl ', '123.4')
+
+        self.check_convert_roundabout(' onoff ', 'ON')
+        self.check_convert_roundabout(' onoff ', 'OFF')
+
+        self.check_convert_roundabout(' upDown ', 'UP')
+        self.check_convert_roundabout(' upDown ', 'DOWN')
+
+        self.check_convert_roundabout(' thing_status ', 'ONLINE')
+        self.check_convert_roundabout(' thing ', 'OFFLINE')
+        self.check_convert_roundabout(' thing ', 'INITIALIZING')
+        self.check_convert_roundabout(StateType.THING_STATUS.name, 'ONLINE')
+
         pass
 
 

@@ -156,9 +156,9 @@ class OhEvent:
         if payload_text:
             payload = json.loads(payload_text)
             state_text = payload.get('type')
-            state_type = StateType.parse(state_text)
-            state_value = State.convert_to_value(state_type, payload.get('value'))
-            event.state = State.create(state_type, state_value)
+            state_type = payload.get('type')
+            state_value = payload.get('value')
+            event.state = State.convert(state_type, state_value)
 
     @staticmethod
     def _fill_event_from_group(event: 'OhEvent', json_data):
@@ -170,10 +170,9 @@ class OhEvent:
         payload_text = json_data.get('payload')
         if payload_text:
             payload = json.loads(payload_text)
-            state_text = payload.get('type')
-            state_type = StateType.parse(state_text)
-            state_value = State.convert_to_value(state_type, payload.get('value'))
-            event.state = State.create(state_type, state_value)
+            state_type = payload.get('type')
+            state_value = payload.get('value')
+            event.state = State.convert(state_type, state_value)
 
     @staticmethod
     def _fill_event_from_thing(event: 'OhEvent', json_data):
@@ -191,10 +190,8 @@ class OhEvent:
             else:
                 payload_inner = payload
 
-            state_type = StateType.THING_STATUS
-            state_text = payload_inner.get('status')
-            state_value = State.convert_to_value(state_type, state_text)
-            event.state = State.create(state_type, state_value)
+            state_value = payload_inner.get('status')
+            event.state = State.convert(StateType.THING_STATUS.name, state_value)
 
     @staticmethod
     def create_from_state_json(json_data: dict, channel_type: ChannelType):
@@ -209,14 +206,9 @@ class OhEvent:
         channel_name = json_data.get('name')
         event.channel = Channel.create(channel_type, channel_name)
 
-        state_type_text = json_data.get('type')
-        state_type = StateType.parse(state_type_text)
-
-        state_value = State.convert_to_value(state_type, json_data.get('state'))
-
-        event.state = State.create(state_type, state_value)
-        event.state.last_change = datetime.datetime.now()
-
+        state_type = json_data.get('type')
+        state_value = json_data.get('state')
+        event.state = State.convert(state_type, state_value)
         return event
 
     @staticmethod
@@ -228,16 +220,12 @@ class OhEvent:
         channel_name = json_data.get('UID')
         event.channel = Channel.create(ChannelType.THING, channel_name)
 
-        state_text = None
+        state_value = None
         status_info = json_data.get('statusInfo')
         if status_info:
-            state_text = status_info.get('status')
+            state_value = status_info.get('status')
 
-        state_type = StateType.THING_STATUS
-        state_value = State.convert_to_value(state_type, state_text)
-        event.state = State.create(state_type, state_value)
-        event.state.last_change = datetime.datetime.now()
-
+        event.state = State.convert(StateType.THING_STATUS.name, state_value)
         return event
 
     @staticmethod
