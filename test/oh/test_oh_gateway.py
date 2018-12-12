@@ -53,7 +53,7 @@ class TestOhGateway(unittest.TestCase):
         rest.dummy_events.append(ev_dummy)
         ev_dummy = OhEvent.create(OhNotificationType.THING_CHANGE
                                   , Channel.create(ChannelType.THING, 'homematic:bridge:rhm')
-                                  , State.create(StateType.THING, ThingStatusValue.ONLINE))
+                                  , State.create(StateType.THING_STATUS, ThingStatusValue.ONLINE))
         rest.dummy_events.append(ev_dummy)
 
         ev_dummy = OhEvent.create(OhNotificationType.ITEM_CHANGE

@@ -7,20 +7,21 @@ from prend.values import OnOffValue, ThingStatusValue, UpDownValue
 
 class StateType(Enum):
     UNDEF = 1  # NOT undefined AND NOT None - will be delivered by openhab!
-    DECIMAL = 2  # could be switched to DIMMER or ROLLERSHUTTER
-    DIMMER = 3
-    STRING = 4
-    ONOFF = 5  # can be SWITCH or CONTACT
-    SWITCH = 6
-    CONTACT = 7
-    DATETIME = 8
-    COLOR = 9
-    ROLLERSHUTTER = 10
-    GROUP = 11  # value type undefined => string
-    THING = 12
-    PERCENT = 13
-    HSB = 14  # color
-    UPDOWN = 15
+    # UNKNOWN = 2
+    COLOR = 3
+    CONTACT = 4
+    DATETIME = 5
+    DECIMAL = 6  # could be switched to DIMMER or ROLLERSHUTTER
+    DIMMER = 7
+    GROUP = 8  # value type undefined => string
+    HSB = 9  # color
+    ONOFF = 10  # can be SWITCH or CONTACT
+    PERCENT = 11
+    ROLLERSHUTTER = 12
+    STRING = 13
+    SWITCH = 14
+    THING_STATUS = 15
+    UPDOWN = 16
 
     def __str__(self):
         return self.__repr__()
@@ -124,7 +125,7 @@ class State:
                 value_out = int(value_in)
             elif state_type == StateType.UPDOWN:
                 value_out = UpDownValue.parse(value_in)
-            elif state_type == StateType.THING:
+            elif state_type == StateType.THING_STATUS:
                 value_out = ThingStatusValue.parse(value_in)
             elif state_type == StateType.DATETIME:
                 value_out = dateutil.parser.parse(value_in)
