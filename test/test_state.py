@@ -3,7 +3,7 @@ import datetime
 import unittest
 from dateutil.tz import tzoffset
 from prend.state import State, StateType
-from prend.values import OnOffValue, OnlineOfflineValue
+from prend.values import OnOffValue, ThingStatusValue
 
 
 class TestStateType(unittest.TestCase):
@@ -59,9 +59,9 @@ class TestState(unittest.TestCase):
         out = State.convert_to_json(123)
         self.assertEqual(out, '123')
 
-        out = State.convert_to_json(OnlineOfflineValue.ONLINE)
+        out = State.convert_to_json(ThingStatusValue.ONLINE)
         self.assertEqual(out, 'ONLINE')
-        out = State.convert_to_json(OnlineOfflineValue.OFFLINE)
+        out = State.convert_to_json(ThingStatusValue.OFFLINE)
         self.assertEqual(out, 'OFFLINE')
 
         out = State.convert_to_json(OnOffValue.ON)

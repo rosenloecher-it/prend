@@ -9,7 +9,7 @@ from prend.oh.oh_event import OhEvent, OhNotificationType
 from prend.oh.oh_gateway import OhGateway
 from prend.oh.oh_rest import OhRest
 from prend.state import State, StateType
-from prend.values import OnOffValue, OnlineOfflineValue
+from prend.values import OnOffValue, ThingStatusValue
 
 
 class TestRest(OhRest):
@@ -53,7 +53,7 @@ class TestOhGateway(unittest.TestCase):
         rest.dummy_events.append(ev_dummy)
         ev_dummy = OhEvent.create(OhNotificationType.THING_CHANGE
                                   , Channel.create(ChannelType.THING, 'homematic:bridge:rhm')
-                                  , State.create(StateType.THING, OnlineOfflineValue.ONLINE))
+                                  , State.create(StateType.THING, ThingStatusValue.ONLINE))
         rest.dummy_events.append(ev_dummy)
 
         ev_dummy = OhEvent.create(OhNotificationType.ITEM_CHANGE

@@ -29,9 +29,10 @@ class OnOffValue(Enum):
         return result
 
 
-class OnlineOfflineValue(Enum):
+class ThingStatusValue(Enum):
     ONLINE = 1
     OFFLINE = 2
+    INITIALIZING = 3
 
     def __str__(self):
         return self.__repr__()
@@ -45,7 +46,7 @@ class OnlineOfflineValue(Enum):
 
         if text:
             text = text.strip().upper()
-            for e in OnlineOfflineValue:
+            for e in ThingStatusValue:
                 if e.name == text:
                     result = e
                     break

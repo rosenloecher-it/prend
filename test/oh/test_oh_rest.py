@@ -6,7 +6,7 @@ from prend.oh.oh_event import OhEvent, OhNotificationType
 from prend.oh.oh_gateway import OhGatewayEventSink
 from prend.oh.oh_rest import OhRest
 from prend.state import State, StateType
-from prend.values import OnOffValue, OnlineOfflineValue
+from prend.values import OnOffValue, ThingStatusValue
 import datetime
 
 
@@ -112,7 +112,7 @@ class TestOhRest(unittest.TestCase):
         json_data = {'statusInfo': {'status': 'ONLINE', 'statusDetail': 'NONE'}, 'editable': False, 'label': 'Homematic Bridge', 'configuration': {'cuxdPort': 8701, 'socketMaxAlive': 900, 'installModeDuration': 60, 'reconnectInterval': 3600, 'timeout': 15, 'hmIpPort': 2010, 'discoveryTimeToLive': -1, 'wiredPort': 2000, 'gatewayType': 'ccu', 'callbackHost': '127.0.0.1', 'groupPort': 9292, 'gatewayAddress': '127.0.0.1', 'unpairOnDeletion': False, 'rfPort': 2001}, 'properties': {'serialNumber': 'NEQ1327832', 'firmwareVersion': '2.29.23.20171118', 'modelId': 'CCU2'}, 'UID': 'homematic:bridge:rhm', 'thingTypeUID': 'homematic:bridge', 'channels': []}
         ev_out = rest._fetch_thing(time_start_loading, json_data)
         channel = Channel.create(ChannelType.THING, 'homematic:bridge:rhm')
-        state = State.create(StateType.THING, OnlineOfflineValue.ONLINE)
+        state = State.create(StateType.THING, ThingStatusValue.ONLINE)
         ev_cmp = OhEvent.create(OhNotificationType.THING_CHANGE, channel, state)
         self.check_fetch_event(ev_out, ev_cmp)
 

@@ -2,7 +2,7 @@ from enum import Enum
 import datetime
 import dateutil.parser
 import typing
-from prend.values import OnOffValue, OnlineOfflineValue, UpDownValue
+from prend.values import OnOffValue, ThingStatusValue, UpDownValue
 
 
 class StateType(Enum):
@@ -125,7 +125,7 @@ class State:
             elif state_type == StateType.UPDOWN:
                 value_out = UpDownValue.parse(value_in)
             elif state_type == StateType.THING:
-                value_out = OnlineOfflineValue.parse(value_in)
+                value_out = ThingStatusValue.parse(value_in)
             elif state_type == StateType.DATETIME:
                 value_out = dateutil.parser.parse(value_in)
             elif state_type == StateType.UNDEF:
@@ -144,7 +144,7 @@ class State:
             value_out = value_in.isoformat()
         elif type(value_in) is OnOffValue:
             value_out = value_in.name
-        elif type(value_in) is OnlineOfflineValue:
+        elif type(value_in) is ThingStatusValue:
             value_out = value_in.name
 
         else:
