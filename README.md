@@ -1,8 +1,8 @@
 # prend
 
-**P**ython **R**ule **En**gine **D**aemon - an external rule engine for [OpenHAB](https://www.openhab.org/)
+**P**ython **R**ule **En**gine **D**aemon - an external rule engine for [OpenHAB]
 
-Write your own [OpenHAB](https://www.openhab.org/) rules with Python 3. Use your favorite editor, debug your code and write unittests!
+Write your own [OpenHAB] rules with Python 3. Use your favorite editor, debug your code and write unittests!
 
 
 ## Features
@@ -59,7 +59,7 @@ $ python --version
 pip install -r requirements.txt
 ```
 
-Configure the OpenHAB items used in $PROJECT_DIR/prend_app/sample_rule.py ($OPENHAB_CONF_DIR/items/*.items):
+Configure the OpenHAB items used in [sample_rule.py] ($OPENHAB_CONF_DIR/items/*.items):
 ```
 Switch dummy_switch 		"dummy_switch"
 String dummy_string 		"dummy_string [%s]"
@@ -106,7 +106,7 @@ $ python prend.py --stop           # stop daemon
 ## Provide your own rules
 
 provide a rule class:
-- see the sample rule $PROJECT_DIR/prend_app/sample_rule.py and all functions provide by base class
+- see [$PROJECT_DIR/prend_app/sample_rule.py][sample_rule.py] and all functions provide by base class
 - inherit from prend.Rule
 - implement "register_actions" to subscribe to changes or cron actions
 - implement "notify_action" and put your code here
@@ -126,4 +126,7 @@ def main():
     return process.run()
     ...
 ```
+
+[OpenHAB]: https://www.openhab.org/
+[sample_rule.py]: https://github.com/rosenloecher-it/prend/blob/master/prend_app/sample_rule.py
 
