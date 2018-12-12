@@ -18,9 +18,10 @@ Write your own [OpenHAB](https://www.openhab.org/) rules with Python 3. Use your
 
 ## Disclaimer
 
-- tested only under Linux (no plan to support other operating systems)
-- at moment the code is provided only as sample project, not as python package.
-- this is a very early version, so I expect some API changes...
+- Tested only under Linux and I have no intentions to support other operating systems.
+- At moment the code is provided only as sample project, not as python package.
+- This is a very early version, so I expect some API changes...
+- There are lots of different devices available for OpenHAB. Each of them could provide different values and types which could lead to unexpected behavior.
 
 
 ## Motivation
