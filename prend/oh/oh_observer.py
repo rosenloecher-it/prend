@@ -42,11 +42,11 @@ class OhObserver(threading.Thread):
             else:
                 raise OhObserverException('invalid event!')
 
-        except json.decoder.JSONDecodeError as ex:
+        except json.decoder.JSONDecodeError:
             _logger.error('cannot parse faulty json: %s', event_in.data)
         except Exception as ex:
             _logger.exception(ex)
-            _logger.error('faulty event json: %s', event_in.data)
+            _logger.error('cannot parse faulty json: %s', event_in.data)
 
     # copied from aiosseclient.aiosseclient - to set timeout
     @staticmethod
@@ -81,8 +81,6 @@ class OhObserver(threading.Thread):
                         lines = []
                     else:
                         lines.append(line)
-
-
         except (
                 aiohttp.client_exceptions.ClientError,
                 asyncio.TimeoutError,

@@ -24,6 +24,7 @@ class ConnectionChecker:
         self._oh_gateway = oh_gateway
 
     def _time_now(self):
+        # overwrite for tests
         return datetime.datetime.now()
 
     def check_connection_state(self):

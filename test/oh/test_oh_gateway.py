@@ -1,5 +1,4 @@
 import copy
-import datetime
 import unittest
 from prend.action import Action
 from prend.config import Config

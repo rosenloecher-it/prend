@@ -128,7 +128,10 @@ class State:
             if state_text:
                 if state_text in ['NULL', 'UNDEF']:
                     state.value = None
-                elif state.type in [StateType.STRING, StateType.GROUP, StateType.COLOR, StateType.HSB, StateType.UNKNOWN]:
+                elif state.type in [
+                    StateType.STRING, StateType.GROUP, StateType.COLOR
+                    , StateType.HSB, StateType.UNKNOWN
+                ]:
                     state.value = str(state_text)
                 elif state.type in [StateType.DECIMAL, StateType.DIMMER, StateType.ROLLERSHUTTER]:
                     state.value = float(state_text)

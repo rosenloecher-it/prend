@@ -3,10 +3,8 @@ import datetime
 import logging
 import requests
 import threading
-import urllib3
 from prend.action import Action
 from prend.channel import Channel, OhIllegalChannelException
-from prend.constants import Constants
 from prend.oh.oh_event import OhEvent, OhIllegalEventException, OhNotificationType
 from prend.state import State
 from typing import Optional
@@ -68,7 +66,7 @@ class OhGateway(OhGatewayEventSink):
         if not self._rest:
             return False
         if not self._cache_states_last_fetch:
-            return False;
+            return False
         if self._last_connection_error:
             return False
         return True

@@ -1,6 +1,5 @@
 from enum import Enum
 from typing import Optional
-import datetime
 import json
 from prend.channel import Channel, ChannelType
 from prend.state import State, StateType
@@ -155,7 +154,6 @@ class OhEvent:
         payload_text = json_data.get('payload')
         if payload_text:
             payload = json.loads(payload_text)
-            state_text = payload.get('type')
             state_type = payload.get('type')
             state_value = payload.get('value')
             event.state = State.convert(state_type, state_value)
