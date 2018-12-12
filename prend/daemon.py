@@ -107,9 +107,8 @@ class Daemon:
         except SystemExit:
             pid = None
 
-        if pid is not None:
-            if not os.path.exists('/proc/%d' % pid):
-                pid = None
+        if not self.exists_proc(pid):
+            pid = None
 
         if pid:
             _logger.error('pidfile (%s) already exist. daemon is already running!? => exit', self.pidfile)
@@ -235,6 +234,13 @@ class Daemon:
             pid = None
         return pid
 
+    @staticmethod
+    def exists_proc(pid) -> bool:
+        if pid is not None:
+            if os.path.exists('/proc/{}'.format(pid)):
+                return True
+        return False
+
     def is_running(self, notify_func=None):
         pid = self.get_pid_from_file()
 
@@ -243,7 +249,7 @@ class Daemon:
                 notify_func('daemon is stopped')
             return False
 
-        if os.path.exists('/proc/%d' % pid):
+        if self.exists_proc(pid):
             if notify_func:
                 notify_func('daemon (pid={}) is running...'.format(pid))
             return True
