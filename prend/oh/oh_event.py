@@ -133,54 +133,68 @@ class OhEvent:
         event.notification_type = OhNotificationType.parse(json_data.get('type'))
 
         if event.notification_type in [OhNotificationType.ITEM_CHANGE, OhNotificationType.ITEM_COMMAND]:
-
-            channel_type = OhEvent.get_channel_type(event.notification_type)
-            channel_name = OhEvent.extract_item_name(json_data.get('topic'))
-            event.channel = Channel.create(channel_type, channel_name)
-
-            # embedded structure as string!
-            payload_text = json_data.get('payload')
-            if payload_text:
-                payload = json.loads(payload_text)
-                state_text = payload.get('type')
-                state_type = StateType.parse(state_text)
-                state_value = State.convert_to_value(state_type, payload.get('value'))
-                event.state = State.create(state_type, state_value)
-
+            OhEvent._fill_event_from_item(event, json_data)
         elif event.notification_type == OhNotificationType.GROUP_CHANGE:
-            channel_type = OhEvent.get_channel_type(event.notification_type)
-            channel_name = OhEvent.extract_group_name(json_data.get('topic'))
-            event.channel = Channel.create(channel_type, channel_name)
-
-            # embedded structure as string!
-            payload_text = json_data.get('payload')
-            if payload_text:
-                payload = json.loads(payload_text)
-                state_text = payload.get('type')
-                state_type = StateType.parse(state_text)
-                state_value = State.convert_to_value(state_type, payload.get('value'))
-                event.state = State.create(state_type, state_value)
-
+            OhEvent._fill_event_from_group(event, json_data)
         elif event.notification_type in [OhNotificationType.THING_CHANGE]:
-            channel_type = OhEvent.get_channel_type(event.notification_type)
-            channel_name = OhEvent.extract_item_name(json_data.get('topic'))
-            event.channel = Channel.create(channel_type, channel_name)
-
-            # embedded structure as string!
-            payload_text = json_data.get('payload')
-            if payload_text:
-                payload = json.loads(payload_text)
-                state_type = StateType.THING
-                state_text = payload.get('status')
-                state_value = State.convert_to_value(state_type, state_text)
-                event.state = State.create(state_type, state_value)
-
+            OhEvent._fill_event_from_thing(event, json_data)
         elif event.notification_type in [OhNotificationType.RELOAD, OhNotificationType.IGNORE]:
             pass  # do nothing
         else:
             raise OhEventException('wrong notification type ({})!'.format(event.notification_type))
 
         return event
+
+    @staticmethod
+    def _fill_event_from_item(event: 'OhEvent', json_data):
+        channel_type = OhEvent.get_channel_type(event.notification_type)
+        channel_name = OhEvent.extract_item_name(json_data.get('topic'))
+        event.channel = Channel.create(channel_type, channel_name)
+
+        # embedded structure as string!
+        payload_text = json_data.get('payload')
+        if payload_text:
+            payload = json.loads(payload_text)
+            state_text = payload.get('type')
+            state_type = StateType.parse(state_text)
+            state_value = State.convert_to_value(state_type, payload.get('value'))
+            event.state = State.create(state_type, state_value)
+
+    @staticmethod
+    def _fill_event_from_group(event: 'OhEvent', json_data):
+        channel_type = OhEvent.get_channel_type(event.notification_type)
+        channel_name = OhEvent.extract_group_name(json_data.get('topic'))
+        event.channel = Channel.create(channel_type, channel_name)
+
+        # embedded structure as string!
+        payload_text = json_data.get('payload')
+        if payload_text:
+            payload = json.loads(payload_text)
+            state_text = payload.get('type')
+            state_type = StateType.parse(state_text)
+            state_value = State.convert_to_value(state_type, payload.get('value'))
+            event.state = State.create(state_type, state_value)
+
+    @staticmethod
+    def _fill_event_from_thing(event: 'OhEvent', json_data):
+        channel_type = OhEvent.get_channel_type(event.notification_type)
+        channel_name = OhEvent.extract_item_name(json_data.get('topic'))
+        event.channel = Channel.create(channel_type, channel_name)
+
+        # embedded structure as string!
+        payload_text = json_data.get('payload')
+        if payload_text:
+            payload = json.loads(payload_text)
+
+            if isinstance(payload, list):
+                payload_inner = payload[0]
+            else:
+                payload_inner = payload
+
+            state_type = StateType.THING
+            state_text = payload_inner.get('status')
+            state_value = State.convert_to_value(state_type, state_text)
+            event.state = State.create(state_type, state_value)
 
     @staticmethod
     def create_from_state_json(json_data: dict, channel_type: ChannelType):

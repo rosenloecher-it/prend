@@ -106,13 +106,23 @@ class TestOhEventNotify(unittest.TestCase):
         ev_cmp = OhEvent.create(OhNotificationType.THING_CHANGE, oh_channel, oh_state)
         self.check_notify_event(str_in, ev_cmp)
 
-    # todo - paylod is list but opposite states !?
-    # def test_create_notify_thing2(self):
-    #     str_in = '{"topic":"smarthome/things/hue:0210:1:hueOfficeStripeUpper/statuschanged","payload":"[{\\\"status\\\":\\\"ONLINE\\\",\\\"statusDetail\\\":\\\"NONE\\\"},{\\\"status\\\":\\\"OFFLINE\\\",\\\"statusDetail\\\":\\\"NONE\\\",\\\"description\\\":\\\"Die Hue Bridge meldet, dass die Lampe nicht erreichbar ist.\\\"}]","type":"ThingStatusInfoChangedEvent"}'
-    #     oh_channel = Channel.create(ChannelType.THING, 'hue:0200:1:hueOfficeIris')
-    #     oh_state = State.create(StateType.THING, OnlineOfflineValue.ONLINE)
-    #     ev_cmp = OhEvent.create(OhNotificationType.THING_CHANGE, oh_channel, oh_state)
-    #     self.check_notify_event(str_in, ev_cmp)
+        str_in = '{"topic":"smarthome/things/hue:0210:1:hueOfficeStripeUpper/statuschanged","payload":"[{\\\"status\\\":\\\"ONLINE\\\",\\\"statusDetail\\\":\\\"NONE\\\"},{\\\"status\\\":\\\"OFFLINE\\\",\\\"statusDetail\\\":\\\"NONE\\\",\\\"description\\\":\\\"Die Hue Bridge meldet, dass die Lampe nicht erreichbar ist.\\\"}]","type":"ThingStatusInfoChangedEvent"}'
+        oh_channel = Channel.create(ChannelType.THING, 'hue:0210:1:hueOfficeStripeUpper')
+        oh_state = State.create(StateType.THING, ThingStatusValue.ONLINE)
+        ev_cmp = OhEvent.create(OhNotificationType.THING_CHANGE, oh_channel, oh_state)
+        self.check_notify_event(str_in, ev_cmp)
+
+        str_in = '{"topic":"smarthome/things/homematic:GATEWAY-EXTRAS-CCU:ccu:GWE00000000/statuschanged","payload":"[{\\\"status\\\":\\\"INITIALIZING\\\",\\\"statusDetail\\\":\\\"NONE\\\"},{\\\"status\\\":\\\"UNINITIALIZED\\\",\\\"statusDetail\\\":\\\"BRIDGE_UNINITIALIZED\\\"}]","type":"ThingStatusInfoChangedEvent"}'
+        oh_channel = Channel.create(ChannelType.THING, 'homematic:GATEWAY-EXTRAS-CCU:ccu:GWE00000000')
+        oh_state = State.create(StateType.THING, ThingStatusValue.INITIALIZING)
+        ev_cmp = OhEvent.create(OhNotificationType.THING_CHANGE, oh_channel, oh_state)
+        self.check_notify_event(str_in, ev_cmp)
+
+        str_in = '{"topic":"smarthome/things/homematic:HM-Sec-RHS:ccu:NEQ1479199/statuschanged","payload":"[{\\\"status\\\":\\\"OFFLINE\\\",\\\"statusDetail\\\":\\\"BRIDGE_OFFLINE\\\"},{\\\"status\\\":\\\"ONLINE\\\",\\\"statusDetail\\\":\\\"NONE\\\"}]","type":"ThingStatusInfoChangedEvent"}'
+        oh_channel = Channel.create(ChannelType.THING, 'homematic:HM-Sec-RHS:ccu:NEQ1479199')
+        oh_state = State.create(StateType.THING, ThingStatusValue.OFFLINE)
+        ev_cmp = OhEvent.create(OhNotificationType.THING_CHANGE, oh_channel, oh_state)
+        self.check_notify_event(str_in, ev_cmp)
 
     def test_create_notify_hsb(self):
         str_in = '{"topic":"smarthome/items/valLiOfficeIris/statechanged","payload":"{\\\"type\\\":\\\"HSB\\\",\\\"value\\\":\\\"66,56,0\\\",\\\"oldType\\\":\\\"HSB\\\",\\\"oldValue\\\":\\\"66,56,56\\\"}","type":"ItemStateChangedEvent"}'
@@ -122,7 +132,7 @@ class TestOhEventNotify(unittest.TestCase):
         self.check_notify_event(str_in, ev_cmp)
 
 
-    def test_create_notify_hsb(self):
+    def test_create_notify_updown(self):
         str_in = '{"topic":"smarthome/items/valShutterOfficeEast/state","payload":"{\\\"type\\\":\\\"UpDown\\\",\\\"value\\\":\\\"DOWN\\\"}","type":"ItemStateEvent"}'
         oh_channel = Channel.create(ChannelType.ITEM, 'valShutterOfficeEast')
         oh_state = State.create(StateType.UPDOWN, UpDownValue.DOWN)
