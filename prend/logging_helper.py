@@ -4,6 +4,13 @@ import os
 import sys
 
 
+"""
+multiprocessing_logging
+    https://stackoverflow.com/questions/641420/how-should-i-log-while-using-multiprocessing-in-python
+    https://github.com/jruere/multiprocessing-logging
+"""
+
+
 class LoggingHelper:
     LOGLEVEL_DEFAULT = logging.INFO
 

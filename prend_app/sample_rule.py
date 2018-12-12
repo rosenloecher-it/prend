@@ -16,7 +16,7 @@ class SampleRule(Rule):
         _logger.info('register_actions')
 
         # _logger.info('show config: {}'.format(self._config))
-        # better access confif via self.get_config*
+        # better access config via self.get_config*
 
         # create cron job - syntax see https://github.com/dbader/schedule
         cron_job = schedule.every().minute

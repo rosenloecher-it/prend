@@ -10,6 +10,11 @@ from prend.oh.oh_event import OhEvent, OhIllegalEventException
 from prend.state import State
 
 
+"""
+see also: python-openhab: https://github.com/sim0nx/python-openhab
+"""
+
+
 _logger = logging.getLogger(__name__)
 
 

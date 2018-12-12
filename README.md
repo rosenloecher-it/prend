@@ -11,7 +11,7 @@ Write your own [OpenHAB](https://www.openhab.org/) rules with Python 3. Use your
 - connects to OpenHAB via REST API (see [REST demo](http://demo.openhab.org:8080/doc/index.html))
 - gets updated by change notifications about state changes
 - runs as deamon
-- write you own rules and subscribe for state changes and cron events
+- write your own rules and subscribe for state changes and cron events
 - change OpenHAB states via COMMANDs and UPDATEs
 - programming language: Python 3 (use your favorite tools incl. debugger, unittests, code inspection)
 
@@ -22,6 +22,7 @@ Write your own [OpenHAB](https://www.openhab.org/) rules with Python 3. Use your
 - At moment the code is provided only as sample project, not as python package.
 - This is a very early version, so I expect some API changes...
 - There are lots of different devices available for OpenHAB. Each of them could provide different values and types which could lead to unexpected behavior.
+- No service script is provided so far to run it as system daemon.
 
 
 ## Motivation
@@ -58,7 +59,7 @@ $ python --version
 pip install -r requirements.txt
 ```
 
-Configure the OpenHAB items used in ./app/test_rule.py ($OPENHAB_CONF_DIR/items/*.items):
+Configure the OpenHAB items used in $PROJECT_DIR/prend_app/sample_rule.py ($OPENHAB_CONF_DIR/items/*.items):
 ```
 Switch dummy_switch 		"dummy_switch"
 String dummy_string 		"dummy_string [%s]"
@@ -74,12 +75,12 @@ username=
 password=
 
 [system]
-work_dir=./__test__
-pid_file=./__test__/prend.pid
+work_dir=./__work__
+pid_file=./__work__/prend.pid
 
 [logging]
 loglevel=debug
-logfile=./__test__/prend.log
+logfile=./__work__/prod.log
 ```
 
 Run:
@@ -98,17 +99,19 @@ $ python prend.py --help
 $ python prend.py --status         # check settings
 $ python prend.py --foreground     # for debugging
 $ python prend.py --start          # start daemon
+$ python prend.py --ensure         # ensure that the daemon is running (e.g. call from cron)
 $ python prend.py --stop           # stop daemon
 ```
 
 ## Provide your own rules
 
 provide a rule class:
-- see the sample rule $PROJECT_DIR/app/test_rule.py
-- inherit from pred.Rule
+- see the sample rule $PROJECT_DIR/prend_app/sample_rule.py and all functions provide by base class
+- inherit from prend.Rule
 - implement "register_actions" to subscribe to changes or cron actions
 - implement "notify_action" and put your code here
 - access states via super class functions
+- read entries from configuration
 
 register your rule class in $PROJECT_DIR/prend.py:
 ```python
@@ -123,20 +126,4 @@ def main():
     return process.run()
     ...
 ```
-
-## Package dependencies
-
-(in addition to requirements.txt)
-
-- multiprocessing_logging
-    - https://stackoverflow.com/questions/641420/how-should-i-log-while-using-multiprocessing-in-python
-    - https://github.com/jruere/multiprocessing-logging
-- aiosseclient
-    - for OpenHAB notifications
-    - Asynchronous Server Side Events (SSE) Client
-    - https://github.com/ebraminio/aiosseclient
-    - pip install git+https://github.com/ebraminio/aiosseclient
-- cannibalised projects
-    - for deamon: https://github.com/serverdensity/python-daemon
-    - python-openhab: https://github.com/sim0nx/python-openhab
 
