@@ -1,6 +1,6 @@
 import sys
 from prend.process import Process
-from prend_app.sample_rule import SampleRule
+from app.sample_rule import SampleRule
 
 
 def main():

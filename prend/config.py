@@ -20,7 +20,7 @@ class CliParser(argparse.ArgumentParser):
 
     def exit(self, status=0, message=None):
         """
-        overwritten base function to avoid prend_app exits => possible unit testing!
+        overwritten base function to avoid app exits => unit testing possible!
         """
         if message:
             print(message)

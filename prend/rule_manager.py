@@ -41,7 +41,7 @@ class RuleManager(Daemon):
 
     def check_start_conditions(self) -> None:
         if not self._rules:
-            raise RuleManagerException('no prend_app registered - nothing to do!')
+            raise RuleManagerException('no app registered - nothing to do!')
 
     def shutdown_observer(self):
         try:
