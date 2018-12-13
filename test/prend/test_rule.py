@@ -120,6 +120,9 @@ class TestRule(unittest.TestCase):
         out = rule.get_state(channel)
         self.assertEqual(out, state)
 
+        out = rule.get_item_state(channel.name)
+        self.assertEqual(out, state)
+
         out = rule.get_state_value(channel)
         self.assertEqual(out, state.value)
 
