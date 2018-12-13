@@ -1,0 +1,17 @@
+{
+   "Body" : {
+      "Data" : {}
+   },
+   "Head" : {
+      "RequestArguments" : {
+         "DeviceClass" : "Storage",
+         "Scope" : "System"
+      },
+      "Status" : {
+         "Code" : 0,
+         "Reason" : "",
+         "UserMessage" : ""
+      },
+      "Timestamp" : "2018-11-04T17:43:56+01:00"
+   }
+}

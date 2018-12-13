@@ -1,0 +1,123 @@
+{
+   "Body" : {
+      "Data" : {
+         "0" : {
+            "Controller" : {
+               "Capacity_Maximum" : 4800,
+               "Current_DC" : -1.98,
+               "DesignedCapacity" : 4800,
+               "Details" : {
+                  "Manufacturer" : "Fronius International",
+                  "Model" : "Fronius Solar Battery",
+                  "Serial" : "28232340"
+               },
+               "Enable" : 1,
+               "StateOfCharge_Relative" : 68,
+               "Temperature_Cell" : 26.150000000000034,
+               "TimeStamp" : 1541531898,
+               "Voltage_DC" : 209,
+               "Voltage_DC_Maximum_Cell" : 3.27,
+               "Voltage_DC_Minimum_Cell" : 3.2629999999999999
+            },
+            "Modules" : [
+               {
+                  "Capacity_Maximum" : 1200,
+                  "Current_DC" : -1.8799999999999999,
+                  "CycleCount_BatteryCell" : 311,
+                  "DesignedCapacity" : 1200,
+                  "Details" : {
+                     "Manufacturer" : "Sony",
+                     "Model" : "unknown",
+                     "Serial" : "S013011197 "
+                  },
+                  "Enable" : 1,
+                  "StateOfCharge_Relative" : 68,
+                  "Status_BatteryCell" : 83,
+                  "Temperature_Cell" : 26.650000000000034,
+                  "Temperature_Cell_Maximum" : 27.450000000000045,
+                  "Temperature_Cell_Minimum" : 26.350000000000023,
+                  "TimeStamp" : 1541531893,
+                  "Voltage_DC" : 52.284999999999997,
+                  "Voltage_DC_Maximum_Cell" : 3.2719999999999998,
+                  "Voltage_DC_Minimum_Cell" : 3.266
+               },
+               {
+                  "Capacity_Maximum" : 1200,
+                  "Current_DC" : -2,
+                  "CycleCount_BatteryCell" : 311,
+                  "DesignedCapacity" : 1200,
+                  "Details" : {
+                     "Manufacturer" : "Sony",
+                     "Model" : "unknown",
+                     "Serial" : "S013011184 "
+                  },
+                  "Enable" : 1,
+                  "StateOfCharge_Relative" : 68,
+                  "Status_BatteryCell" : 83,
+                  "Temperature_Cell" : 26.75,
+                  "Temperature_Cell_Maximum" : 27.450000000000045,
+                  "Temperature_Cell_Minimum" : 26.450000000000045,
+                  "TimeStamp" : 1541531893,
+                  "Voltage_DC" : 52.265000000000001,
+                  "Voltage_DC_Maximum_Cell" : 3.2690000000000001,
+                  "Voltage_DC_Minimum_Cell" : 3.2650000000000001
+               },
+               {
+                  "Capacity_Maximum" : 1200,
+                  "Current_DC" : -1.9399999999999999,
+                  "CycleCount_BatteryCell" : 312,
+                  "DesignedCapacity" : 1200,
+                  "Details" : {
+                     "Manufacturer" : "Sony",
+                     "Model" : "unknown",
+                     "Serial" : "S013011190 "
+                  },
+                  "Enable" : 1,
+                  "StateOfCharge_Relative" : 68,
+                  "Status_BatteryCell" : 83,
+                  "Temperature_Cell" : 26.150000000000034,
+                  "Temperature_Cell_Maximum" : 27.050000000000011,
+                  "Temperature_Cell_Minimum" : 25.75,
+                  "TimeStamp" : 1541531893,
+                  "Voltage_DC" : 52.262,
+                  "Voltage_DC_Maximum_Cell" : 3.2679999999999998,
+                  "Voltage_DC_Minimum_Cell" : 3.2639999999999998
+               },
+               {
+                  "Capacity_Maximum" : 1200,
+                  "Current_DC" : -1.9399999999999999,
+                  "CycleCount_BatteryCell" : 310,
+                  "DesignedCapacity" : 1200,
+                  "Details" : {
+                     "Manufacturer" : "Sony",
+                     "Model" : "unknown",
+                     "Serial" : "S013011185 "
+                  },
+                  "Enable" : 1,
+                  "StateOfCharge_Relative" : 68,
+                  "Status_BatteryCell" : 83,
+                  "Temperature_Cell" : 25.550000000000011,
+                  "Temperature_Cell_Maximum" : 26.25,
+                  "Temperature_Cell_Minimum" : 25.050000000000011,
+                  "TimeStamp" : 1541531893,
+                  "Voltage_DC" : 52.270000000000003,
+                  "Voltage_DC_Maximum_Cell" : 3.2690000000000001,
+                  "Voltage_DC_Minimum_Cell" : 3.2639999999999998
+               }
+            ]
+         }
+      }
+   },
+   "Head" : {
+      "RequestArguments" : {
+         "DeviceClass" : "Storage",
+         "Scope" : "System"
+      },
+      "Status" : {
+         "Code" : 0,
+         "Reason" : "",
+         "UserMessage" : ""
+      },
+      "Timestamp" : "2018-11-06T20:18:19+01:00"
+   }
+}
