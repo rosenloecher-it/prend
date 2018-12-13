@@ -1,12 +1,13 @@
 import time
 import datetime
 import logging
-from prend.oh.oh_observer import OhObserver
-from prend.oh.oh_rest import OhRest
-from prend.daemon import Daemon
-from prend.oh.oh_gateway import OhGateway
-from .dispatcher import Dispatcher
+from .action import Action
 from .connection_checker import ConnectionChecker
+from .daemon import Daemon
+from .dispatcher import Dispatcher
+from .oh.oh_gateway import OhGateway
+from .oh.oh_observer import OhObserver
+from .oh.oh_rest import OhRest
 
 
 # https://github.com/serverdensity/python-daemon
@@ -94,6 +95,9 @@ class RuleManager(Daemon):
             rule.set_dispatcher(self._dispatcher)
             rule.set_oh_gateway(self._oh_gateway)
             rule.open()
+
+            startup_action = Action.create_startup_action()
+            self._dispatcher.queue_action(startup_action)
 
     def run(self):
 
