@@ -23,6 +23,8 @@ Write your own [OpenHAB] rules with Python 3. Use your favorite editor, debug yo
 - This is a very early version, so I expect some API changes...
 - There are lots of different devices available for OpenHAB. Each of them could provide different values and types which could lead to unexpected behavior.
 - No service script is provided so far to run it as system daemon.
+- Python programming skills required.
+- HTTP authenification (username/password) is not tested.
 
 
 ## Motivation
@@ -67,6 +69,18 @@ Number dummy_number 		"dummy_number [%d]"
 Number dummy_number_2 		"dummy_number_2 [%d]"
 ```
 
+Put the items into your OpenHAB *.sitemap:
+```
+sitemap default label="Smarthome" {
+    Frame label="Test" {
+        Default item=dummy_switch
+        Default item=dummy_string
+        Setpoint item=dummy_number minValue=-100 maxValue=100 step=1
+        Default item=dummy_number_2
+    }
+}
+```
+
 Configure app via config file ($PROJECT_DIR/prend.conf):
 ```
 [openhab]
@@ -105,22 +119,23 @@ $ python prend.py --stop           # stop daemon
 
 ## Provide your own rules
 
-provide a rule class:
-- see [$PROJECT_DIR/prend_app/sample_rule.py][sample_rule.py] and all functions provide by base class
+See [$PROJECT_DIR/prend_app/sample_rule.py][sample_rule.py] and all functions provided by the base class.
+
+Create a new rule class:
 - inherit from prend.Rule
 - implement "register_actions" to subscribe to changes or cron actions
 - implement "notify_action" and put your code here
 - access states via super class functions
-- read entries from configuration
+- read entries from configuration via super class functions
 
-register your rule class in $PROJECT_DIR/prend.py:
+register your rule class in [/$PROJECT_DIR/prend.py](https://github.com/rosenloecher-it/prend/blob/master/prend.py):
 ```python
 def main():
     process = Process()
     ...
 
     # todo - register your rule classes
-    process.register_rule(TestRule())
+    process.register_rule(SampleRule())
 
     # run endless loop
     return process.run()
