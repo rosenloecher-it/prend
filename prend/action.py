@@ -12,13 +12,6 @@ class OhIllegalActionException(ActionException):
         super().__init__('invalid action ({})!'.format(str(event) if event else 'None'))
 
 
-class ActionType(Enum):
-    CRON = 1
-    ITEM = 2
-    GROUP = 3
-    THING = 4
-
-
 class Action:
 
     def __init__(self):
@@ -46,7 +39,7 @@ class Action:
         return True
 
     def __repr__(self) -> str:
-        if self.channel and self.channel.type == ChannelType.CRON:
+        if self.channel and self.channel.type in [ChannelType.CRON, ChannelType.STARTUP]:
             return '{}({})'.format(self.__class__.__name__, self.channel)
         else:
             return '{}({} | {} => {}; | {} (old: {}))'\
@@ -78,6 +71,12 @@ class Action:
     def create_cron_action(channel_name: str) -> 'Action':
         action = Action()
         action.channel = Channel.create(ChannelType.CRON, channel_name)
+        return action
+
+    @staticmethod
+    def create_startup_action() -> 'Action':
+        action = Action()
+        action.channel = Channel.create_startup()
         return action
 
     @staticmethod

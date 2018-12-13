@@ -36,6 +36,13 @@ class TestChannel(unittest.TestCase):
         comp.name = orig.name + '2'
         self.assertTrue(orig != comp)
 
+        startup = Channel.create_startup()
+        self.assertEqual(startup.type, ChannelType.STARTUP)
+        comp = Channel.create_startup()
+        self.assertEqual(startup, comp)
+        comp.name = 'xx'
+        self.assertEqual(startup, comp)
+
     def test_is_valid(self):
         channel = Channel.create(ChannelType.ITEM, 'dummyNumber')
         out = channel.is_valid()

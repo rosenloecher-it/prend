@@ -10,11 +10,9 @@ class TestOhAction(unittest.TestCase):
 
     def test_repr(self):
         # no crash
-        action = Action()
-        print(action)
-
-        action = Action.create_cron_action('cron1')
-        print(action)
+        print(Action())
+        print(Action.create_cron_action('cron1'))
+        print(Action.create_startup_action())
 
     def test_eq(self):
         orig = Action()

@@ -92,6 +92,11 @@ class Rule(ABC):
             return state.value
         return None
 
+    def get_item_state(self, channel_name: str):
+        channel = Channel.create(ChannelType.ITEM, channel_name)
+        state = self._oh_gateway.get_state(channel)
+        return state
+
     def get_item_state_value(self, channel_name: str):
         channel = Channel.create(ChannelType.ITEM, channel_name)
         state = self._oh_gateway.get_state(channel)

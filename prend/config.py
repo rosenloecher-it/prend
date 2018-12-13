@@ -96,6 +96,7 @@ class Config:
         self.oh_password = None
         self.oh_rest_base_url = None
         self.oh_username = None
+        self.oh_simulate_sending = False
         self.parsed = None
         self.pid_file = None
         self.work_dir = None
@@ -111,15 +112,17 @@ class Config:
         lines = []
 
         if self.config_file or print_all:
-            lines.append('config file = {}'.format(self.config_file))
+            lines.append('config file   = {}'.format(self.config_file))
         if self.oh_rest_base_url or print_all:
-            lines.append('oh rest url = {}'.format(self.oh_rest_base_url))
+            lines.append('oh rest url   = {}'.format(self.oh_rest_base_url))
         if self.oh_username or print_all:
-            lines.append('username    = {}'.format(self.oh_username))
+            lines.append('username      = {}'.format(self.oh_username))
+        if self.oh_simulate_sending or print_all:
+            lines.append('simulate send = {}'.format(self.oh_simulate_sending))
         if self.pid_file or print_all:
-            lines.append('pid file    = {}'.format(self.pid_file))
+            lines.append('pid file      = {}'.format(self.pid_file))
         if self.work_dir or print_all:
-            lines.append('work dir    = {}'.format(self.work_dir))
+            lines.append('work dir      = {}'.format(self.work_dir))
 
         if len(lines) > 0:
             print('\nconfiguration:')
@@ -247,10 +250,12 @@ class ConfigLoader:
             config.log_delete_at_start = \
                 cls._read_bool_config_parser(file_reader, section_logging, 'delete_at_start', False)
 
-            section = 'openhab'
-            config.oh_rest_base_url = cls._read_from_config_parser(file_reader, section, 'rest_base_url')
-            config.oh_username = cls._read_from_config_parser(file_reader, section, 'username')
-            config.oh_password = cls._read_from_config_parser(file_reader, section, 'password')
+            section_openhab = 'openhab'
+            config.oh_rest_base_url = cls._read_from_config_parser(file_reader, section_openhab, 'rest_base_url')
+            config.oh_username = cls._read_from_config_parser(file_reader, section_openhab, 'username')
+            config.oh_password = cls._read_from_config_parser(file_reader, section_openhab, 'password')
+            config.oh_simulate_sending = \
+                cls._read_bool_config_parser(file_reader, section_logging, 'simulate_sending', False)
 
             section_system = 'system'
             config.pid_file = cls._read_from_config_parser(file_reader, section_system, 'pid_file')
@@ -282,9 +287,10 @@ class ConfigLoader:
             config.rule_config = {s: dict(file_reader.items(s)) for s in file_reader.sections()}
             cls.add_to_rule_config(config.rule_config, section_logging, 'logfile', config.logfile)
             cls.add_to_rule_config(config.rule_config, section_logging, 'loglevel', config.loglevel)
-            cls.add_to_rule_config(config.rule_config, section_system, 'work_dir', config.work_dir)
-            cls.add_to_rule_config(config.rule_config, section_system, 'pid_file', config.pid_file)
+            cls.add_to_rule_config(config.rule_config, section_openhab, 'simulate_sending', config.oh_simulate_sending)
             cls.add_to_rule_config(config.rule_config, section_system, 'config_file', config.config_file)
+            cls.add_to_rule_config(config.rule_config, section_system, 'pid_file', config.pid_file)
+            cls.add_to_rule_config(config.rule_config, section_system, 'work_dir', config.work_dir)
 
         except Exception as ex:
             if init_app_do_not_raise:

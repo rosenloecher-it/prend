@@ -8,10 +8,11 @@ class OhIllegalChannelException(Exception):
 
 
 class ChannelType(Enum):
-    CRON = 1
-    ITEM = 2
-    GROUP = 3
-    THING = 4
+    STARTUP = 1
+    CRON = 2
+    ITEM = 3
+    GROUP = 4
+    THING = 5
 
     def __str__(self):
         return self.__repr__()
@@ -45,6 +46,10 @@ class Channel:
             return False
         if self.type != other.type:
             return False
+
+        if self.type == ChannelType.STARTUP and self.type == other.type:
+            return True  # no name check neccessary
+
         if self.name != other.name:
             return False
         return True
@@ -62,10 +67,15 @@ class Channel:
             return False
         return True
 
-    # noinspection PyShadowingBuiltins
     @staticmethod
     def create(channel_type: ChannelType, name: str) -> 'Channel':
         channel = Channel()
         channel.type = channel_type
         channel.name = name
+        return channel
+
+    @staticmethod
+    def create_startup() -> 'Channel':
+        channel = Channel()
+        channel.type = ChannelType.STARTUP
         return channel

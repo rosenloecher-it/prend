@@ -27,8 +27,8 @@ class OhRest:
         self._rest_base_url = config.oh_rest_base_url
         self._username = config.oh_username
         self._password = config.oh_password
+        self._simulate_sending = config.oh_simulate_sending
         self._timeout = config.timeout or None
-
         self._session = None
 
     def __enter__(self):
@@ -141,12 +141,18 @@ class OhRest:
 
         if send_command:
             url = '/items/{}'.format(item_name)
-            _logger.info('send POST COMMAND: "%s" => %s', value_json, url)
-            self._req_post(url, data=value_json)
+            if self._simulate_sending:
+                _logger.info('SIMULATE post command: "%s" => %s', value_json, url)
+            else:
+                _logger.info('send POST COMMAND: "%s" => %s', value_json, url)
+                self._req_post(url, data=value_json)
         else:
             url = '/items/{}/state'.format(item_name)
-            _logger.info('send PUT UPDATE: "%s" => %s', value_json, url)
-            self._req_put(url, data=value_json)
+            if self._simulate_sending:
+                _logger.info('SIMULATE put update: "%s" => %s', value_json, url)
+            else:
+                _logger.info('send PUT UPDATE: "%s" => %s', value_json, url)
+                self._req_put(url, data=value_json)
 
     def _req_get(self, uri_path: str) -> typing.Any:
         req = self._session.get(self._rest_base_url + uri_path, timeout=self._timeout)
