@@ -119,7 +119,7 @@ $ python prend.py --stop           # stop daemon
 
 ## Provide your own rules
 
-See [$PROJECT_DIR/prend_app/sample_rule.py][sample_rule.py] and all functions provided by the base class.
+See [$PROJECT_DIR/app/sample_rule.py][sample_rule.py] and all functions provided by the base class.
 
 Create a new rule class:
 - inherit from prend.Rule
@@ -143,5 +143,5 @@ def main():
 ```
 
 [OpenHAB]: https://www.openhab.org/
-[sample_rule.py]: https://github.com/rosenloecher-it/prend/blob/master/prend_app/sample_rule.py
+[sample_rule.py]: https://github.com/rosenloecher-it/prend/blob/master/app/sample_rule.py
 
