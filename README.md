@@ -117,6 +117,7 @@ $ python prend.py --ensure         # ensure that the daemon is running (e.g. cal
 $ python prend.py --stop           # stop daemon
 ```
 
+
 ## Provide your own rules
 
 See [$PROJECT_DIR/app/sample_rule.py][sample_rule.py] and all functions provided by the base class.
@@ -141,6 +142,21 @@ def main():
     return process.run()
     ...
 ```
+
+
+## Maintainer
+
+- [Raul Rosenlöcher](https://github.com/rosenloecher-it)
+
+
+## License
+
+GPLv3 © [Raul Rosenlöcher](https://github.com/rosenloecher-it)
+
+The code is available at [GitHub][home].
+
+
+[home]: https://github.com/rosenloecher-it/prend
 
 [OpenHAB]: https://www.openhab.org/
 [sample_rule.py]: https://github.com/rosenloecher-it/prend/blob/master/app/sample_rule.py
