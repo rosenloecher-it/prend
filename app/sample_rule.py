@@ -40,9 +40,9 @@ class SampleRule(Rule):
 
         # check for general connection to openhab
         if not self.is_connected():
-            _logger.info('notify_action - NOT CONNECTED - %s', action)
+            _logger.debug('notify_action - NOT CONNECTED - %s', action)
         else:
-            _logger.info('notify_action - %s', action)
+            _logger.debug('notify_action - %s', action)
 
             # get item state
             dummy_number = self.get_item_state_value('dummy_number')
