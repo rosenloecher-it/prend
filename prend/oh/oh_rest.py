@@ -1,6 +1,7 @@
 import datetime
 import logging
 import requests
+import threading
 import typing
 from requests.auth import HTTPBasicAuth
 from typing import Optional
@@ -30,6 +31,7 @@ class OhRest:
         self._simulate_sending = config.oh_simulate_sending
         self._timeout = config.timeout or None
         self._session = None
+        self._lock_session = threading.Lock()
 
     def __enter__(self):
         self.open()
@@ -39,15 +41,17 @@ class OhRest:
         self.close()
 
     def open(self):
-        self._session = requests.Session()
-        self._session.headers['accept'] = 'application/json'
-        if self._username:
-            self._session.auth = HTTPBasicAuth(self._username, self._password)
+        with self._lock_session:
+            self._session = requests.Session()
+            self._session.headers['accept'] = 'application/json'
+            if self._username:
+                self._session.auth = HTTPBasicAuth(self._username, self._password)
 
     def close(self):
-        if self._session:
-            self._session.close()
-            self._session = None
+        with self._lock_session:
+            if self._session:
+                self._session.close()
+                self._session = None
 
     def fetch_all(self):
         events = []
@@ -155,14 +159,17 @@ class OhRest:
                 self._req_put(url, data=value_json)
 
     def _req_get(self, uri_path: str) -> typing.Any:
-        req = self._session.get(self._rest_base_url + uri_path, timeout=self._timeout)
-        self._check_req_return(req)
-        return req.json()
+        with self._lock_session:
+            req = self._session.get(self._rest_base_url + uri_path, timeout=self._timeout)
+            self._check_req_return(req)
+            return req.json()
 
     def _req_post(self, uri_path: str, data: typing.Optional[dict] = None) -> None:
-        req = self._session.post(self._rest_base_url + uri_path, data=data, timeout=self._timeout)
-        self._check_req_return(req)
+        with self._lock_session:
+            req = self._session.post(self._rest_base_url + uri_path, data=data, timeout=self._timeout)
+            self._check_req_return(req)
 
     def _req_put(self, uri_path: str, data: typing.Optional[dict] = None) -> None:
-        req = self._session.put(self._rest_base_url + uri_path, data=data, timeout=self._timeout)
-        self._check_req_return(req)
+        with self._lock_session:
+            req = self._session.put(self._rest_base_url + uri_path, data=data, timeout=self._timeout)
+            self._check_req_return(req)
