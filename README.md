@@ -144,12 +144,7 @@ def main():
 ```
 
 
-## Maintainer
-
-- [Raul Rosenlöcher](https://github.com/rosenloecher-it)
-
-
-## License
+## Maintainer & License
 
 GPLv3 © [Raul Rosenlöcher](https://github.com/rosenloecher-it)
 
@@ -157,7 +152,6 @@ The code is available at [GitHub][home].
 
 
 [home]: https://github.com/rosenloecher-it/prend
-
 [OpenHAB]: https://www.openhab.org/
 [sample_rule.py]: https://github.com/rosenloecher-it/prend/blob/master/app/sample_rule.py
 
