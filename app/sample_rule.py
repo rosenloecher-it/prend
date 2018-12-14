@@ -25,11 +25,11 @@ class SampleRule(Rule):
 
         # create channel object and subscribe for changes
         channel = Channel.create(ChannelType.ITEM, 'dummy_number')
-        self.subscribe_openhab_actions(channel)
+        self.subscribe_channel_actions(channel)
 
         # create channel obect and subscribe for changes
         channel = Channel.create(ChannelType.ITEM, 'dummy_switch')
-        self.subscribe_openhab_actions(channel)
+        self.subscribe_channel_actions(channel)
 
         # state changes for things
         # channel = Channel.create(ChannelType.THING, 'uid')
