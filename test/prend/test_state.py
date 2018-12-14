@@ -26,6 +26,16 @@ class TestStateType(unittest.TestCase):
         self.assertEqual(out, StateType.DECIMAL)
 
 
+    def test_is_number_type(self):
+
+        for en in StateType:
+            expected = False
+            if en in [StateType.DECIMAL, StateType.DIMMER, StateType.ROLLERSHUTTER, StateType.PERCENT]:
+                expected = True
+            out = en.is_number_type()
+            self.assertEqual(out, expected)
+
+
 class TestState(unittest.TestCase):
 
     def test_eq(self):
@@ -113,7 +123,16 @@ class TestState(unittest.TestCase):
         self.check_convert_roundabout(' thing ', 'INITIALIZING')
         self.check_convert_roundabout(StateType.THING_STATUS.name, 'ONLINE')
 
-        pass
+    def check_ensure_value_int(self, state_type, value_in, value_cmp):
+        state = State.create(state_type, copy.deepcopy(value_in))
+        value_out = state.ensure_value_int()
+        self.assertEqual(value_out, value_cmp)
+
+    def test_ensure_value_int(self):
+        self.check_ensure_value_int(StateType.ROLLERSHUTTER, 11.23, 11)
+        self.check_ensure_value_int(StateType.DIMMER, 11.23, 11)
+        self.check_ensure_value_int(StateType.DECIMAL, -11.23, -11)
+        self.check_ensure_value_int(StateType.PERCENT, 11, 11)
 
 
 if __name__ == '__main__':
