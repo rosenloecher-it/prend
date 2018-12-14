@@ -134,6 +134,30 @@ class TestState(unittest.TestCase):
         self.check_ensure_value_int(StateType.DECIMAL, -11.23, -11)
         self.check_ensure_value_int(StateType.PERCENT, 11, 11)
 
+    def check_ensure_value_float(self, state_type, value_in, value_cmp):
+        state = State.create(state_type, copy.deepcopy(value_in))
+        value_out = state.ensure_value_float()
+        self.assertEqual(value_out, value_cmp)
+
+    def test_ensure_value_float(self):
+        self.check_ensure_value_float(StateType.ROLLERSHUTTER, 11.23, 11.23)
+        self.check_ensure_value_float(StateType.DIMMER, 11.23, 11.23)
+        self.check_ensure_value_float(StateType.DECIMAL, -11.23, -11.23)
+        self.check_ensure_value_float(StateType.PERCENT, 11, 11)
+
+    def check_set_value_check_type(self, state_type, value1, value2, expected_result):
+        state = State.create(state_type, value1)
+        result = state.set_value_check_type(copy.deepcopy(value2))
+        self.assertEqual(result, expected_result)
+        if result:
+            self.assertEqual(state.value, value2)
+
+    def test_set_value_check_type(self):
+        self.check_set_value_check_type(StateType.DECIMAL, 1, 2.4, True)
+        self.check_set_value_check_type(StateType.DECIMAL, 1, 2, True)
+        self.check_set_value_check_type(StateType.DECIMAL, 1.23, 2.34, True)
+        self.check_set_value_check_type(StateType.DECIMAL, 1.23, 2, True)
+
 
 if __name__ == '__main__':
     unittest.main()
