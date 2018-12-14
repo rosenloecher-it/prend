@@ -87,6 +87,7 @@ Configure app via config file ($PROJECT_DIR/prend.conf):
 rest_base_url=http://127.0.0.1:8080/rest
 username=
 password=
+simulate_sending=False
 
 [system]
 work_dir=./__work__
