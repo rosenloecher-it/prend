@@ -119,6 +119,21 @@ class State:
         self.value = value
         self.update_last_change()
 
+    def set_value_check_type(self, value) -> bool:
+        type_matches = False
+        if isinstance(self.value, int):
+            if self.type.is_number_type():
+                type_matches = True
+        elif isinstance(self.value, float):
+            if self.type.is_number_type():
+                type_matches = True
+        else:
+            type_matches = True
+
+        if type_matches:
+             self.set_value(value)
+        return type_matches
+
     def import_state(self, other) -> None:
         if self.type != StateType.UNDEF and other.type == StateType.UNDEF:
             self.value = None
