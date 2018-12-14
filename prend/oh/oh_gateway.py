@@ -27,7 +27,7 @@ class OhGatewayEventSink:
 
 class OhGateway(OhGatewayEventSink):
 
-    def __init__(self, dispatcher, rest):
+    def __init__(self):
         self._lock_state = threading.Lock()
         self._states = {}
         self._lock_channel_listeners = threading.Lock()
