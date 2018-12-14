@@ -75,6 +75,13 @@ class Channel:
         return channel
 
     @staticmethod
+    def create_item(name: str) -> 'Channel':
+        channel = Channel()
+        channel.type = ChannelType.ITEM
+        channel.name = name
+        return channel
+
+    @staticmethod
     def create_startup() -> 'Channel':
         channel = Channel()
         channel.type = ChannelType.STARTUP
