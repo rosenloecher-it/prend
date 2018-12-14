@@ -32,14 +32,14 @@ class FronstorExtracter:
             subKeys = keys[1:]
             return self.get_deep_attribute(attribute, subKeys)
 
-    def store_value(self, dict, channel, value):
+    def _store_value(self, dict, channel, value):
         dict[channel] = value
         print("store json value: {} = {}".format(channel, value))
 
-    def find_temp_and_cycle(self, json):
+    def _find_temp_and_cycle(self, json):
         result = {}
         tempInv = self.get_deep_attribute(json, ['Body', 'Data', '0', 'Controller', 'Temperature_Cell'])
-        self.store_value(result, FronstorConstants.ITEM_INV_TEMP, tempInv)
+        self._store_value(result, FronstorConstants.ITEM_INV_TEMP, tempInv)
 
         jsonMods = self.get_deep_attribute(json, ['Body', 'Data', '0', 'Modules'])
 
@@ -69,20 +69,20 @@ class FronstorExtracter:
                 if cycleMod < cycleMin or cycleMin < 0 and cycleMod > 0:
                     cycleMin = cycleMod
 
-            self.store_value(result, itemTemp, tempMod)
-            self.store_value(result, itemCycle, cycleMod)
+            self._store_value(result, itemTemp, tempMod)
+            self._store_value(result, itemCycle, cycleMod)
 
         if tempMax > 0:
-            self.store_value(result, FronstorConstants.ITEM_BAT_TEMP_MAX, tempMax)
+            self._store_value(result, FronstorConstants.ITEM_BAT_TEMP_MAX, tempMax)
         else:
-            self.store_value(result, FronstorConstants.ITEM_BAT_TEMP_MAX, None)
+            self._store_value(result, FronstorConstants.ITEM_BAT_TEMP_MAX, None)
 
         if cycleMin < 0:
             cycleMin = '?'
         if cycleMax < 0:
             cycleMax = '?'
 
-        self.store_value(result, FronstorConstants.ITEM_BAT_CYCLE_SPAN, "{}-{}".format(cycleMin, cycleMax))
+        self._store_value(result, FronstorConstants.ITEM_BAT_CYCLE_SPAN, "{}-{}".format(cycleMin, cycleMax))
 
         return result
 
@@ -103,7 +103,7 @@ class FronstorExtracter:
         else:
             try:
                 print("find_temp_and_cycle")
-                values = self.find_temp_and_cycle(json)
+                values = self._find_temp_and_cycle(json)
                 status = FronstorStatus.SUCCESS
 
             except AttributeError as e:
@@ -113,8 +113,8 @@ class FronstorExtracter:
                 print(traceback.format_exc())
 
         values = {}
-        self.store_value(values, FronstorConstants.ITEM_INV_TEMP, None)
-        self.store_value(values, 'valPvBat4Cycle', None)
+        self._store_value(values, FronstorConstants.ITEM_INV_TEMP, None)
+        self._store_value(values, 'valPvBat4Cycle', None)
 
         Result = namedtuple('Result', ['status', 'message', 'values'])
         result = Result(status, message, values)

@@ -11,6 +11,10 @@ from .fronstor_constants import FronstorConstants
 _logger = logging.getLogger(__name__)
 
 
+class FronstorException(Exception):
+    pass
+
+
 class FronstorRule(Rule):
 
     def __init__(self):
@@ -31,69 +35,39 @@ class FronstorRule(Rule):
         if not self._extracter:
             self._extracter = FronstorExtracter()
 
-
-
-    # (overwriten) register your notifications and do some initialisation
     def register_actions(self) -> None:
-        _logger.info('register_actions')
+        cron_job = schedule.every().minute
+        self.subscribe_cron_actions(self.__class__.__name__, cron_job)
 
-        # # _logger.info('show config: {}'.format(self._config))
-        # # better access config via self.get_config*
-        #
-        # # create cron job - syntax see https://github.com/dbader/schedule
-        # cron_job = schedule.every().minute
-        # # choose a cron name to recognize several cron jobs
-        # self.subscribe_cron_actions('cron_name_1', cron_job)
-        #
-        # # create channel object and subscribe for changes
-        # channel = Channel.create(ChannelType.ITEM, 'dummy_number')
-        # self.subscribe_openhab_actions(channel)
-        #
-        # # create channel obect and subscribe for changes
-        # channel = Channel.create(ChannelType.ITEM, 'dummy_switch')
-        # self.subscribe_openhab_actions(channel)
+        self.subscribe_openhab_actions(Channel.create_startup())
 
-
-    # all notification will be sent here
     def notify_action(self, action) -> None:
+        try:
+            # check for general connection to openhab
+            if not self.is_connected():
+                _logger.debug('notify_action - NOT CONNECTED - abort')
+                return
 
-        # check for general connection to openhab
-        if not self.is_connected():
-            _logger.debug('notify_action - NOT CONNECTED - %s', action)
-            return
+            if not self._is_battery_active():
+                _logger.debug('notify_action - battery not active - abort')
+                return
 
-        if not self._is_battery_active():
-            _logger.debug('notify_action - battery not active - %s', action)
-            return
+            _logger.debug('notify_action - %s', action)
 
-        _logger.debug('notify_action - %s', action)
+            json = self._requester.request()
+            self.last_extract = self._extracter.extract(json)
+            if self.last_extract.status == FronstorStatus.SUCCESS:
+                self.send_values(self.last_extract.values)
 
-        json = self._requester.request()
-        self.last_extract = self._extracter.extract(json)
-        if self.last_extract.status == FronstorStatus.SUCCESS:
-            self.send_values(self.last_extract.values)
-
-
-
-            # # get item state
-            # dummy_number = self.get_item_state_value('dummy_number')
-            #
-            # if dummy_number is None:
-            #     dummy_number = 1
-            #     self.send_item_command('dummy_number', dummy_number)
-            #
-            # # send command to another item (there is also a "send_item_update")
-            # self.send_item_command('dummy_number_2', dummy_number)
-            #
-            # # send another command
-            # text = '{} ({})'.format(dummy_number, datetime.datetime.now().isoformat())
-            # self.send_item_command('dummy_string', text)
-
-
+        except FronstorException as ex:
+            _logger.error('notify_action failed - %s', ex)
 
     def _is_battery_active(self):
-        battery_state = self.get_value(FronstorConstants.ITEM_BAT_STATE)
-        battery_active = False
+        channel = Channel.create_item(FronstorConstants.ITEM_BAT_STATE)
+        battery_state = self.get_state(channel)
+        battery_state_value = battery_state.ensure_value_int()
+        if battery_state_value is None:
+            raise FronstorException('no battery state ({}; {}) available!'.format(channel, battery_state))
 
         try:
             # valid
@@ -112,41 +86,29 @@ class FronstorRule(Rule):
         return battery_active
 
     def send_values(self, values):
-        for key, newValue in values.items():
-            currItem = self.values.get(key)
 
-            self.get_item_state_value('dummy_number')
+        class ItemData:
+            def __init__(self):
+                self.channel = None
+                self.state = None
+                pass
+        items = []
 
+        for key, new_value in values.items():
+            item = ItemData()
+            item.channel = Channel.create_item(key)
+            item.state = self.get_item_state(item.channel)
+            if not item.state:
+                raise FronstorException('openhab state ({}) not found!'.format(item.channel))
+            if item.state.value == new_value:
+                _logger.debug('found equal values: item ({}) - current={} == new={} => skip'.format(key, item.state.value, new_value))
+                continue
+            if not item.state.set_value_check_type(new_value):
+                raise FronstorException('cannot set state ({}) not found!'.format(item.channel))
+            items.append(item)
 
-            if currItem == None:
-                print('error: openhab item ({}) not found!'.format(key))
-            else:
-                currValue = currItem.state
-                if currValue != newValue:
-                    print('openhab item ({}) found (current={} != new={})'.format(key, currValue, newValue))
-                    self.send_item_command(key, newValue)
-                else:
-                    print('openhab item ({}) found (current={} != new={}) => no change'.format(key, currValue, newValue))
+        for item in items:
+            # logging is done in OhRest
+            self.send_item_command(item.channel, item.state)
 
-
-# class FroniusStorageRule(Rule):
-#
-#
-#     def process(self):
-#         try:
-#
-#             print('load openhab values')
-#             self.openhab.load_values()
-#             print('request service')
-#             json = self.requester.request()
-#             print('extract json')
-#             self.last_extract = self.extracter.extract(json)
-#             if self.last_extract.status == Status.SUCCESS:
-#                 print('values extracted => send values')
-#                 self.openhab.send_values(self.last_extract.values)
-#         finally:
-#             self.openhab.close()
-#
-#     def get_last_extract(self):
-#         return self.last_extract
 

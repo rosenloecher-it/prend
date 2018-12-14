@@ -9,11 +9,15 @@ class TestExtracter(unittest.TestCase):
 
     def setUp(self):
 
-        self.openhab = MockOpenhab()
+        self.rule = FronstorRule()
+
         self.requester = MockRequester()
         self.extracter = FronstorExtracter()
-        self.rule = FronstorRule(self.openhab, self.requester, self.processor)
 
+        self.rule.set_requester(self.requester)
+        self.rule.set_extracter(self.extracter)
+
+        self.rule.open()
 
 #    def test_loadRequestFileNotFound(self):
 #        hitException = False
