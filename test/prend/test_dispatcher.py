@@ -34,7 +34,7 @@ class TestDispatcher(unittest.TestCase):
         checker = DispatchCheckerRule(dispatcher)
 
         channel = Channel.create(ChannelType.ITEM, 'dummyNumber')
-        checker.subscribe_openhab_actions(channel)
+        checker.subscribe_channel_actions(channel)
 
         action_in = Action()
         action_in.channel = channel

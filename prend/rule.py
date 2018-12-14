@@ -43,7 +43,7 @@ class Rule(ABC):
     def close(self) -> None:
         pass
 
-    def subscribe_openhab_actions(self, channel: Channel) -> None:
+    def subscribe_channel_actions(self, channel: Channel) -> None:
         self._dispatcher.register_oh_listener(channel, self)
 
     def subscribe_cron_actions(self, cron_key: str, job: schedule.Job) -> None:
