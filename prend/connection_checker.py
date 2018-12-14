@@ -36,8 +36,8 @@ class ConnectionChecker:
         if not self._observer or not self._oh_gateway:
             raise ValueError()
 
-        self._should_reconnect_observer = False
-        self._should_reconnect_oh_gateway = False
+        self._reconnect_observer = False
+        self._reconnect_oh_gateway = False
 
         paralyse_gateway_connection = False
         time_now = self._time_now()

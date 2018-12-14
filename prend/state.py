@@ -131,7 +131,7 @@ class State:
             type_matches = True
 
         if type_matches:
-             self.set_value(value)
+            self.set_value(value)
         return type_matches
 
     def import_state(self, other) -> None:

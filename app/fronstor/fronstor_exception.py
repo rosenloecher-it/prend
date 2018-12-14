@@ -1,0 +1,3 @@
+
+class FronstorException(Exception):
+    pass

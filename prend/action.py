@@ -1,4 +1,3 @@
-from enum import Enum
 from prend.channel import Channel, ChannelType
 from prend.oh.oh_event import OhEvent, OhNotificationType
 

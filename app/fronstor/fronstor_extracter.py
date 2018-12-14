@@ -1,8 +1,11 @@
-import json
+import logging
 import traceback
 from enum import Enum
 from collections import namedtuple
 from .fronstor_constants import FronstorConstants
+
+
+_logger = logging.getLogger(__name__)
 
 
 class FronstorStatus(Enum):
@@ -11,113 +14,102 @@ class FronstorStatus(Enum):
     SUCCESS = 3
 
 
-
 class FronstorExtracter:
 
-    def get_deep_attribute(self, json, keys):
-        lenAttributes = len(keys)
-        if lenAttributes < 1:
+    def get_deep_attribute(self, json_data, keys):
+        len_attributes = len(keys)
+        if len_attributes < 1:
             return None
 
         key = keys[0]
 
         if isinstance(key, int):
-            attribute = json[key]
+            attribute = json_data[key]
         else:
-            attribute = json.get(keys[0])
+            attribute = json_data.get(keys[0])
 
-        if lenAttributes == 1 or attribute == None:
+        if len_attributes == 1 or attribute is None:
             return attribute
         else:
-            subKeys = keys[1:]
-            return self.get_deep_attribute(attribute, subKeys)
+            sub_keys = keys[1:]
+            return self.get_deep_attribute(attribute, sub_keys)
 
-    def _store_value(self, dict, channel, value):
-        dict[channel] = value
-        print("store json value: {} = {}".format(channel, value))
+    @staticmethod
+    def _store_value(datadict, channel, value):
+        datadict[channel] = value
+        # _logger.debug("store json value: %s = %s", channel, value)
 
-    def _find_temp_and_cycle(self, json):
+    def _find_temp_and_cycle(self, json_data):
         result = {}
-        tempInv = self.get_deep_attribute(json, ['Body', 'Data', '0', 'Controller', 'Temperature_Cell'])
-        self._store_value(result, FronstorConstants.ITEM_INV_TEMP, tempInv)
+        temp_inv = self.get_deep_attribute(json_data, ['Body', 'Data', '0', 'Controller', 'Temperature_Cell'])
+        self._store_value(result, FronstorConstants.ITEM_INV_TEMP, temp_inv)
 
-        jsonMods = self.get_deep_attribute(json, ['Body', 'Data', '0', 'Modules'])
+        json_mods = self.get_deep_attribute(json_data, ['Body', 'Data', '0', 'Modules'])
 
-        lenJsonMods = -1
-        if isinstance(jsonMods, list):
-            lenJsonMods = len(jsonMods)
-            if lenJsonMods != FronstorConstants.ITEM_BAT_COUNT:
-                print('warning: count batteries ({}) does not match configured count  ({})!'.format(lenJsonMods, Constants.item_bat_count))
+        if isinstance(json_mods, list):
+            len_json_mods = len(json_mods)
+            if len_json_mods != FronstorConstants.ITEM_BAT_COUNT:
+                _logger.warning('warning: count batteries (%d) does not match configured count  (%d)!'
+                                , len_json_mods, FronstorConstants.ITEM_BAT_COUNT)
 
-        tempMax = -1
-        cycleMin = -1
-        cycleMax = -1
+        temp_max = None
+        cycle_min = None
+        cycle_max = None
 
         for i in range(0, FronstorConstants.ITEM_BAT_COUNT):
-            itemTemp = FronstorConstants.ITEM_BAT_TEMP_FORMAT.format(i + 1)
-            itemCycle = FronstorConstants.ITEM_BAT_CYCLE_FORMAT.format(i + 1)
+            item_temp = FronstorConstants.ITEM_BAT_TEMP_FORMAT.format(i + 1)
+            item_cycle = FronstorConstants.ITEM_BAT_CYCLE_FORMAT.format(i + 1)
 
-            tempMod = None
-            cycleMod = None
-            if i < lenJsonMods:
-                tempMod = self.get_deep_attribute(json, ['Body', 'Data', '0', 'Modules', i, 'Temperature_Cell_Maximum'])
-                cycleMod = self.get_deep_attribute(json, ['Body', 'Data', '0', 'Modules', i, 'CycleCount_BatteryCell'])
-                if tempMod > tempMax:
-                    tempMax = tempMod
-                if cycleMod > cycleMax:
-                    cycleMax = cycleMod
-                if cycleMod < cycleMin or cycleMin < 0 and cycleMod > 0:
-                    cycleMin = cycleMod
+            temp_mod = self.get_deep_attribute(json_data
+                                               , ['Body', 'Data', '0', 'Modules', i, 'Temperature_Cell_Maximum'])
+            self._store_value(result, item_temp, temp_mod)
+            if temp_mod is not None:
+                if temp_max is None or temp_mod > temp_max:
+                    temp_max = temp_mod
 
-            self._store_value(result, itemTemp, tempMod)
-            self._store_value(result, itemCycle, cycleMod)
+            cycle_mod = self.get_deep_attribute(json_data
+                                                , ['Body', 'Data', '0', 'Modules', i, 'CycleCount_BatteryCell'])
+            if cycle_mod is not None:
+                # don't overwrite real cycle values with None
+                self._store_value(result, item_cycle, cycle_mod)
+                if cycle_max is None or cycle_mod > cycle_max:
+                    cycle_max = cycle_mod
+                if cycle_min is None or cycle_mod < cycle_min:
+                    cycle_min = cycle_mod
 
-        if tempMax > 0:
-            self._store_value(result, FronstorConstants.ITEM_BAT_TEMP_MAX, tempMax)
-        else:
-            self._store_value(result, FronstorConstants.ITEM_BAT_TEMP_MAX, None)
+        self._store_value(result, FronstorConstants.ITEM_BAT_TEMP_MAX, temp_max)
 
-        if cycleMin < 0:
-            cycleMin = '?'
-        if cycleMax < 0:
-            cycleMax = '?'
-
-        self._store_value(result, FronstorConstants.ITEM_BAT_CYCLE_SPAN, "{}-{}".format(cycleMin, cycleMax))
+        if cycle_min is not None or cycle_max is not None:
+            if cycle_min is None:
+                cycle_min = '?'
+            if cycle_max is None:
+                cycle_max = '?'
+            self._store_value(result, FronstorConstants.ITEM_BAT_CYCLE_SPAN, '{}-{}'.format(cycle_min, cycle_max))
 
         return result
 
+    def extract(self, json_data):
 
-    def extract(self, json):
-
-        status = FronstorStatus.ERROR
         message = None
         values = None
 
-        statusCode = self.get_deep_attribute(json, ['Head', 'Status', 'Code'])
-        if statusCode != 0:
+        status_code = self.get_deep_attribute(json_data, ['Head', 'Status', 'Code'])
+        if status_code != 0:
             status = FronstorStatus.ERROR
-            message = self.get_deep_attribute(json, ['Head', 'Status', 'Reason'])
-            message2 = self.get_deep_attribute(json, ['Head', 'Status', 'UserMessage'])
-            print("extract failure: status = {}; message = {} ({})".format(status, message, message2))
+            message = self.get_deep_attribute(json_data, ['Head', 'Status', 'Reason'])
+            message2 = self.get_deep_attribute(json_data, ['Head', 'Status', 'UserMessage'])
+            _logger.error("extract failure - status: %s | message: %s ({})", status, message, message2)
 
         else:
             try:
-                print("find_temp_and_cycle")
-                values = self._find_temp_and_cycle(json)
+                values = self._find_temp_and_cycle(json_data)
                 status = FronstorStatus.SUCCESS
 
-            except AttributeError as e:
+            except AttributeError as ex:
                 status = FronstorStatus.ERROR
-                message = 'exception: cannot extract temps and cycles!'
-                print(message)
-                print(traceback.format_exc())
-
-        values = {}
-        self._store_value(values, FronstorConstants.ITEM_INV_TEMP, None)
-        self._store_value(values, 'valPvBat4Cycle', None)
+                _logger.error('extract failed (%s)', ex)
 
         Result = namedtuple('Result', ['status', 'message', 'values'])
         result = Result(status, message, values)
         return result
 
-# --------------------------------------------------------------------

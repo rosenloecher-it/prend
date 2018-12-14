@@ -1,25 +1,25 @@
 import datetime
 import logging
 import schedule
-from prend.channel import Channel, ChannelType
+from prend.channel import Channel
 from prend.rule import Rule
 from .fronstor_requester import FronstorRequester
-from app.fronstor.fronstor_extracter import FronstorExtracter, FronstorStatus
-from .fronstor_constants import FronstorConstants
+from .fronstor_extracter import FronstorExtracter
+from .fronstor_processor import FronstorProcessor
+from .fronstor_exception import FronstorException
 
 
 _logger = logging.getLogger(__name__)
 
 
-class FronstorException(Exception):
-    pass
-
-
 class FronstorRule(Rule):
 
     def __init__(self):
+        super().__init__()
         self._requester = None
         self._extracter = None
+        self._processor = None
+        self._processor_config = None
         pass
 
     def set_requester(self, requester):
@@ -48,67 +48,33 @@ class FronstorRule(Rule):
                 _logger.debug('notify_action - NOT CONNECTED - abort')
                 return
 
-            if not self._is_battery_active():
-                _logger.debug('notify_action - battery not active - abort')
-                return
+            # todo config
 
+            # todo time measurment
             _logger.debug('notify_action - %s', action)
 
-            json = self._requester.request()
-            self.last_extract = self._extracter.extract(json)
-            if self.last_extract.status == FronstorStatus.SUCCESS:
-                self.send_values(self.last_extract.values)
+            self._start_processor()
 
         except FronstorException as ex:
             _logger.error('notify_action failed - %s', ex)
 
-    def _is_battery_active(self):
-        channel = Channel.create_item(FronstorConstants.ITEM_BAT_STATE)
-        battery_state = self.get_state(channel)
-        battery_state_value = battery_state.ensure_value_int()
-        if battery_state_value is None:
-            raise FronstorException('no battery state ({}; {}) available!'.format(channel, battery_state))
+    def _start_processor(self):
 
-        try:
-            # valid
-            # 3=(3) DISCHARGE
-            # 4=(4) CHARGING
-            # 5=(5) FULL
-            # 6=(6) HOLDING
-            # 7=(7) TESTING
-            num_state = float(battery_state)
-            if num_state >= 3 and num_state <= 7:
-                battery_active = True
-        except ValueError as e:
-            _logger.error('is_battery_active: cannot convert battery (%s) state to float! => no active', battery_state)
-            battery_active = False
+        if self._processor:
+            if not self._processor.is_alive():
+                self._processor.shutdown()
+                self._processor = None
 
-        return battery_active
+        if self._processor:
+            raise FronstorException('processor is still running!')
 
-    def send_values(self, values):
+        self._processor = FronstorProcessor()
+        self._processor.set_requester(self._requester)
+        self._processor.set_extracter(self._extracter)
+        self._processor.set_oh_gateway(self._oh_gateway)
 
-        class ItemData:
-            def __init__(self):
-                self.channel = None
-                self.state = None
-                pass
-        items = []
+        self._processor.start()
 
-        for key, new_value in values.items():
-            item = ItemData()
-            item.channel = Channel.create_item(key)
-            item.state = self.get_item_state(item.channel)
-            if not item.state:
-                raise FronstorException('openhab state ({}) not found!'.format(item.channel))
-            if item.state.value == new_value:
-                _logger.debug('found equal values: item ({}) - current={} == new={} => skip'.format(key, item.state.value, new_value))
-                continue
-            if not item.state.set_value_check_type(new_value):
-                raise FronstorException('cannot set state ({}) not found!'.format(item.channel))
-            items.append(item)
 
-        for item in items:
-            # logging is done in OhRest
-            self.send_item_command(item.channel, item.state)
 
 

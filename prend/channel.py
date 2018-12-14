@@ -69,6 +69,8 @@ class Channel:
 
     @staticmethod
     def create(channel_type: ChannelType, name: str) -> 'Channel':
+        if not isinstance(name, str):
+            raise TypeError()
         channel = Channel()
         channel.type = channel_type
         channel.name = name
@@ -76,6 +78,8 @@ class Channel:
 
     @staticmethod
     def create_item(name: str) -> 'Channel':
+        if not isinstance(name, str):
+            raise TypeError()
         channel = Channel()
         channel.type = ChannelType.ITEM
         channel.name = name

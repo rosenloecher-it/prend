@@ -1,14 +1,16 @@
 import unittest
 from prend.channel import Channel, ChannelType
 from prend.config import ConfigLoader
+from prend.oh.oh_gateway import OhGateway
 from prend.rule import Rule
 from prend.state import State, StateType
 from typing import Optional
 
 
-class MockOhGateway:
+class MockOhGateway(OhGateway):
 
     def __init__(self):
+        super().__init__()
         self.last_channel = None
         self.last_state = None
 

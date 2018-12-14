@@ -25,7 +25,6 @@ class TestStateType(unittest.TestCase):
         out = StateType.parse('Decimal')
         self.assertEqual(out, StateType.DECIMAL)
 
-
     def test_is_number_type(self):
 
         for en in StateType:

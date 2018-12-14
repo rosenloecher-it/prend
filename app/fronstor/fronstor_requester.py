@@ -12,10 +12,12 @@ class FronstorRequesterBase(ABC):
 
 class FronstorRequester(FronstorRequesterBase):
 
-    def __init__(self, url = None):
+    def __init__(self, url=None):
         super().__init__()
         self._url = url
 
+    def set_url(self, url):
+        self._url = url
 
     def request(self):
         req = requests.get(self._url)
