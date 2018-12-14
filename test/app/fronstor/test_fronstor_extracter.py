@@ -1,19 +1,29 @@
 import unittest
 from app.fronstor.fronstor_extracter import FronstorExtracter, FronstorStatus
 from test.app.fronstor.mock_requester import MockRequester
-from test.app.fronstor.mock_openhab import MockOpenhab
 from app.fronstor.fronstor_constants import FronstorConstants
 from app.fronstor.fronstor_rule import FronstorRule
+
+from test.prend.oh.mock_oh_gateway import MockOhGateway
 
 class TestExtracter(unittest.TestCase):
 
     def setUp(self):
 
-        self.rule = FronstorRule()
+        # todo
+        self.config = {}
+        # todo
+        self.dispatcher = None
+        self.oh_gateway = MockOhGateway()
+        self.oh_gateway.set_dispatcher(self.dispatcher)
 
         self.requester = MockRequester()
         self.extracter = FronstorExtracter()
 
+        self.rule = FronstorRule()
+        self.rule.set_config(self.config)
+        self.rule.set_oh_gateway(self.oh_gateway)
+        self.rule.set_dispatcher(self.dispatcher)
         self.rule.set_requester(self.requester)
         self.rule.set_extracter(self.extracter)
 
@@ -44,7 +54,7 @@ class TestExtracter(unittest.TestCase):
 #        self.assertTrue(hitException)
 
     def test_off(self):
-        self.openhab.clear()
+
         self.requester.set_json_filename('request_off.json')
         self.processor.process()
 

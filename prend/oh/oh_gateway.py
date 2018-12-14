@@ -32,11 +32,16 @@ class OhGateway(OhGatewayEventSink):
         self._states = {}
         self._lock_channel_listeners = threading.Lock()
         self._channel_listeners = {}
-        self._dispatcher = dispatcher
-        self._rest = rest
+        self._dispatcher = None
+        self._rest = None
         self._cache_states_notified_reload = None
         self._cache_states_last_fetch = None
         self._last_connection_error = None
+
+    def set_dispatcher(self, dispatcher):
+        self._dispatcher = dispatcher
+
+    def set_rest(self, rest):
         self._rest = rest
 
     def send(self, send_command: bool, channel: Channel, state):

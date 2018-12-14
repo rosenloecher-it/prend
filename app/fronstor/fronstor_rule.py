@@ -39,7 +39,7 @@ class FronstorRule(Rule):
         cron_job = schedule.every().minute
         self.subscribe_cron_actions(self.__class__.__name__, cron_job)
 
-        self.subscribe_openhab_actions(Channel.create_startup())
+        self.subscribe_channel_actions(Channel.create_startup())
 
     def notify_action(self, action) -> None:
         try:
