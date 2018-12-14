@@ -116,8 +116,15 @@ class Dispatcher(DispatcherActionSink):
         if action and action.listener:
             action_ident = str(action)
             try:
+                time_start = datetime.datetime.now()
+
                 action.listener.notify_action(action)
                 # _logger.debug('dispatch_action(%s)', action_ident)
+
+                diff_seconds = (datetime.datetime.now() - time_start).total_seconds()
+                if diff_seconds > 0.3:
+                    _logger.info('dispatch_action <%s> took %fs', action_ident, diff_seconds)
+
             except Exception as ex:
                 _logger.error('error - dispatch_action(%s) failed! - (%s: %s)', action_ident, ex.__class__.__name__, ex)
                 if not isinstance(ex, requests.exceptions.RequestException):
