@@ -33,6 +33,11 @@ class StateType(Enum):
     def __repr__(self) -> str:
         return self.name
 
+    def is_number_type(self):
+        if self in [StateType.DECIMAL, StateType.DIMMER, StateType.ROLLERSHUTTER, StateType.PERCENT]:
+            return True
+        return False
+
     @staticmethod
     def parse(text) -> Optional['StateType']:
         result = None
@@ -82,8 +87,37 @@ class State:
             return False
         return True
 
+    def ensure_value_int(self) -> int:
+        value_int = None
+        if self.value:
+            if isinstance(self.value, int):
+                value_int = self.value
+            # convert from float
+            elif self.type.is_number_type():
+                try:
+                    value_int = int(self.value)
+                except ValueError:
+                    value_int = None
+        return value_int
+
+    def ensure_value_float(self) -> float:
+        value_float = None
+        if self.value:
+            if isinstance(self.value, float):
+                value_float = self.value
+            elif self.type.is_number_type():
+                try:
+                    value_float = float(self.value)
+                except ValueError:
+                    value_float = None
+        return value_float
+
     def update_last_change(self) -> None:
         self.last_change = datetime.datetime.now()
+
+    def set_value(self, value) -> None:
+        self.value = value
+        self.update_last_change()
 
     def import_state(self, other) -> None:
         if self.type != StateType.UNDEF and other.type == StateType.UNDEF:
