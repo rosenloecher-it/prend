@@ -25,11 +25,13 @@ class OhGatewayEventSink:
         """
         pass
 
+
 class SendData:
     def __init__(self):
         self.send_command = None
         self.channel = None
         self.state = None
+
 
 class OhGateway(OhGatewayEventSink):
 

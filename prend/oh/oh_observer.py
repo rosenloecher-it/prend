@@ -117,8 +117,8 @@ class OhObserver(threading.Thread):
         except (
                 aiohttp.client_exceptions.ClientError,
                 asyncio.TimeoutError,
-                concurrent.futures._base.TimeoutError,
-                ConnectionError
+                ConnectionError,
+                TimeoutError
         ) as ex:
             _logger.error('_loop exiting - %s: %s', ex.__class__.__name__, ex)
         except Exception as ex:
@@ -144,8 +144,8 @@ class OhObserver(threading.Thread):
         except (
                 aiohttp.client_exceptions.ClientError,
                 asyncio.TimeoutError,
-                concurrent.futures._base.TimeoutError,
-                ConnectionError
+                ConnectionError,
+                TimeoutError
         ) as ex:
             _logger.error('run - %s: %s', ex.__class__.__name__, ex)
         except Exception as ex:
