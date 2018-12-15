@@ -90,15 +90,18 @@ class Dispatcher(DispatcherActionSink):
 
     def dispatch_skip_cron(self, skip_cron_ms) -> bool:
         something_processed = False
+        start_loop = True
 
         action = None
-        try:
-            action = self._action_queue.get_nowait()
-        except Empty:
-            pass
+        while action or start_loop:
+            start_loop = False
+            try:
+                action = self._action_queue.get_nowait()
+            except Empty:
+                action = None
 
-        if self._dispatch_action(action):
-            something_processed = True
+            if self._dispatch_action(action):
+                something_processed = True
 
         diff = datetime.datetime.now() - self._last_cron_run
         if diff.microseconds >= skip_cron_ms:

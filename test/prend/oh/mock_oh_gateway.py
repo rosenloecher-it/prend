@@ -14,6 +14,9 @@ class MockOhGateway(OhGateway):
         self.sent_actions_dict = {}
         self.mock_is_connected = True
 
+    def send_queued(self):
+        pass  # do nothing
+
     def send(self, send_command: bool, channel: Channel, state):
         SentAction = namedtuple('SentAction', ['channel', 'state', 'send_command'])
 
@@ -46,8 +49,4 @@ class MockOhGateway(OhGateway):
     def cache_states(self):
         # prepare chache in test setup
         pass
-
-    # def queue_event(self, event: OhEvent) -> None:
-    #     if self._dispatcher:
-    #         super.queue_event(event)
 

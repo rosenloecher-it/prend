@@ -7,6 +7,7 @@ from prend.action import Action
 from prend.channel import Channel, ChannelType, OhIllegalChannelException
 from prend.oh.oh_event import OhEvent, OhIllegalEventException, OhNotificationType
 from prend.state import State
+from queue import Queue, Empty
 from typing import Optional
 
 
@@ -24,26 +25,53 @@ class OhGatewayEventSink:
         """
         pass
 
+class SendData:
+    def __init__(self):
+        self.send_command = None
+        self.channel = None
+        self.state = None
 
 class OhGateway(OhGatewayEventSink):
 
     def __init__(self):
-        self._lock_channel_listeners = threading.Lock()
-        self._lock_state = threading.Lock()
-        self._lock_send = threading.Lock()
-        self._states = {}
+        self._cache_states_last_fetch = None
+        self._cache_states_notified_reload = None
         self._channel_listeners = {}
         self._dispatcher = None
-        self._rest = None
-        self._cache_states_notified_reload = None
-        self._cache_states_last_fetch = None
         self._last_connection_error = None
+        self._lock_channel_listeners = threading.Lock()
+        self._lock_state = threading.Lock()
+        self._rest = None
+        self._send_queue = Queue()  # synchronized
+        self._states = {}
 
     def set_dispatcher(self, dispatcher):
         self._dispatcher = dispatcher
 
     def set_rest(self, rest):
         self._rest = rest
+
+    def send_queued(self):
+        something_processed = False
+        start_loop = True
+
+        send_data = None
+        while send_data or start_loop:
+            start_loop = False
+            try:
+                send_data = self._send_queue.get_nowait()
+            except Empty:
+                send_data = None
+
+            if send_data:
+                try:
+                    self._rest.send(send_data.send_command, send_data.channel, send_data.state)
+                except Exception as ex:
+                    _logger.error('send failed (%s: %s)!', ex.__class__.__name__, ex)
+                    self._cache_states_last_fetch = None
+                    self._last_connection_error = datetime.datetime.now()
+
+        return something_processed
 
     def send(self, send_command: bool, channel: Channel, state):
         if not isinstance(send_command, bool):
@@ -53,14 +81,11 @@ class OhGateway(OhGatewayEventSink):
         # if not isinstance(state, State):
         #     raise TypeError()
 
-        with self._lock_send:
-            try:
-                self._rest.send(send_command, channel, state)
-            except Exception as ex:
-                _logger.error('send failed (%s: %s)!', ex.__class__.__name__, ex)
-                self._cache_states_last_fetch = None
-                self._last_connection_error = datetime.datetime.now()
-                raise
+        send_data = SendData()
+        send_data.send_command = send_command
+        send_data.channel = copy.deepcopy(channel)
+        send_data.state = copy.deepcopy(state)
+        self._send_queue.put(send_data)
 
     # convenience funtion for send
     def send_command(self, channel: Channel, state) -> None:

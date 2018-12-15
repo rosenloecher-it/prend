@@ -135,6 +135,9 @@ class RuleManager(Daemon):
                 if self._dispatcher.dispatch():
                     something_processed = True
 
+                if self._oh_gateway.send_queued():
+                    something_processed = True
+
                 diff = datetime.datetime.now() - last_alive_message
                 if diff.seconds >= wait_alive_message_sec:
                     last_alive_message = datetime.datetime.now()
