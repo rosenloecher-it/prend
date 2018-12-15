@@ -98,8 +98,8 @@ class RuleManager(Daemon):
             rule.set_oh_gateway(self._oh_gateway)
             rule.open()
 
-        startup_action = Action.create_startup_action()
-        self._dispatcher.queue_action(startup_action)
+            startup_action = Action.create_startup_action()
+            self._dispatcher.queue_action(startup_action)
 
     def run(self):
 

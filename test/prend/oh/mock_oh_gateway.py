@@ -47,7 +47,4 @@ class MockOhGateway(OhGateway):
         # prepare chache in test setup
         pass
 
-    # def queue_event(self, event: OhEvent) -> None:
-    #     if self._dispatcher:
-    #         super.queue_event(event)
 

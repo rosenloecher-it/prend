@@ -7,6 +7,7 @@ from prend.action import Action
 from prend.channel import Channel, ChannelType, OhIllegalChannelException
 from prend.oh.oh_event import OhEvent, OhIllegalEventException, OhNotificationType
 from prend.state import State
+from queue import Queue, Empty
 from typing import Optional
 
 
@@ -18,12 +19,17 @@ class OhGatewayException(Exception):
 
 
 class OhGatewayEventSink:
-    def queue_event(self, event: OhEvent) -> None:
+    def push_event(self, event: OhEvent) -> None:
         """overwrite for testing
         :param event:
         """
         pass
 
+class SendData:
+    def __init__(self):
+        self.send_command = None
+        self.channel = None
+        self.state = None
 
 class OhGateway(OhGatewayEventSink):
 
@@ -45,6 +51,28 @@ class OhGateway(OhGatewayEventSink):
     def set_rest(self, rest):
         self._rest = rest
 
+    def send_queued(self):
+        something_processed = False
+        start_loop = True
+
+        send_data = None
+        while send_data or start_loop:
+            start_loop = False
+            try:
+                send_data = self._send_queue.get_nowait()
+            except Empty:
+                send_data = None
+
+            if send_data:
+                try:
+                    self._rest.send(send_data.send_command, send_data.channel, send_data.state)
+                except Exception as ex:
+                    _logger.error('send failed (%s: %s)!', ex.__class__.__name__, ex)
+                    self._cache_states_last_fetch = None
+                    self._last_connection_error = datetime.datetime.now()
+
+        return something_processed
+
     def send(self, send_command: bool, channel: Channel, state):
         if not isinstance(send_command, bool):
             raise TypeError()
@@ -53,14 +81,11 @@ class OhGateway(OhGatewayEventSink):
         # if not isinstance(state, State):
         #     raise TypeError()
 
-        with self._lock_send:
-            try:
-                self._rest.send(send_command, channel, state)
-            except Exception as ex:
-                _logger.error('send failed (%s: %s)!', ex.__class__.__name__, ex)
-                self._cache_states_last_fetch = None
-                self._last_connection_error = datetime.datetime.now()
-                raise
+        send_data = SendData()
+        send_data.send_command = send_command
+        send_data.channel = copy.deepcopy(channel)
+        send_data.state = copy.deepcopy(state)
+        self._send_queue.put(send_data)
 
     # convenience funtion for send
     def send_command(self, channel: Channel, state) -> None:
@@ -142,7 +167,7 @@ class OhGateway(OhGatewayEventSink):
                 existing_channels = {}
                 events = self._rest.fetch_all()
                 for event in events:
-                    self.queue_event(event)
+                    self.push_event(event)
                     existing_channels[event.channel] = event.state
 
                 all_states = self.get_states()  # don't lock all time
@@ -179,7 +204,7 @@ class OhGateway(OhGatewayEventSink):
         # _logger.debug('queue _import_newer_state: %s | %s', channel, changed)
         return changed
 
-    def queue_event(self, event: OhEvent) -> None:
+    def push_event(self, event: OhEvent) -> None:
         if not event or not event.is_valid():
             raise OhIllegalEventException(event)
         # _logger.debug('queue event: %s', event)
@@ -193,6 +218,6 @@ class OhGateway(OhGatewayEventSink):
             self._import_newer_state(action.channel, action.state_new)
 
             if action.should_be_published():
-                self._dispatcher.queue_action(action)
+                self._dispatcher.push_action(action)
 
 

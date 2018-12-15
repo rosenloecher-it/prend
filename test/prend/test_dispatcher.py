@@ -46,7 +46,7 @@ class TestDispatcher(unittest.TestCase):
         self.assertFalse(something_processed)
         self.assertTrue(len(checker.notifications) == 0)
 
-        dispatcher.queue_action(action_in)
+        dispatcher.push_action(action_in)
         something_processed = dispatcher.dispatch()
         self.assertTrue(something_processed)
         self.assertTrue(len(checker.notifications) == 1)

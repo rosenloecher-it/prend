@@ -45,7 +45,7 @@ class OhObserver(threading.Thread):
             if event_out.notification_type == OhNotificationType.IGNORE:
                 pass
             elif event_out.is_valid():
-                self._gateway.queue_event(event_out)
+                self._gateway.push_event(event_out)
                 # _logger.debug('event queued: %s', event_out)
             else:
                 raise OhObserverException('invalid event!')
@@ -92,7 +92,6 @@ class OhObserver(threading.Thread):
         except (
                 aiohttp.client_exceptions.ClientError,
                 asyncio.TimeoutError,
-                concurrent.futures._base.TimeoutError,
                 ConnectionError
         ) as ex:
             _logger.error('exception _aiosseclient - %s: %s', ex.__class__.__name__, ex)

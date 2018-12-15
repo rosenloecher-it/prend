@@ -85,7 +85,6 @@ class Daemon:
         try:
             # the process may fork itself again
             pid_os = os.getpid()
-            pid_written = None
 
             with open(self.pidfile, 'r') as pidhandle:
                 pid_written = int(pidhandle.read().strip())
