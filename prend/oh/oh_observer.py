@@ -92,7 +92,6 @@ class OhObserver(threading.Thread):
         except (
                 aiohttp.client_exceptions.ClientError,
                 asyncio.TimeoutError,
-                concurrent.futures._base.TimeoutError,
                 ConnectionError
         ) as ex:
             _logger.error('exception _aiosseclient - %s: %s', ex.__class__.__name__, ex)

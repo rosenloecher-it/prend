@@ -18,7 +18,8 @@ class TestSampleRule(unittest.TestCase):
                 print(line)
         self.assertEqual(rc, expected_rc)
 
-    def get_def_github(self):
+    @staticmethod
+    def get_def_github():
         def_env = os.environ.copy()
         def_env['GITHOOK_DEBUG'] = '1'
         def_env['GITHOOK_PREPUSH_REMOTE'] = 'github'

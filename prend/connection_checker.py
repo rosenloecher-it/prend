@@ -23,6 +23,7 @@ class ConnectionChecker:
     def set_oh_gateway(self, oh_gateway):
         self._oh_gateway = oh_gateway
 
+    # noinspection PyMethodMayBeStatic
     def _time_now(self):
         # overwrite for tests
         return datetime.datetime.now()
