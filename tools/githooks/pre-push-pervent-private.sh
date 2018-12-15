@@ -77,27 +77,3 @@ else
 fi
 
 exit 0
-
-
-# raul@coffeestation:/home/data/projects/prend$ git push
-# found HOOK_SCRIPT script: ./pre-push-pervent-private.sh
-# GITHOOK_PREPUSH_REMOTE=origin
-# GITHOOK_PREPUSH_URL=git@homeserver:/home/git/prend
-# GITHOOK_PREPUSH_LOCAL_REF=refs/heads/master
-# GITHOOK_PREPUSH_LOCAL_SHA=96923b8365375c4275f2f4044039f2b3ee81b930
-# GITHOOK_PREPUSH_REMOTE_REF=refs/heads/master
-# GITHOOK_PREPUSH_REMOTE_SHA=fbbe0d741228de8ac1b2524f868b7400200d9d49
-# push aborted by hook - origin:fbbe0d741228de8ac1b2524f868b7400200d9d49..96923b8365375c4275f2f4044039f2b3ee81b930
-# error: Fehler beim Versenden einiger Referenzen nach 'git@homeserver:/home/git/prend'
-# raul@coffeestation:/home/data/projects/prend$ git push github
-# Username for 'https://github.com': github@rosenloecher-it.de
-# Password for 'https://github@rosenloecher-it.de@github.com':
-# found HOOK_SCRIPT script: ./pre-push-pervent-private.sh
-# GITHOOK_PREPUSH_REMOTE=github
-# GITHOOK_PREPUSH_URL=https://github.com/rosenloecher-it/prend.git
-# GITHOOK_PREPUSH_LOCAL_REF=refs/heads/master
-# GITHOOK_PREPUSH_LOCAL_SHA=96923b8365375c4275f2f4044039f2b3ee81b930
-# GITHOOK_PREPUSH_REMOTE_REF=refs/heads/master
-# GITHOOK_PREPUSH_REMOTE_SHA=ce05260dda09363ea3ade1339cc1f476ee2765b9
-# push aborted by hook - github:ce05260dda09363ea3ade1339cc1f476ee2765b9..96923b8365375c4275f2f4044039f2b3ee81b930
-# error: Fehler beim Versenden einiger Referenzen nach 'https://github.com/rosenloecher-it/prend.git'
