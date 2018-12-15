@@ -19,7 +19,6 @@ class FronstorRule(Rule):
         self._requester = None
         self._extracter = None
         self._processor = None
-        self._processor_config = None
         pass
 
     def set_requester(self, requester):
@@ -29,17 +28,22 @@ class FronstorRule(Rule):
         self._extracter = extracter
 
     def open(self):
+        super().open()
 
         if not self._requester:
             self._requester = FronstorRequester()
         if not self._extracter:
             self._extracter = FronstorExtracter()
 
+        url = self.get_config('fronstor', 'url')
+        self._requester.set_url(url)
+
     def register_actions(self) -> None:
-        cron_job = schedule.every().minute
+        cron_job = schedule.every(5).minutes
         self.subscribe_cron_actions(self.__class__.__name__, cron_job)
 
-        self.subscribe_channel_actions(Channel.create_startup())
+        channel = Channel.create_startup()
+        self.subscribe_channel_actions(channel)
 
     def notify_action(self, action) -> None:
         try:
@@ -48,11 +52,7 @@ class FronstorRule(Rule):
                 _logger.debug('notify_action - NOT CONNECTED - abort')
                 return
 
-            # todo config
-
-            # todo time measurment
             _logger.debug('notify_action - %s', action)
-
             self._start_processor()
 
         except FronstorException as ex:
@@ -69,11 +69,12 @@ class FronstorRule(Rule):
             raise FronstorException('processor is still running!')
 
         self._processor = FronstorProcessor()
-        self._processor.set_requester(self._requester)
         self._processor.set_extracter(self._extracter)
         self._processor.set_oh_gateway(self._oh_gateway)
+        self._processor.set_requester(self._requester)
 
         self._processor.start()
+
 
 
 

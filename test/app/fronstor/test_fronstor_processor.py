@@ -12,9 +12,6 @@ class TestFronstorProcessor(unittest.TestCase):
 
     def setUp(self):
 
-        # todo
-        self.config = {}
-
         self.dispatcher = None
 
         # todo
@@ -25,7 +22,6 @@ class TestFronstorProcessor(unittest.TestCase):
         self.extracter = FronstorExtracter()
 
         self.processor = FronstorProcessor()
-        self.processor.set_config(self.config)
         self.processor.set_oh_gateway(self.mock_gateway)
         self.processor.set_requester(self.requester)
         self.processor.set_extracter(self.extracter)

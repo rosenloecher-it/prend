@@ -1,8 +1,6 @@
 
 class FronstorConstants:
 
-    URL_FRONIUS_STORAGE = 'http://192.168.12.42/solar_api/v1/GetStorageRealtimeData.cgi?Scope=System'
-
     ITEM_INV_TEMP = 'valPvInvTemp'
 
     ITEM_BAT_TEMP_MAX = 'valPvBatTmax'

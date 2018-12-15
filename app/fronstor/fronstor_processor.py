@@ -8,24 +8,13 @@ from .fronstor_extracter import FronstorStatus
 _logger = logging.getLogger(__name__)
 
 
-class FronstorConfig:
-    def __init__(self):
-        self.url = None
-
-
 class FronstorProcessor(threading.Thread):
 
     def __init__(self):
         threading.Thread.__init__(self)
-        self._config = None
         self._oh_gateway = None
         self._extracter = None
         self._requester = None
-
-        pass
-
-    def set_config(self, config):
-        pass
 
     def set_oh_gateway(self, oh_gateway):
         self._oh_gateway = oh_gateway
@@ -41,14 +30,12 @@ class FronstorProcessor(threading.Thread):
         pass
 
     def check_requirements(self):
-        # if not self._config:
-        #     raise FronstorException('undefined _config!')
         if not self._oh_gateway:
-            raise FronstorException('undefined _oh_gateway!')
+            raise FronstorException('no _oh_gateway!')
         if not self._extracter:
-            raise FronstorException('undefined _extracter!')
+            raise FronstorException('no _extracter!')
         if not self._requester:
-            raise FronstorException('undefined _requester!')
+            raise FronstorException('no _requester!')
 
     def start(self):
         self.check_requirements()
@@ -56,13 +43,19 @@ class FronstorProcessor(threading.Thread):
 
     def run(self):
         try:
+            _logger.debug('run - start query %s', self._requester.get_url())
+
             json = self._requester.request()
             last_extract = self._extracter.extract(json)
             if last_extract.status == FronstorStatus.SUCCESS:
                 self.send_values(last_extract.values)
 
+            _logger.debug('run - success')
+
         except FronstorException as ex:
             _logger.error('run failed - %s', ex)
+        except Exception as ex:
+            _logger.exception(ex)
         # todo catch request erros
 
     def send_values(self, values):

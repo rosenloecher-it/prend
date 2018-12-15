@@ -63,6 +63,8 @@ class Channel:
     def is_valid(self) -> bool:
         if not self.type:
             return False
+        if self.type == ChannelType.STARTUP:
+            return True
         if not self.name:
             return False
         return True

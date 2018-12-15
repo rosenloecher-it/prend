@@ -39,9 +39,19 @@ class FronstorExtracter:
         datadict[channel] = value
         # _logger.debug("store json value: %s = %s", channel, value)
 
+    # def _simulate(self, value_in, is_cylce):
+    #     import random
+    #     if not value_in and 1==1:
+    #         if is_cylce:
+    #             return random.randint(1, 1000)
+    #         else:
+    #             return random.uniform(1, 100)
+    #     return value_in
+
     def _find_temp_and_cycle(self, json_data):
         result = {}
         temp_inv = self.get_deep_attribute(json_data, ['Body', 'Data', '0', 'Controller', 'Temperature_Cell'])
+        # temp_inv = self._simulate(temp_inv, False)
         self._store_value(result, FronstorConstants.ITEM_INV_TEMP, temp_inv)
 
         json_mods = self.get_deep_attribute(json_data, ['Body', 'Data', '0', 'Modules'])
@@ -62,6 +72,7 @@ class FronstorExtracter:
 
             temp_mod = self.get_deep_attribute(json_data
                                                , ['Body', 'Data', '0', 'Modules', i, 'Temperature_Cell_Maximum'])
+            #temp_mod = self._simulate(temp_mod, False)
             self._store_value(result, item_temp, temp_mod)
             if temp_mod is not None:
                 if temp_max is None or temp_mod > temp_max:
@@ -69,6 +80,7 @@ class FronstorExtracter:
 
             cycle_mod = self.get_deep_attribute(json_data
                                                 , ['Body', 'Data', '0', 'Modules', i, 'CycleCount_BatteryCell'])
+            # cycle_mod = self._simulate(cycle_mod, True)
             if cycle_mod is not None:
                 # don't overwrite real cycle values with None
                 self._store_value(result, item_cycle, cycle_mod)

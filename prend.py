@@ -1,7 +1,6 @@
 import sys
 from prend.process import Process
-from app.sample_rule import SampleRule
-
+from app.fronstor.fronstor_rule import FronstorRule
 
 def main():
     process = Process()
@@ -10,8 +9,7 @@ def main():
     if exit_code is not None:
         sys.exit(exit_code)
 
-    # todo - register your rule classes
-    process.register_rule(SampleRule())
+    process.register_rule(FronstorRule())
 
     # run endless loop
     return process.run()
