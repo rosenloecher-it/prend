@@ -1,4 +1,5 @@
 import logging
+import logging.config
 import logging.handlers
 import os
 import sys
@@ -14,16 +15,22 @@ multiprocessing_logging
 class LoggingHelper:
     LOGLEVEL_DEFAULT = logging.INFO
 
-    _inited = False
-
     @classmethod
     def init(cls, config):
         import multiprocessing_logging
         multiprocessing_logging.install_mp_handler()
 
-        if config.logfile:
-            cls._inited = True
+        if config.log_config_file:
+            defaults = None
+            if config.logfile:
+                defaults = {'default_logfile': config.logfile}
+                if config.log_delete_at_start:
+                    if os.path.isfile(config.logfile):
+                        os.remove(config.logfile)
 
+            logging.config.fileConfig(config.log_config_file, defaults=defaults, disable_existing_loggers=False)
+
+        elif config.logfile:
             try:
                 dirname = os.path.dirname(config.logfile)
                 if not os.path.isdir(dirname):
@@ -38,7 +45,7 @@ class LoggingHelper:
                     format='%(asctime)s [%(levelname)8s] <%(process)5d> %(name)s: %(message)s',
                     level=cls.get_loglevel(config.loglevel),
                     handlers=[
-                        logging.handlers.RotatingFileHandler(config.logfile, maxBytes=(1048576 * 10), backupCount=5),
+                        logging.handlers.RotatingFileHandler(config.logfile, maxBytes=(1048576), backupCount=5),
                         logging.StreamHandler(sys.stdout)
                     ]
                 )
