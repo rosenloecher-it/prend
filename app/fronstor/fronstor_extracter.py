@@ -1,5 +1,4 @@
 import logging
-import traceback
 from enum import Enum
 from collections import namedtuple
 from .fronstor_constants import FronstorConstants
@@ -72,7 +71,7 @@ class FronstorExtracter:
 
             temp_mod = self.get_deep_attribute(json_data
                                                , ['Body', 'Data', '0', 'Modules', i, 'Temperature_Cell_Maximum'])
-            #temp_mod = self._simulate(temp_mod, False)
+            # temp_mod = self._simulate(temp_mod, False)
             self._store_value(result, item_temp, temp_mod)
             if temp_mod is not None:
                 if temp_max is None or temp_mod > temp_max:

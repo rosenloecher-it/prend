@@ -2,6 +2,7 @@ import sys
 from prend.process import Process
 from app.fronstor.fronstor_rule import FronstorRule
 
+
 def main():
     process = Process()
 

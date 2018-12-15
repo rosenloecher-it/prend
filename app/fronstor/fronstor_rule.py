@@ -1,4 +1,3 @@
-import datetime
 import logging
 import schedule
 from prend.channel import Channel

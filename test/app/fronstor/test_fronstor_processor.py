@@ -1,6 +1,6 @@
 import unittest
 from app.fronstor.fronstor_constants import FronstorConstants
-from app.fronstor.fronstor_extracter import FronstorExtracter, FronstorStatus
+from app.fronstor.fronstor_extracter import FronstorExtracter
 from app.fronstor.fronstor_processor import FronstorProcessor
 from prend.channel import Channel
 from prend.state import State, StateType

@@ -25,25 +25,27 @@ class OhGatewayEventSink:
         """
         pass
 
+
 class SendData:
     def __init__(self):
         self.send_command = None
         self.channel = None
         self.state = None
 
+
 class OhGateway(OhGatewayEventSink):
 
     def __init__(self):
-        self._lock_channel_listeners = threading.Lock()
-        self._lock_state = threading.Lock()
-        self._lock_send = threading.Lock()
-        self._states = {}
+        self._cache_states_last_fetch = None
+        self._cache_states_notified_reload = None
         self._channel_listeners = {}
         self._dispatcher = None
-        self._rest = None
-        self._cache_states_notified_reload = None
-        self._cache_states_last_fetch = None
         self._last_connection_error = None
+        self._lock_channel_listeners = threading.Lock()
+        self._lock_state = threading.Lock()
+        self._rest = None
+        self._send_queue = Queue()  # synchronized
+        self._states = {}
 
     def set_dispatcher(self, dispatcher):
         self._dispatcher = dispatcher

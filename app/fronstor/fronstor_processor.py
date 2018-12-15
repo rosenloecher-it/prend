@@ -1,6 +1,6 @@
 import logging
 import threading
-from prend.channel import Channel, ChannelType
+from prend.channel import Channel
 from .fronstor_exception import FronstorException
 from .fronstor_extracter import FronstorStatus
 

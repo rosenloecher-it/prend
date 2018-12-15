@@ -99,7 +99,7 @@ class RuleManager(Daemon):
             rule.open()
 
             startup_action = Action.create_startup_action()
-            self._dispatcher.queue_action(startup_action)
+            self._dispatcher.push_action(startup_action)
 
     def run(self):
 
@@ -133,6 +133,9 @@ class RuleManager(Daemon):
                         something_processed = True
 
                 if self._dispatcher.dispatch():
+                    something_processed = True
+
+                if self._oh_gateway.send_queued():
                     something_processed = True
 
                 diff = datetime.datetime.now() - last_alive_message
