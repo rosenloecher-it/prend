@@ -214,13 +214,16 @@ class ConfigLoader:
     @classmethod
     def _read_from_config_parser(cls, parser, section, key):
         try:
-            return parser[section].get(key, fallback=None)
+            data = parser[section].get(key, fallback=None)
+            return data
         except KeyError:
             return None
 
     @classmethod
     def _read_bool_config_parser(cls, parser, section, key, default_value) -> bool:
-        return Convert.convert_to_bool(cls._read_from_config_parser(parser, section, key), default_value)
+        text = cls._read_from_config_parser(parser, section, key)
+        data = Convert.convert_to_bool(text, default_value)
+        return data
 
     @staticmethod
     def add_to_rule_config(ruleconf, section_name, value_name, value):
@@ -255,7 +258,7 @@ class ConfigLoader:
             config.oh_username = cls._read_from_config_parser(file_reader, section_openhab, 'username')
             config.oh_password = cls._read_from_config_parser(file_reader, section_openhab, 'password')
             config.oh_simulate_sending = \
-                cls._read_bool_config_parser(file_reader, section_logging, 'simulate_sending', False)
+                cls._read_bool_config_parser(file_reader, section_openhab, 'simulate_sending', False)
 
             section_system = 'system'
             config.pid_file = cls._read_from_config_parser(file_reader, section_system, 'pid_file')
