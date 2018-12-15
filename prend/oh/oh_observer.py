@@ -45,7 +45,7 @@ class OhObserver(threading.Thread):
             if event_out.notification_type == OhNotificationType.IGNORE:
                 pass
             elif event_out.is_valid():
-                self._gateway.queue_event(event_out)
+                self._gateway.push_event(event_out)
                 # _logger.debug('event queued: %s', event_out)
             else:
                 raise OhObserverException('invalid event!')

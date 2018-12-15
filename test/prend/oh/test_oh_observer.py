@@ -11,7 +11,7 @@ class TestEventSink(OhGatewayEventSink):
     def __init__(self):
         self.list = []
 
-    def queue_event(self, event: OhEvent) -> None:
+    def push_event(self, event: OhEvent) -> None:
         self.list.append(event)
 
 

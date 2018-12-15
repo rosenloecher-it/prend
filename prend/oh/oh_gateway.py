@@ -18,7 +18,7 @@ class OhGatewayException(Exception):
 
 
 class OhGatewayEventSink:
-    def queue_event(self, event: OhEvent) -> None:
+    def push_event(self, event: OhEvent) -> None:
         """overwrite for testing
         :param event:
         """
@@ -142,7 +142,7 @@ class OhGateway(OhGatewayEventSink):
                 existing_channels = {}
                 events = self._rest.fetch_all()
                 for event in events:
-                    self.queue_event(event)
+                    self.push_event(event)
                     existing_channels[event.channel] = event.state
 
                 all_states = self.get_states()  # don't lock all time
@@ -179,7 +179,7 @@ class OhGateway(OhGatewayEventSink):
         # _logger.debug('queue _import_newer_state: %s | %s', channel, changed)
         return changed
 
-    def queue_event(self, event: OhEvent) -> None:
+    def push_event(self, event: OhEvent) -> None:
         if not event or not event.is_valid():
             raise OhIllegalEventException(event)
         # _logger.debug('queue event: %s', event)

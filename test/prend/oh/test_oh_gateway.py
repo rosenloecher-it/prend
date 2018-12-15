@@ -60,7 +60,7 @@ class TestOhGateway(unittest.TestCase):
         ev_dummy = OhEvent.create(OhNotificationType.ITEM_CHANGE
                                   , Channel.create(ChannelType.ITEM, 'to_be_remove')
                                   , State.create(StateType.SWITCH, OnOffValue.ON))
-        gateway.queue_event(ev_dummy)
+        gateway.push_event(ev_dummy)
 
         states_comp = gateway.get_states()
         self.assertEqual(1, len(states_comp))
@@ -99,17 +99,17 @@ class TestOhGateway(unittest.TestCase):
         dispatcher.queued_actions.clear()
         ev_update.state.value = OnOffValue.OFF
         ev_update.state.update_last_change()
-        gateway.queue_event(ev_update)
+        gateway.push_event(ev_update)
         state_g3 = gateway.get_state(ev_update.channel)
         self.assertEqual(ev_update.state, state_g3)
         self.assertEqual(1, len(dispatcher.queued_actions))
         dispatcher.queued_actions.clear()
-        gateway.queue_event(ev_update)
+        gateway.push_event(ev_update)
         self.assertEqual(0, len(dispatcher.queued_actions))  # no change
 
         ev_update.notification_type = OhNotificationType.ITEM_COMMAND
         dispatcher.queued_actions.clear()
-        gateway.queue_event(ev_update)
+        gateway.push_event(ev_update)
         self.assertEqual(1, len(dispatcher.queued_actions))
 
 
