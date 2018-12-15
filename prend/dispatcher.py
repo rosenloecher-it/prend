@@ -23,7 +23,7 @@ class ActionListener:
 
 
 class DispatcherActionSink:
-    def queue_action(self, root_action: Action) -> None:
+    def push_action(self, root_action: Action) -> None:
         """overwrite for testing"""
         pass
 
@@ -67,7 +67,7 @@ class Dispatcher(DispatcherActionSink):
 
             job.do(job_closure)
 
-    def queue_action(self, root_action: Action) -> None:
+    def push_action(self, root_action: Action) -> None:
         if not root_action or not root_action.is_valid():
             raise OhIllegalActionException(root_action)
 

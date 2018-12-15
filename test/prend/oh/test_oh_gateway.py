@@ -25,7 +25,7 @@ class TestDispatcher(DispatcherActionSink):
     def __init__(self):
         self.queued_actions = {}
 
-    def queue_action(self, root_action: Action) -> None:
+    def push_action(self, root_action: Action) -> None:
         self.queued_actions[root_action.channel] = root_action
 
 

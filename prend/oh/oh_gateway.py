@@ -193,6 +193,6 @@ class OhGateway(OhGatewayEventSink):
             self._import_newer_state(action.channel, action.state_new)
 
             if action.should_be_published():
-                self._dispatcher.queue_action(action)
+                self._dispatcher.push_action(action)
 
 

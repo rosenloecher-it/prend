@@ -99,7 +99,7 @@ class RuleManager(Daemon):
             rule.open()
 
             startup_action = Action.create_startup_action()
-            self._dispatcher.queue_action(startup_action)
+            self._dispatcher.push_action(startup_action)
 
     def run(self):
 
