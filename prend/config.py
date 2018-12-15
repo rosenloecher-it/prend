@@ -93,6 +93,7 @@ class Config:
         self.exit_code = None
         self.logfile = None
         self.loglevel = None
+        self.log_config_file = None
         self.oh_password = None
         self.oh_rest_base_url = None
         self.oh_username = None
@@ -123,6 +124,10 @@ class Config:
             lines.append('pid file      = {}'.format(self.pid_file))
         if self.work_dir or print_all:
             lines.append('work dir      = {}'.format(self.work_dir))
+        if self.log_config_file or print_all:
+            lines.append('log conf file = {}'.format(self.log_config_file))
+        if self.logfile or print_all:
+            lines.append('log file      = {}'.format(self.logfile))
 
         if len(lines) > 0:
             print('\nconfiguration:')
@@ -250,6 +255,7 @@ class ConfigLoader:
             section_logging = 'logging'
             config.logfile = cls._read_from_config_parser(file_reader, section_logging, 'logfile')
             config.loglevel = cls._read_from_config_parser(file_reader, section_logging, 'loglevel')
+            config.log_config_file = cls._read_from_config_parser(file_reader, section_logging, 'log_config_file')
             config.log_delete_at_start = \
                 cls._read_bool_config_parser(file_reader, section_logging, 'delete_at_start', False)
 
@@ -274,6 +280,11 @@ class ConfigLoader:
             else:
                 config.logfile = cls._ensure_abs_path_to_config(config.config_file, config.logfile)
 
+            if config.log_config_file:
+                config.log_config_file = cls._ensure_abs_path_to_config(config.config_file, config.log_config_file)
+                if not os.path.isfile(config.log_config_file):
+                    raise FileNotFoundError('error: "log_config_file" not exists! ({})'.format(config.log_config_file))
+
             if not config.work_dir:
                 config.work_dir = '/var/lib/{}'.format(app_name)
             else:
@@ -288,6 +299,7 @@ class ConfigLoader:
                 raise FileNotFoundError('error: work dir does not exists! ({})'.format(config.work_dir))
 
             config.rule_config = {s: dict(file_reader.items(s)) for s in file_reader.sections()}
+            cls.add_to_rule_config(config.rule_config, section_logging, 'log_config_file', config.log_config_file)
             cls.add_to_rule_config(config.rule_config, section_logging, 'logfile', config.logfile)
             cls.add_to_rule_config(config.rule_config, section_logging, 'loglevel', config.loglevel)
             cls.add_to_rule_config(config.rule_config, section_openhab, 'simulate_sending', config.oh_simulate_sending)

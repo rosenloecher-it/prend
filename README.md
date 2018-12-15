@@ -20,8 +20,6 @@ Write your own [OpenHAB] rules with Python 3. Use your favorite editor, debug yo
 
 - Tested only under Linux and I have no intentions to support other operating systems.
 - At moment the code is provided only as sample project, not as python package.
-- This is a very early version, so I expect some API changes...
-- There are lots of different devices available for OpenHAB. Each of them could provide different values and types which could lead to unexpected behavior.
 - No service script is provided so far to run it as system daemon.
 - Python programming skills required.
 - HTTP authenification (username/password) is not tested.
@@ -61,7 +59,7 @@ $ python --version
 pip install -r requirements.txt
 ```
 
-Configure the OpenHAB items used in [sample_rule.py] ($OPENHAB_CONF_DIR/items/*.items):
+Configure the OpenHAB items used in [sample_rule.py]($OPENHAB_CONF_DIR/items/*.items):
 ```
 Switch dummy_switch 		"dummy_switch"
 String dummy_string 		"dummy_string [%s]"
@@ -69,7 +67,7 @@ Number dummy_number 		"dummy_number [%d]"
 Number dummy_number_2 		"dummy_number_2 [%d]"
 ```
 
-Put the items into your OpenHAB *.sitemap:
+Put the items into your OpenHAB \*.sitemap:
 ```
 sitemap default label="Smarthome" {
     Frame label="Test" {
@@ -80,6 +78,7 @@ sitemap default label="Smarthome" {
     }
 }
 ```
+
 
 Configure app via config file ($PROJECT_DIR/prend.conf):
 ```
@@ -96,7 +95,12 @@ pid_file=./__work__/prend.pid
 [logging]
 loglevel=debug
 logfile=./__work__/prod.log
+log_config_file=
 ```
+
+Via *log_config_file* you can configure a Python logging ini file - [see the Hitchhiker's guide](https://docs.python-guide.org/writing/logging/#example-configuration-via-an-ini-file).
+The *logfile* is taken over by using the key *default_logfile*. But be carefully, the app won't start with a wrong configuration.
+
 
 Run:
 ```bash
