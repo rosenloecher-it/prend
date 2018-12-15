@@ -82,6 +82,8 @@ class TestOhAction(unittest.TestCase):
         cron.state_new = None
         cron.notification_type = None
 
+        startup = Action.create_startup_action()
+
         comp = copy.deepcopy(orig)
         out = comp.is_valid()
         self.assertTrue(out)
@@ -110,6 +112,8 @@ class TestOhAction(unittest.TestCase):
         out = comp.is_valid()
         self.assertFalse(out)
 
+        out = startup.is_valid()
+        self.assertTrue(out)
 
 
 

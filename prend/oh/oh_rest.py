@@ -146,16 +146,16 @@ class OhRest:
         if send_command:
             url = '/items/{}'.format(item_name)
             if self._simulate_sending:
-                _logger.info('SIMULATE post command: "%s" => %s', value_json, url)
+                _logger.info('SIMULATE post command: "%s" = %s', url, value_json)
             else:
-                _logger.info('send POST COMMAND: "%s" => %s', value_json, url)
+                _logger.info('send POST COMMAND: "%s" = %s', url, value_json)
                 self._req_post(url, data=value_json)
         else:
             url = '/items/{}/state'.format(item_name)
             if self._simulate_sending:
-                _logger.info('SIMULATE put update: "%s" => %s', value_json, url)
+                _logger.info('SIMULATE put update: "%s" = %s', url, value_json)
             else:
-                _logger.info('send PUT UPDATE: "%s" => %s', value_json, url)
+                _logger.info('send PUT UPDATE: "%s" = %s', url, value_json)
                 self._req_put(url, data=value_json)
 
     def _req_get(self, uri_path: str) -> typing.Any:

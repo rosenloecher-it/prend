@@ -63,12 +63,16 @@ class Channel:
     def is_valid(self) -> bool:
         if not self.type:
             return False
+        if self.type == ChannelType.STARTUP:
+            return True
         if not self.name:
             return False
         return True
 
     @staticmethod
     def create(channel_type: ChannelType, name: str) -> 'Channel':
+        if not isinstance(name, str):
+            raise TypeError()
         channel = Channel()
         channel.type = channel_type
         channel.name = name
@@ -76,6 +80,8 @@ class Channel:
 
     @staticmethod
     def create_item(name: str) -> 'Channel':
+        if not isinstance(name, str):
+            raise TypeError()
         channel = Channel()
         channel.type = ChannelType.ITEM
         channel.name = name

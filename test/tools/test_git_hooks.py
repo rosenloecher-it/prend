@@ -6,7 +6,7 @@ from test.setup_test import SetupTest
 
 class TestSampleRule(unittest.TestCase):
 
-    def run_hook(self, hook_script, test_env, expected_rc):
+    def check_run_hook(self, hook_script, test_env, expected_rc):
         self.assertTrue(os.path.isfile(hook_script))
 
         process = subprocess.Popen(hook_script, env=test_env, stdout=subprocess.PIPE)
@@ -40,18 +40,18 @@ class TestSampleRule(unittest.TestCase):
         hook_script = os.path.join(SetupTest.get_project_dir(), 'tools', 'githooks', 'pre-push-pervent-private.sh')
 
         test_env = self.get_def_github()
-        rc = self.run_hook(hook_script, test_env, 0)
+        self.check_run_hook(hook_script, test_env, 0)
 
         test_env = self.get_def_github()
         test_env['GITHOOK_PREPUSH_LOCAL_REF'] = 'refs/heads/priVate'
-        rc = self.run_hook(hook_script, test_env, 1)
+        self.check_run_hook(hook_script, test_env, 1)
 
         test_env = self.get_def_github()
         test_env['GITHOOK_PREPUSH_REMOTE_REF'] = 'refs/heads/privatE/gggg'
-        rc = self.run_hook(hook_script, test_env, 1)
+        self.check_run_hook(hook_script, test_env, 1)
 
         test_env = self.get_def_other()
         test_env['GITHOOK_PREPUSH_LOCAL_REF'] = 'refs/heads/private'
         test_env['GITHOOK_PREPUSH_REMOTE_REF'] = 'refs/heads/private'
-        rc = self.run_hook(hook_script, test_env, 0)
+        self.check_run_hook(hook_script, test_env, 0)
 

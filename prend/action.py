@@ -1,4 +1,3 @@
-from enum import Enum
 from prend.channel import Channel, ChannelType
 from prend.oh.oh_event import OhEvent, OhNotificationType
 
@@ -51,7 +50,7 @@ class Action:
             return False
         if not self.channel.is_valid():
             return False
-        if self.channel.type != ChannelType.CRON:
+        if self.channel.type not in [ChannelType.CRON,ChannelType.STARTUP]:
             if not self.notification_type:
                 return False
             if not self.state_new or not self.state_new.is_valid():

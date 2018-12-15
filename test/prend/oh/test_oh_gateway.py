@@ -35,7 +35,9 @@ class TestOhGateway(unittest.TestCase):
     def test_fetch_items(self):
         dispatcher = TestDispatcher()
         rest = TestRest()
-        gateway = OhGateway(dispatcher, rest)
+        gateway = OhGateway()
+        gateway.set_dispatcher(dispatcher)
+        gateway.set_rest(rest)
 
         # prepare rest
         ev_update = OhEvent.create(OhNotificationType.ITEM_CHANGE

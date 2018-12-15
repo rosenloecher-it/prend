@@ -28,7 +28,9 @@ class RuleManager(Daemon):
         self._rules = []
         self._dispatcher = Dispatcher()
         self._rest = OhRest(config)
-        self._oh_gateway = OhGateway(self._dispatcher, self._rest)
+        self._oh_gateway = OhGateway()
+        self._oh_gateway.set_dispatcher(self._dispatcher)
+        self._oh_gateway.set_rest(self._rest)
         self._observer = None
         self._con_checker = ConnectionChecker(self._oh_gateway)
 
