@@ -138,7 +138,6 @@ class OhRest:
             _logger.warning('cannot send None/UNDEF via COMMAND => use UPDATE instead!')
             # noinspection PyUnusedLocal
             send_command = False
-            return
 
         item_name = oh_channel.name
         value_json = State.convert_to_json(value_state)
