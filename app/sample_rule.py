@@ -13,7 +13,7 @@ class SampleRule(Rule):
 
     # (overwriten) register your notifications and do some initialisation
     def register_actions(self) -> None:
-        _logger.info('register_actions')
+        _logger.debug('register_actions')
 
         # _logger.info('show config: {}'.format(self._config))
         # better access config via self.get_config*

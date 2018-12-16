@@ -3,7 +3,6 @@ import asyncio
 import json
 import logging
 import threading
-import concurrent
 from aiosseclient import Event
 from prend.config import Config
 from prend.oh.oh_event import OhEvent, OhNotificationType
