@@ -116,6 +116,23 @@ class TestOhRest(unittest.TestCase):
         ev_cmp = OhEvent.create(OhNotificationType.THING_CHANGE, channel, state)
         self.check_fetch_event(ev_out, ev_cmp)
 
+    def test_format_for_request(self):
+
+        out = OhRest.format_for_request(123)
+        print(out)
+        self.assertEqual(b'123', out)
+
+        out = OhRest.format_for_request(1.23)
+        print(out)
+        self.assertEqual(b'1.23', out)
+
+        out = OhRest.format_for_request('abc')
+        print(out)
+        self.assertEqual(b'abc', out)
+
+        out = OhRest.format_for_request('3,4°C / 56%')
+        print(out)
+        self.assertEqual(b'3,4\xc2\xb0C / 56%', out)
 
 if __name__ == '__main__':
     unittest.main()
