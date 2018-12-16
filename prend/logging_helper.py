@@ -45,7 +45,7 @@ class LoggingHelper:
                     format='%(asctime)s [%(levelname)8s] <%(process)5d> %(name)s: %(message)s',
                     level=cls.get_loglevel(config.loglevel),
                     handlers=[
-                        logging.handlers.RotatingFileHandler(config.logfile, maxBytes=(1048576), backupCount=5),
+                        logging.handlers.RotatingFileHandler(config.logfile, maxBytes=1048576, backupCount=5),
                         logging.StreamHandler(sys.stdout)
                     ]
                 )

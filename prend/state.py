@@ -137,10 +137,10 @@ class State:
     def import_state(self, other) -> None:
         if self.type != StateType.UNDEF and other.type == StateType.UNDEF:
             self.value = None
-        if self.type in [StateType.CONTACT, StateType.SWITCH] and other.type == StateType.ONOFF:
+        elif self.type in [StateType.CONTACT, StateType.SWITCH] and other.type == StateType.ONOFF:
             # don't overwrite type
             self.value = other.value
-        if self.type in [StateType.DIMMER, StateType.ROLLERSHUTTER] and other.type == StateType.DECIMAL:
+        elif self.type in [StateType.DIMMER, StateType.ROLLERSHUTTER] and other.type == StateType.DECIMAL:
             # don't overwrite type
             self.value = other.value
         else:

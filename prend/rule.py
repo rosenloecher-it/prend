@@ -85,7 +85,7 @@ class Rule(ABC):
     def get_state_value(self, channel: Channel):
         return self._oh_gateway.get_state_value(channel)
 
-    def get_item_state(self, channel_name: str):
+    def get_item_state(self, channel_name: str) -> State:
         return self._oh_gateway.get_item_state(channel_name)
 
     def get_item_state_value(self, channel_name: str):
