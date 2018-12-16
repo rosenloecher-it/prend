@@ -140,7 +140,7 @@ class OhRest:
             send_command = False
 
         item_name = oh_channel.name
-        value_json = State.convert_to_json(value_state)
+        value_json = self.format_for_request(value_state)
 
         if send_command:
             url = '/items/{}'.format(item_name)
@@ -172,3 +172,9 @@ class OhRest:
         with self._lock_session:
             req = self._session.put(self._rest_base_url + uri_path, data=data, timeout=self._timeout)
             self._check_req_return(req)
+
+    @staticmethod
+    def format_for_request(value_in: str) -> str:
+        text_out = State.convert_to_json(value_in)
+        text_out = text_out.encode('utf-8')
+        return text_out
