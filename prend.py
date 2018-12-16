@@ -1,7 +1,7 @@
 import sys
 from prend.process import Process
 from app.fronstor.fronstor_rule import FronstorRule
-
+from app.tehu_form_rule import TehuFormRule
 
 def main():
     process = Process()
@@ -11,6 +11,7 @@ def main():
         sys.exit(exit_code)
 
     process.register_rule(FronstorRule())
+    process.register_rule(TehuFormRule())
 
     # run endless loop
     return process.run()

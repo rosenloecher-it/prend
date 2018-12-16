@@ -14,7 +14,6 @@ class TestFronstorProcessor(unittest.TestCase):
 
         self.dispatcher = None
 
-        # todo
         self.mock_gateway = MockOhGateway()
         self.mock_gateway.set_dispatcher(self.dispatcher)
 
