@@ -51,8 +51,12 @@ class SampleRule(Rule):
                 dummy_number = 1
                 self.send_item_command('dummy_number', dummy_number)
 
+            dummy_number_2 = dummy_number
+            if dummy_number % 5 == 0:
+                dummy_number_2 = None
+
             # send command to another item (there is also a "send_item_update")
-            self.send_item_command('dummy_number_2', dummy_number)
+            self.send_item_command('dummy_number_2', dummy_number_2)
 
             # send another command
             text = '{} ({})'.format(dummy_number, datetime.datetime.now().isoformat())
