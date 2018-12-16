@@ -18,6 +18,7 @@ class FronstorRule(Rule):
         self._requester = None
         self._extracter = None
         self._processor = None
+        self._is_open = False
         pass
 
     def set_requester(self, requester):
@@ -27,15 +28,20 @@ class FronstorRule(Rule):
         self._extracter = extracter
 
     def open(self):
-        super().open()
+        url = self.get_config('fronstor', 'url')
+        if not url:
+            _logger.warning('no url => disable!')
+            return
 
         if not self._requester:
             self._requester = FronstorRequester()
         if not self._extracter:
             self._extracter = FronstorExtracter()
 
-        url = self.get_config('fronstor', 'url')
         self._requester.set_url(url)
+
+        super().open()
+        self._is_open = True
 
     def register_actions(self) -> None:
         cron_job = schedule.every(5).minutes
@@ -46,6 +52,10 @@ class FronstorRule(Rule):
 
     def notify_action(self, action) -> None:
         try:
+            if not self._is_open:
+                _logger.debug('not opened => abort')
+                return
+
             # check for general connection to openhab
             if not self.is_connected():
                 _logger.debug('notify_action - NOT CONNECTED - abort')
