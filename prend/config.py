@@ -91,6 +91,7 @@ class Config:
     def __init__(self):
         self.config_file = None
         self.exit_code = None
+        self.locale = None
         self.logfile = None
         self.loglevel = None
         self.log_config_file = None
@@ -267,6 +268,7 @@ class ConfigLoader:
                 cls._read_bool_config_parser(file_reader, section_openhab, 'simulate_sending', False)
 
             section_system = 'system'
+            config.locale = cls._read_from_config_parser(file_reader, section_system, 'locale')
             config.pid_file = cls._read_from_config_parser(file_reader, section_system, 'pid_file')
             config.work_dir = cls._read_from_config_parser(file_reader, section_system, 'work_dir')
 
@@ -304,6 +306,7 @@ class ConfigLoader:
             cls.add_to_rule_config(config.rule_config, section_logging, 'loglevel', config.loglevel)
             cls.add_to_rule_config(config.rule_config, section_openhab, 'simulate_sending', config.oh_simulate_sending)
             cls.add_to_rule_config(config.rule_config, section_system, 'config_file', config.config_file)
+            cls.add_to_rule_config(config.rule_config, section_system, 'locale', config.locale)
             cls.add_to_rule_config(config.rule_config, section_system, 'pid_file', config.pid_file)
             cls.add_to_rule_config(config.rule_config, section_system, 'work_dir', config.work_dir)
 

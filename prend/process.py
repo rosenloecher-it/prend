@@ -1,6 +1,7 @@
-
+import locale
 import logging
 import traceback
+import typing
 from prend.config import ConfigLoader
 from prend.logging_helper import LoggingHelper
 
@@ -31,12 +32,26 @@ class Process:
 
             from prend.rule_manager import RuleManager
             self._rule_manager = RuleManager(self._config)
+
+            self._init_locale(self._config.locale)
+
             return None
 
         except Exception as ex:
             print('error: {}'.format(ex))
             print(traceback.format_exc())
             return 1
+
+    @staticmethod
+    def _init_locale(locale_name: typing.Optional[str]):
+        try:
+            if locale_name:
+                locale_name = locale_name.strip()
+                locale.setlocale(locale.LC_ALL, locale_name)
+            return True
+        except locale.Error as ex:
+            print('set locale failed (use e.g. "de_DE.UTF8", not "{}"): {}'.format(locale_name, ex))
+        return False
 
     def run(self):
         logger = logging.getLogger(__name__)
