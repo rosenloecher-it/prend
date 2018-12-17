@@ -75,7 +75,8 @@ class FronstorRule(Rule):
                 self._processor = None
 
         if self._processor:
-            raise FronstorException('processor is still running!')
+            _logger.warning('processor is still running => skip!')
+            return
 
         self._processor = FronstorProcessor()
         self._processor.set_extracter(self._extracter)
