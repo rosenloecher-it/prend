@@ -23,6 +23,7 @@ Write your own [OpenHAB] rules with Python 3. Use your favorite editor, debug yo
 - No service script is provided so far to run it as system daemon.
 - Python programming skills required.
 - HTTP authenification (username/password) is not tested.
+- Tested with OpenHAB 2.3 Release (only)
 
 
 ## Motivation
