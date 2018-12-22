@@ -13,7 +13,7 @@ class CliParser(argparse.ArgumentParser):
 
     def __init__(self):
         super().__init__(
-            description=Constants.app_desc,
+            description=Constants.APP_DESC,
             add_help=False
         )
         self.exit_code = None
@@ -78,7 +78,7 @@ class CliParser(argparse.ArgumentParser):
         parser.add_argument(
             '--version', '-v',
             action='version',
-            version='{} v{}'.format(ConfigLoader.get_app_name(), Constants.app_version)
+            version='{} v{}'.format(ConfigLoader.get_app_name(), Constants.APP_VERSION)
         )
 
         return parser
@@ -146,7 +146,7 @@ class ConfigLoader:
         """
         main = os.path.abspath(sys.modules['__main__'].__file__)
         dirname = os.path.dirname(main)
-        config_file = os.path.join(dirname, '{}{}'.format(cls.get_app_name(), Constants.config_ext))
+        config_file = os.path.join(dirname, '{}{}'.format(cls.get_app_name(), Constants.CONFIG_EXT))
         return config_file
 
     @classmethod
@@ -154,7 +154,7 @@ class ConfigLoader:
         """
         sesach in /etc/<app_name>
         """
-        config_file = os.path.join('/etc', '{}{}'.format(cls.get_app_name(), Constants.config_ext))
+        config_file = os.path.join('/etc', '{}{}'.format(cls.get_app_name(), Constants.CONFIG_EXT))
         return config_file
 
     @classmethod

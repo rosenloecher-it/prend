@@ -56,7 +56,7 @@ class SetupTest:
     @classmethod
     def get_def_config_file(cls):
         project_dir = cls.get_project_dir()
-        config_file = os.path.join(project_dir, '{}{}'.format('tests', Constants.config_ext))
+        config_file = os.path.join(project_dir, '{}{}'.format('tests', Constants.CONFIG_EXT))
         if not os.path.isfile(config_file):
             print('error: config file ({}) has to be created!'.format(config_file))
             raise FileNotFoundError('error: config file ({}) does not exist!'.format(config_file))
