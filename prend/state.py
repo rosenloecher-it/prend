@@ -2,7 +2,7 @@ import datetime
 import dateutil.parser
 import logging
 from enum import Enum
-from prend.values import OnOffValue, ThingStatusValue, UpDownValue
+from prend.values import FormatToJson, OnOffValue, ThingStatusValue, UpDownValue, HsbValue
 from typing import Optional
 
 
@@ -12,7 +12,6 @@ _logger = logging.getLogger(__name__)
 class StateType(Enum):
     UNDEF = 1  # NOT undefined AND NOT None - will be delivered by openhab!
     UNKNOWN = 2  # types not listed here, will be collected as unknown
-    COLOR = 3
     CONTACT = 4
     DATETIME = 5
     DECIMAL = 6  # could be switched to DIMMER or ROLLERSHUTTER
@@ -50,6 +49,8 @@ class StateType(Enum):
                     break
             if not result and text == 'NUMBER':
                 result = StateType.DECIMAL
+            elif not result and text == 'COLOR':
+                result = StateType.HSB
             elif not result and text == 'THING':
                 result = StateType.THING_STATUS
 
@@ -177,15 +178,14 @@ class State:
             if state_text:
                 if state_text in ['NULL', 'UNDEF']:
                     state.value = None
-                elif state.type in [
-                    StateType.STRING, StateType.GROUP, StateType.COLOR
-                    , StateType.HSB, StateType.UNKNOWN
-                ]:
+                elif state.type in [StateType.STRING, StateType.GROUP, StateType.UNKNOWN]:
                     state.value = str(state_text)
                 elif state.type in [StateType.DECIMAL, StateType.DIMMER, StateType.ROLLERSHUTTER]:
                     state.value = float(state_text)
                 elif state.type in [StateType.CONTACT, StateType.ONOFF, StateType.SWITCH]:
                     state.value = OnOffValue.parse(state_text)
+                elif state.type == StateType.HSB:
+                    state.value = HsbValue.parse(state_text)
                 elif state.type == StateType.PERCENT:
                     state.value = int(state_text)
                 elif state.type == StateType.UPDOWN:
@@ -215,15 +215,13 @@ class State:
 
         if value_in is None:
             value_out = 'UNDEF'
+
+        elif isinstance(value_in, FormatToJson):
+            value_out = value_in.format_to_json()
         elif isinstance(value_in, datetime.datetime):
             value_out = value_in.isoformat()
-        elif isinstance(value_in, OnOffValue):
+        elif isinstance(value_in, Enum):
             value_out = value_in.name
-        elif isinstance(value_in, ThingStatusValue):
-            value_out = value_in.name
-        elif isinstance(value_in, UpDownValue):
-            value_out = value_in.name
-
         else:
             value_out = str(value_in)
 

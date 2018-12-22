@@ -134,6 +134,7 @@ class TestOhRest(unittest.TestCase):
         print(out)
         self.assertEqual(b'3,4\xc2\xb0C / 56%', out)
 
+
 if __name__ == '__main__':
     unittest.main()
 

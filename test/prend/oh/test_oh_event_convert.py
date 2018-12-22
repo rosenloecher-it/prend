@@ -3,7 +3,7 @@ import datetime
 from dateutil.tz import tzoffset
 from prend.oh.oh_event import OhEvent, OhNotificationType
 from prend.state import StateType
-from prend.values import OnOffValue, ThingStatusValue, UpDownValue
+from prend.values import OnOffValue, ThingStatusValue, UpDownValue, HsbValue
 from prend.state import State
 from prend.channel import Channel, ChannelType
 
@@ -127,7 +127,7 @@ class TestOhEventNotify(unittest.TestCase):
     def test_create_notify_hsb(self):
         str_in = '{"topic":"smarthome/items/valLiOfficeIris/statechanged","payload":"{\\\"type\\\":\\\"HSB\\\",\\\"value\\\":\\\"66,56,0\\\",\\\"oldType\\\":\\\"HSB\\\",\\\"oldValue\\\":\\\"66,56,56\\\"}","type":"ItemStateChangedEvent"}'
         oh_channel = Channel.create(ChannelType.ITEM, 'valLiOfficeIris')
-        oh_state = State.create(StateType.HSB, '66,56,0')
+        oh_state = State.create(StateType.HSB, HsbValue(66,56,0))
         ev_cmp = OhEvent.create(OhNotificationType.ITEM_CHANGE, oh_channel, oh_state)
         self.check_notify_event(str_in, ev_cmp)
 
@@ -186,7 +186,7 @@ class TestOhEventItemState(unittest.TestCase):
     def test_create_state_color(self):
         json_data = {'link': 'http://127.0.0.1:8080/rest/items/valLiLivingIris', 'state': '61,63,0', 'editable': False, 'type': 'Color', 'name': 'valLiLivingIris', 'label': 'Hue Iris - Wohnzimmer', 'tags': [], 'groupNames': ['gLiving', 'gsHueLiving', 'gsLightsLivKit']}
         oh_channel = Channel.create(ChannelType.ITEM, 'valLiLivingIris')
-        oh_state = State.create(StateType.COLOR, '61,63,0')
+        oh_state = State.create(StateType.HSB, HsbValue(61,63,0))
         ev_cmp = OhEvent.create(OhNotificationType.ITEM_CHANGE, oh_channel, oh_state)
         self.check_event(json_data, ev_cmp)
 

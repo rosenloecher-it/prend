@@ -116,4 +116,5 @@ class TestOhAction(unittest.TestCase):
         self.assertTrue(out)
 
 
-
+if __name__ == '__main__':
+    unittest.main()

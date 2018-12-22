@@ -61,3 +61,5 @@ class TestLoggingHelper(unittest.TestCase):
     #     return loglevel_def
 
 
+if __name__ == '__main__':
+    unittest.main()

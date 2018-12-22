@@ -174,7 +174,7 @@ class OhRest:
             self._check_req_return(req)
 
     @staticmethod
-    def format_for_request(value_in: str) -> str:
+    def format_for_request(value_in) -> str:
         text_out = State.convert_to_json(value_in)
         text_out = text_out.encode('utf-8')
         return text_out

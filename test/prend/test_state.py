@@ -25,6 +25,12 @@ class TestStateType(unittest.TestCase):
         out = StateType.parse('Decimal')
         self.assertEqual(out, StateType.DECIMAL)
 
+        out = StateType.parse(' Color ')
+        self.assertEqual(out, StateType.HSB)
+
+        out = StateType.parse(' hsb ')
+        self.assertEqual(out, StateType.HSB)
+
     def test_is_number_type(self):
 
         for en in StateType:
@@ -99,7 +105,8 @@ class TestState(unittest.TestCase):
 
     def test_convert_roundabout(self):
 
-        # wrong type/value combination
+        self.check_convert_roundabout(' 12,14,16 ', '12,14,16')
+
         self.check_convert_roundabout(' onoff ', 'abc')
         self.check_convert_roundabout(' upDown ', 'abc')
         self.check_convert_roundabout(' decimAl ', 'abc')
