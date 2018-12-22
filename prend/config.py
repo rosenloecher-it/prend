@@ -13,7 +13,7 @@ class CliParser(argparse.ArgumentParser):
 
     def __init__(self):
         super().__init__(
-            description=Constants.app_desc,
+            description=Constants.APP_DESC,
             add_help=False
         )
         self.exit_code = None
@@ -78,7 +78,7 @@ class CliParser(argparse.ArgumentParser):
         parser.add_argument(
             '--version', '-v',
             action='version',
-            version='{} v{}'.format(ConfigLoader.get_app_name(), Constants.app_version)
+            version='{} v{}'.format(ConfigLoader.get_app_name(), Constants.APP_VERSION)
         )
 
         return parser
@@ -103,7 +103,7 @@ class Config:
         self.pid_file = None
         self.work_dir = None
         self.timeout = None
-        self.rule_config = None  # just a dict
+        self.rule_config = {}
 
     def __repr__(self) -> str:
         return '{}(exit={}; conffile={}; rest={}; log={}:{}; parsed=<{}>)'\
@@ -146,7 +146,7 @@ class ConfigLoader:
         """
         main = os.path.abspath(sys.modules['__main__'].__file__)
         dirname = os.path.dirname(main)
-        config_file = os.path.join(dirname, '{}{}'.format(cls.get_app_name(), Constants.config_ext))
+        config_file = os.path.join(dirname, '{}{}'.format(cls.get_app_name(), Constants.CONFIG_EXT))
         return config_file
 
     @classmethod
@@ -154,7 +154,7 @@ class ConfigLoader:
         """
         sesach in /etc/<app_name>
         """
-        config_file = os.path.join('/etc', '{}{}'.format(cls.get_app_name(), Constants.config_ext))
+        config_file = os.path.join('/etc', '{}{}'.format(cls.get_app_name(), Constants.CONFIG_EXT))
         return config_file
 
     @classmethod
@@ -253,7 +253,7 @@ class ConfigLoader:
             file_reader = configparser.ConfigParser()
             file_reader.read(config.config_file)
 
-            section_logging = 'logging'
+            section_logging = Constants.LOGGING
             config.logfile = cls._read_from_config_parser(file_reader, section_logging, 'logfile')
             config.loglevel = cls._read_from_config_parser(file_reader, section_logging, 'loglevel')
             config.log_config_file = cls._read_from_config_parser(file_reader, section_logging, 'log_config_file')

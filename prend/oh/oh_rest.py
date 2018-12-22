@@ -163,18 +163,18 @@ class OhRest:
             self._check_req_return(req)
             return req.json()
 
-    def _req_post(self, uri_path: str, data: typing.Optional[dict] = None) -> None:
+    def _req_post(self, uri_path: str, data=None) -> None:
         with self._lock_session:
             req = self._session.post(self._rest_base_url + uri_path, data=data, timeout=self._timeout)
             self._check_req_return(req)
 
-    def _req_put(self, uri_path: str, data: typing.Optional[dict] = None) -> None:
+    def _req_put(self, uri_path: str, data=None) -> None:
         with self._lock_session:
             req = self._session.put(self._rest_base_url + uri_path, data=data, timeout=self._timeout)
             self._check_req_return(req)
 
     @staticmethod
-    def format_for_request(value_in: str) -> str:
+    def format_for_request(value_in) -> str:
         text_out = State.convert_to_json(value_in)
         text_out = text_out.encode('utf-8')
         return text_out

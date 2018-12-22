@@ -61,3 +61,5 @@ class TestChannel(unittest.TestCase):
         self.assertFalse(out)
 
 
+if __name__ == '__main__':
+    unittest.main()

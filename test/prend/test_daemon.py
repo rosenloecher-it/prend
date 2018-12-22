@@ -47,3 +47,6 @@ class TestDaemon(unittest.TestCase):
         daemon.delete_pidfile()
         self.assertTrue(not os.path.isfile(config.pid_file))
 
+
+if __name__ == '__main__':
+    unittest.main()

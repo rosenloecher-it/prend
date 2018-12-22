@@ -140,3 +140,5 @@ class TestRule(unittest.TestCase):
         self.assertEqual(gateway.last_state, state)
 
 
+if __name__ == '__main__':
+    unittest.main()

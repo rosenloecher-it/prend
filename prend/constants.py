@@ -2,11 +2,13 @@
 
 class Constants:
     # setup tools + cli arg parser
-    app_version = '0.1.0'
-    app_desc = 'external openhab rule engine (via rest api)'
+    APP_VERSION = '0.1.0'
+    APP_DESC = 'external openhab rule engine (via rest api)'
 
     # config
-    config_ext = ".conf"
+    CONFIG_EXT = ".conf"
+    LOGGING = 'logging'
+    LOGLEVEL = 'loglevel'
 
     # OhGateway
     WAIT_AFTER_CONNECTION_ERROR_SEC = 20

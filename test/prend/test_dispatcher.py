@@ -95,3 +95,5 @@ class TestDispatcher(unittest.TestCase):
         self.assertTrue(compare)
 
 
+if __name__ == '__main__':
+    unittest.main()

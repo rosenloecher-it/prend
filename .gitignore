@@ -4,7 +4,7 @@
 .idea/tasks.xml
 
 # private data
-/prend.conf
+/prend*.conf
 
 # setuptools
 /dist/
