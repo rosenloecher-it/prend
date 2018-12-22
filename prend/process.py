@@ -30,6 +30,8 @@ class Process:
             if self._config.exit_code is not None:
                 return self._print_and_return(self._config.exit_code)
 
+            LoggingHelper.set_explicit_module_loglevels(self._config)
+
             from prend.rule_manager import RuleManager
             self._rule_manager = RuleManager(self._config)
 

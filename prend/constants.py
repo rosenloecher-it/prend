@@ -7,6 +7,7 @@ class Constants:
 
     # config
     CONFIG_EXT = ".conf"
+    LOGGING = 'logging'
     LOGLEVEL = 'loglevel'
 
     # OhGateway

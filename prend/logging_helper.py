@@ -3,6 +3,7 @@ import logging.config
 import logging.handlers
 import os
 import sys
+from prend.constants import Constants
 
 
 """
@@ -73,6 +74,45 @@ class LoggingHelper:
         if loglevel_in.startswith('crit') or loglevel_in == 'fatal':
             return logging.CRITICAL
         return loglevel_def
+
+    @classmethod
+    def set_explicit_module_loglevels(cls, config):
+        try:
+            if config is None:
+                return
+            if not hasattr(config, 'rule_config'):
+                return
+            if config.rule_config is None:
+                return
+            section = config.rule_config.get(Constants.LOGGING)
+            if section is None:
+                return
+
+            search_for = '{}|'.format(Constants.LOGLEVEL)
+            for config_item in section:
+                if not config_item.startswith(search_for):
+                    continue
+                parts = config_item.split('|')
+                if len(parts) != 2:
+                    continue
+                value = section.get(config_item)
+                if not value:
+                    continue
+                loglevel = cls.get_loglevel(value)
+                logger_name = parts[1]
+                if len(logger_name) < 1:
+                    continue
+                logger = logging.getLogger(logger_name)
+                if not logger:
+                    continue
+                logger.setLevel(loglevel)
+
+        except Exception as ex:
+            logger = logging.getLogger(__name__)
+            if logger:
+                logger.exception(ex)
+            else:
+                print('set_explicit_module_loglevels failed: %s'.format(ex))
 
     @staticmethod
     def remove_logger_console_output():

@@ -103,7 +103,7 @@ class Config:
         self.pid_file = None
         self.work_dir = None
         self.timeout = None
-        self.rule_config = None  # just a dict
+        self.rule_config = {}
 
     def __repr__(self) -> str:
         return '{}(exit={}; conffile={}; rest={}; log={}:{}; parsed=<{}>)'\
@@ -253,7 +253,7 @@ class ConfigLoader:
             file_reader = configparser.ConfigParser()
             file_reader.read(config.config_file)
 
-            section_logging = 'logging'
+            section_logging = Constants.LOGGING
             config.logfile = cls._read_from_config_parser(file_reader, section_logging, 'logfile')
             config.loglevel = cls._read_from_config_parser(file_reader, section_logging, 'loglevel')
             config.log_config_file = cls._read_from_config_parser(file_reader, section_logging, 'log_config_file')

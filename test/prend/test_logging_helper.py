@@ -1,7 +1,8 @@
 import logging
 import unittest
+from prend.config import Config, ConfigLoader
+from prend.constants import Constants
 from prend.logging_helper import LoggingHelper
-from prend.config import Config
 
 
 class TestLoggingHelper(unittest.TestCase):
@@ -39,26 +40,60 @@ class TestLoggingHelper(unittest.TestCase):
         LoggingHelper.disable_other_loggers()
         LoggingHelper.disable_other_loggers()
 
-    #
-    # @classmethod
-    # def get_loglevel(cls, loglevel_in):
-    #     loglevel_def = logging.INFO
-    #
-    #     if not loglevel_in:
-    #         return loglevel_def
-    #
-    #     loglevel_in = loglevel_in.strip().lower()
-    #     if loglevel_in == 'info':
-    #         return logging.INFO
-    #     elif loglevel_in == 'debug':
-    #         return logging.
-    #     elif loglevel_in.index('warn') == 0:
-    #         return logging.WARN
-    #     elif loglevel_in.index('err') == 0:
-    #         return logging.ERROR
-    #     elif loglevel_in.index('crit') == 0 or loglevel_in == 'fatal':
-    #         return logging.CRITICAL
-    #     return loglevel_def
+    def test_set_explicit_module_loglevels_success(self):
+        config = Config()
+
+        logname_1 = 'app.logger_name_1'
+        loglevel_1 = 'error'
+        logcomp_1 = LoggingHelper.get_loglevel(loglevel_1)
+        logname_2 = 'xxx.dfgdg.logger_name_1'
+        loglevel_2 = 'warn'
+        logcomp_2 = LoggingHelper.get_loglevel(loglevel_2)
+
+        ConfigLoader.add_to_rule_config(config.rule_config,
+                                        Constants.LOGGING,
+                                        '{}|{}'.format(Constants.LOGLEVEL, logname_1),
+                                        loglevel_1)
+        ConfigLoader.add_to_rule_config(config.rule_config,
+                                        Constants.LOGGING,
+                                        '{}|{}'.format(Constants.LOGLEVEL, logname_2),
+                                        loglevel_2)
+        ConfigLoader.add_to_rule_config(config.rule_config,
+                                        Constants.LOGGING,
+                                        '{}|{}'.format(Constants.LOGLEVEL, logname_1),
+                                        loglevel_1)
+
+        LoggingHelper.set_explicit_module_loglevels(config)
+
+        logger = logging.getLogger(logname_1)
+        loglevel_out = logger.getEffectiveLevel()
+        self.assertEqual(logcomp_1, loglevel_out)
+
+        logger = logging.getLogger(logname_2)
+        loglevel_out = logger.getEffectiveLevel()
+        self.assertEqual(logcomp_2, loglevel_out)
+
+    def test_set_explicit_module_loglevels_nocrash(self):
+        config = Config()
+
+        ConfigLoader.add_to_rule_config(config.rule_config,
+                                        Constants.LOGGING,
+                                        '{}||abc'.format(Constants.LOGLEVEL),
+                                        'warn')
+        ConfigLoader.add_to_rule_config(config.rule_config,
+                                        Constants.LOGGING,
+                                        '{}|abc'.format(Constants.LOGLEVEL),
+                                        'warn')
+        ConfigLoader.add_to_rule_config(config.rule_config,
+                                        Constants.LOGGING,
+                                        'dfasfdsafd',
+                                        'warn')
+
+        LoggingHelper.set_explicit_module_loglevels(config)
+
+        LoggingHelper.set_explicit_module_loglevels(None)
+        LoggingHelper.set_explicit_module_loglevels({})
+
 
 
 if __name__ == '__main__':
