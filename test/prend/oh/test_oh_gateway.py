@@ -152,7 +152,7 @@ class TestOhGateway(unittest.TestCase):
 
     def test_send(self):
 
-        send_list = []
+        comp_list = []
         rest = MockRest()
         gateway = OhGateway()
         gateway.set_rest(rest)
@@ -161,44 +161,44 @@ class TestOhGateway(unittest.TestCase):
         send_data.send_command = True
         send_data.channel = Channel.create(ChannelType.ITEM, 'test1-send_command')
         send_data.state = State.create(StateType.STRING, send_data.channel.name)
-        send_list.append(send_data)
+        comp_list.append(send_data)
         gateway.send_command(send_data.channel, send_data.state)
 
         send_data = SendData()
         send_data.send_command = False
         send_data.channel = Channel.create(ChannelType.ITEM, 'test2-send_update')
         send_data.state = State.create(StateType.STRING, send_data.channel.name)
-        send_list.append(send_data)
+        comp_list.append(send_data)
         gateway.send_update(send_data.channel, send_data.state)
 
         send_data = SendData()
         send_data.send_command = True
         send_data.channel = Channel.create(ChannelType.ITEM, 'test3-send_item_command')
         send_data.state = State.create(StateType.STRING, send_data.channel.name)
-        send_list.append(send_data)
+        comp_list.append(send_data)
         gateway.send_item_command(send_data.channel.name, send_data.state)
 
         send_data = SendData()
         send_data.send_command = False
         send_data.channel = Channel.create(ChannelType.ITEM, 'test4-send_item_update')
         send_data.state = State.create(StateType.STRING, send_data.channel.name)
-        send_list.append(send_data)
+        comp_list.append(send_data)
         gateway.send_item_update(send_data.channel.name, send_data.state)
 
         send_data = SendData()
         send_data.send_command = False
         send_data.channel = Channel.create(ChannelType.ITEM, 'test5-send_item_update(None)')
         send_data.state = None
-        send_list.append(send_data)
+        comp_list.append(send_data)
         gateway.send_item_update(send_data.channel.name, send_data.state)
 
         gateway.send_queued()
 
-        self.assertEqual(len(send_list), len(rest.dummy_send))
+        self.assertEqual(len(comp_list), len(rest.dummy_send))
 
-        for i in range(0, len(send_list)):
+        for i in range(0, len(comp_list)):
             sent = rest.dummy_send[i]
-            comp = send_list[i]
+            comp = comp_list[i]
 
             self.assertEqual(comp.send_command, sent.send_command)
             self.assertEqual(comp.channel, sent.channel)

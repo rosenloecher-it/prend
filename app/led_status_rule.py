@@ -9,10 +9,9 @@ _logger = logging.getLogger(__name__)
 
 
 class EvalState(Enum):
-    ERROR = 0  # shown as RED
-    GREEN = 1
-    ORANGE = 2
-    RED = 3
+    GREEN = 0
+    ORANGE = 1
+    RED = 2  # is also ERROR
 
     def __str__(self):
         return self.__repr__()
@@ -144,7 +143,7 @@ class LedStatusRule(Rule):
             self._update_diff()
 
     def _update_action_item(self, action):
-        eval_set = self._child_to_eval(action.channel.name)
+        eval_set = self._child_to_eval.get(action.channel.name)
         if not eval_set:
             _logger.error('no eval-set found (%s)!', action)
             return
@@ -156,9 +155,12 @@ class LedStatusRule(Rule):
 
     def _handle_eval_set(self, eval_set, check_diff_and_update = False) -> None:
         eval_state = self._check_eval_set(eval_set)
-        self._send_eval_state(eval_state, check_diff_and_update)
 
-    def _send_eval_state(self, eval_set, check_diff_and_update = False):
+        state_value = self.get_item_state_value(eval_set.led_item)
+        if state_value != eval_state.name or not check_diff_and_update:
+            self._send_eval_state(eval_set.led_item, eval_state, check_diff_and_update)
+
+    def _send_eval_state(self, led_item, eval_set, check_diff_and_update = False):
         pass
 
     def _check_eval_set(self, eval_set) -> EvalState:
@@ -174,180 +176,32 @@ class LedStatusRule(Rule):
         state = self.get_item_state(eval_item.item_name)
         if state is None:
             _logger.warning('_check_eval_item - item (%s) does not exists!', eval_item.item_name)
-            return EvalState.ERROR
+            return EvalState.RED
 
         eval_state_out = None
         try:
             if eval_item.eval_type == EvalType.ELEC:
                 if state.is_switched_on():
                     eval_state_out = EvalState.RED
+                else:
+                    eval_state_out = EvalState.GREEN
             elif eval_item.eval_type == EvalType.OPEN:
                 if state.is_tilted():
                     eval_state_out = EvalState.ORANGE
                 elif state.is_open():
                     eval_state_out = EvalState.RED
-            elif eval_item.eval_type == EvalType.DOOR:
-                if state.is_open():
-                    eval_state_out = EvalState.RED
+                else:
+                    eval_state_out = EvalState.GREEN
         except ValueError:
             eval_state_out = None
             _logger.warning('_check_eval_item failed - cannot evaluate %s for %s', state, eval_item)
 
         if eval_state_out is None:
-            eval_state_out = EvalState.ERROR
-        if eval_state_out < eval_state_in:
+            eval_state_out = EvalState.RED
+        if eval_state_out.value < eval_state_in.value:
             eval_state_out = eval_state_in
 
         _logger.debug('_check_eval_item: %s = %s => %s', eval_item, state, eval_state_out)
 
         return eval_state_out
-
-
-
-#
-# // 0 == zu; 1 = offen
-# val Functions$Function3<String, GenericItem, Number, Number> determineStatusWindow01 =
-#     [ logClass, itemWindows01, stateWindowsIn |
-#             val String logKey = "determineStatusWindow01(" + itemWindows01.name + ") - "
-#             var Number stateWindows = stateWindowsIn
-#
-# 			if (itemWindows01 !== null) {
-# 			// TODO change
-#             //if (itemWindows01 !== null && itemWindows01 !== NULL) {
-#                 //logKey = logKey + itemWindows01.name
-#
-#                 var Number stateWindow = 2
-#
-#                 if (itemWindows01.state !== NULL) {
-#                 	var Number value = (itemWindows01.state as Number).intValue()
-#                 	if (value == 0) stateWindow = 0
-#                 }
-#
-#                 if (stateWindows < stateWindow ) { stateWindows = stateWindow; }
-#
-#                 //logDebug(logClass, logKey + " - out: " + String::format("%s == %d => stateWindows = %d", value, stateWindow, stateWindows))
-#             }
-#             else {
-#                 logError(logClass, logKey + " itemWindows01 is NULL!")
-#                 stateWindows = 2
-#             }
-#
-#             return stateWindows
-#     ]
-#
-#
-# // Number stateWindows; 0 = CLOSED (Standard); 1 = TILTED; 2 = OPEN
-# val Functions.Function3<String, StringItem, Number, Number> determineStatusWindowsHandle =
-#     [ logClass, itemWindowsHandle, stateWindowsIn |
-#             val String logKey = "determineStatusWindowsHandle(" + itemWindowsHandle.name + ") - "
-#             var Number stateWindows = stateWindowsIn
-#
-#             var Number stateWindow = 2
-#             val String value = itemWindowsHandle.state.toString
-#
-#             if (value == "CLOSED")
-#                 stateWindow = 0
-#             else if (value == "TILTED")
-#                 stateWindow = 1
-#             else if (value != "NULL" && value != "OPEN")
-#                 logWarn(logClass, logKey + " unknown value: " + String::format("%s == %d => stateWindows = %d", value, stateWindow, stateWindows))
-#
-#             if (stateWindows < stateWindow)
-#                 stateWindows = stateWindow;
-#
-#             logDebug(logClass, logKey + "out: " + String::format("%s == %d => stateWindows = %d", value, stateWindow, stateWindows))
-#
-#             return stateWindows
-#     ]
-#
-#
-# // Number stateWindows; 0 = OFF; 2 = ON
-# val Functions$Function3<String, GenericItem, Number, Number> determineStatusOnOff =
-#     [ logClass, itemOnOff, stateWindowsIn |
-#             val String logKey = "determineStatusOnOff(" + itemOnOff.name + ") - "
-#             var Number stateWindows = stateWindowsIn
-#
-#             if (itemOnOff !== null && itemOnOff.state !== NULL) {
-#                 //logKey = logKey + itemOnOff.name
-#
-#                 var Number stateWindow = 2
-#                 var String value = itemOnOff.state.toString
-#                 //logDebug(logClass, logKey + String.format("%s=%s", itemOnOff.name, value))
-#
-#                 if (value == "OFF") { stateWindow = 0 }
-#
-#                 if (stateWindows < stateWindow ) { stateWindows = stateWindow; }
-#
-#                 logDebug(logClass, String::format("%s%s == %d => stateWindows = %d", logKey, value, stateWindow, stateWindows))
-#             }
-#             else {
-#                 logWarn(logClass, String.format("%s itemOnOff.state is %s!", logKey, itemOnOff.state.toString))
-#                 stateWindows = 2
-#             }
-#
-#             return stateWindows
-#     ]
-#
-# // Number stateWindows; value==0 => OFF; >0 => ON
-# val Functions$Function3<String, GenericItem, Number, Number> determineStatusNumber =
-#     [ logClass, itemOnOff, stateWindowsIn |
-#             val String logKey = "determineStatusNumber(" + itemOnOff.name + ") - "
-#             var Number stateWindows = stateWindowsIn
-#
-#             logDebug(logClass, String::format("%s ", logKey))
-#
-#             if (itemOnOff !== null && itemOnOff.state !== NULL) {
-#
-#                 logDebug(logClass, String::format("%s %s => stateWindows = ", logKey, itemOnOff.state.toString))
-#
-#                 if (itemOnOff.state instanceof Number) {
-#                     val value = itemOnOff.state as Number
-#                     var Number stateWindow = 2
-#                     if (value < 0.001 && value > -0.001)
-#                         stateWindow = 0
-#
-#                     if (stateWindows < stateWindow )
-#                         stateWindows = stateWindow;
-#                 } else {
-#                     stateWindows = 2
-#                     logError(logClass, logKey + "itemOnOff.state is NO Number valid!")
-#                 }
-#
-#                 logDebug(logClass, String::format("%s %s => stateWindows = ", logKey, itemOnOff.state.toString))
-#
-#                 logDebug(logClass, String::format("%s %s => stateWindows = %d", logKey, itemOnOff.state.toString, stateWindows))
-#             }
-#             else {
-#                 logError(logClass, logKey + "itemOnOff.state is NOT valid!")
-#                 stateWindows = 2
-#             }
-#
-#             return stateWindows
-#     ]
-#
-# // 0 GREEN; 1 ORANGE; 2 nzw. sonst RED
-# val Functions$Function3<String, StringItem, Number, String> setLedStatus =
-#     [ logClass, itemLed, stateWindows |
-#             val String logKey = "setLedStatus - "
-#             if (itemLed !== null && itemLed != NULL) {
-#                 //logKey = logKey + itemLed.name
-#
-#                 //! LED-Statusanzeige (16-fach): HM-OU-LED16: 0 aus; 1 rot; 2 grün; 3 orange
-#                 var String stateOut = "RED";
-#                 if ( stateWindows == 0) {
-#                     stateOut = "GREEN";
-#                 } else if ( stateWindows == 1) {
-#                     stateOut = "ORANGE";
-#                 }
-#
-#                 itemLed.sendCommand(stateOut)
-#
-#                 return stateOut
-#             }
-#             else {
-#                 logDebug(logClass, logKey + " itemLed is NULL!")
-#
-#                 return "ERROR"
-#             }
-#     ]
 
