@@ -178,6 +178,13 @@ class TestState(unittest.TestCase):
         out = state.is_switched_off()
         self.assertEqual(False, out)
 
+        try:
+            state = State.create(StateType.ONOFF, None)
+            state.is_switched_on()
+            self.assertFalse(True)
+        except ValueError:
+            pass
+
         state = State.create(StateType.HSB, HsbValue(42, 78, 0))
         out = state.is_switched_on()
         self.assertEqual(False, out)
@@ -189,6 +196,31 @@ class TestState(unittest.TestCase):
         self.assertEqual(True, out)
         out = state.is_switched_off()
         self.assertEqual(False, out)
+
+        state = State.create(StateType.PERCENT, 0)
+        out = state.is_switched_on()
+        self.assertEqual(False, out)
+        out = state.is_switched_off()
+        self.assertEqual(True, out)
+
+        state = State.create(StateType.PERCENT, 1)
+        out = state.is_switched_on()
+        self.assertEqual(True, out)
+        out = state.is_switched_off()
+        self.assertEqual(False, out)
+
+        state = State.create(StateType.PERCENT, 100)
+        out = state.is_switched_on()
+        self.assertEqual(True, out)
+        out = state.is_switched_off()
+        self.assertEqual(False, out)
+
+        try:
+            state = State.create(StateType.PERCENT, -1)
+            state.is_switched_on()
+            self.assertFalse(True)
+        except ValueError:
+            pass
 
         state = State.create(StateType.DIMMER, 0)
         out = state.is_switched_on()
@@ -228,12 +260,7 @@ class TestState(unittest.TestCase):
         except ValueError:
             pass
 
-        try:
-            state = State.create(StateType.ONOFF, None)
-            state.is_switched_on()
-            self.assertFalse(True)
-        except ValueError:
-            pass
+
 
         state = State.create(StateType.ONOFF, OnOffValue.OFF)
         out = state.is_switched_on()
