@@ -12,8 +12,8 @@ def main():
     if exit_code is not None:
         sys.exit(exit_code)
 
-    # process.register_rule(FronstorRule())
-    # process.register_rule(TehuFormRule())
+    process.register_rule(FronstorRule())
+    process.register_rule(TehuFormRule())
     process.register_rule(LedStatusRule())
 
     # run endless loop

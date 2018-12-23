@@ -2,9 +2,10 @@ import copy
 import unittest
 from app.led_status_rule import LedStatusRule, EvalItem, EvalType, EvalState
 from prend.action import Action
-from prend.channel import Channel, ChannelType
+from prend.channel import Channel
 from prend.state import State, StateType
-from prend.values import FormatToJson, OnOffValue, ThingStatusValue, UpDownValue, HsbValue, OpeningValue
+from prend.values import OnOffValue, OpeningValue
+
 
 class SentEvalState:
     def __init__(self, led_item, eval_set, check_diff_and_update):
@@ -13,7 +14,11 @@ class SentEvalState:
         self.check_diff_and_update = check_diff_and_update
 
     def __repr__(self) -> str:
-        return '{}(led={}, {}, upd={})'.format(self.__class__.__name__, self.led_item, self.eval_set, self.check_diff_and_update)
+        return '{}(led={}, {}, upd={})'.format(
+            self.__class__.__name__,
+            self.led_item,
+            self.eval_set,
+            self.check_diff_and_update)
 
 
 class MockLedStatusRule(LedStatusRule):
@@ -49,7 +54,7 @@ class MockLedStatusRule(LedStatusRule):
             state = None
         self.dummy_states[channel] = state
 
-    def _send_eval_state(self, led_item, eval_set, check_diff_and_update = False):
+    def _send_eval_state(self, led_item, eval_set, check_diff_and_update=False):
         sent_data = SentEvalState(led_item, eval_set, check_diff_and_update)
         self.sent_list.append(sent_data)
 

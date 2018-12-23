@@ -3,7 +3,7 @@ import locale
 import unittest
 from app.tehu_form_rule import TehuFormRule, ItemSet
 from prend.action import Action
-from prend.channel import Channel, ChannelType
+from prend.channel import Channel
 from prend.dispatcher import Dispatcher
 from prend.oh.oh_event import OhNotificationType
 from prend.state import State, StateType
@@ -30,7 +30,8 @@ class TestTehuFormRule(unittest.TestCase):
         for item_set in self.rule._item_set_list:
             self.mock_gateway.set_state(Channel.create_item(item_set.humi), state_num)
             self.mock_gateway.set_state(Channel.create_item(item_set.temp), state_num)
-            self.mock_gateway.set_state(Channel.create_item(item_set.temp), State.create(StateType.STRING, self.DEFAULT_VALUE))
+            self.mock_gateway.set_state(Channel.create_item(item_set.temp)
+                                        , State.create(StateType.STRING, self.DEFAULT_VALUE))
 
     def check_sent_item(self, item_name, state_type_expected, value_expected):
 
@@ -45,7 +46,6 @@ class TestTehuFormRule(unittest.TestCase):
         item_set = ItemSet('showTempHumiBathDown', 'valTempBathDown', 'valHumiBathDown')
         state_num = State.create(StateType.DECIMAL, self.DEFAULT_VALUE)
 
-        #self.mock_gateway.clear()
         self.mock_gateway.set_state(Channel.create_item(item_set.humi), state_num)
         self.mock_gateway.set_state(Channel.create_item(item_set.temp), state_num)
 
@@ -68,8 +68,6 @@ class TestTehuFormRule(unittest.TestCase):
         self.check_sent_item('showTempHumiBathDown', StateType.STRING, text_value)
 
     def test_action_startup(self):
-        #self.mock_gateway.clear()
-
         action = Action.create_startup_action()
         self.rule.notify_action(action)
 
@@ -84,7 +82,6 @@ class TestTehuFormRule(unittest.TestCase):
 
         for item_set in self.rule._item_set_list:
             self.check_sent_item(item_set.show, StateType.STRING, text_value)
-
 
     def test_format_number(self):
 

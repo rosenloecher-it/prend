@@ -31,6 +31,7 @@ class EvalType(Enum):
     def __repr__(self) -> str:
         return self.name
 
+
 class EvalItem:
     def __init__(self, eval_type, item_name):
         self.eval_type = eval_type
@@ -38,6 +39,7 @@ class EvalItem:
 
     def __repr__(self) -> str:
         return '{}({},{})'.format(self.__class__.__name__, self.item_name, self.eval_type)
+
 
 class EvalSet:
     def __init__(self, key, led_item, child_items):
@@ -153,14 +155,14 @@ class LedStatusRule(Rule):
         for eval_set in self.eval_config:
             self._handle_eval_set(eval_set, True)
 
-    def _handle_eval_set(self, eval_set, check_diff_and_update = False) -> None:
+    def _handle_eval_set(self, eval_set, check_diff_and_update=False) -> None:
         eval_state = self._check_eval_set(eval_set)
 
         state_value = self.get_item_state_value(eval_set.led_item)
         if state_value != eval_state.name or not check_diff_and_update:
             self._send_eval_state(eval_set.led_item, eval_state, check_diff_and_update)
 
-    def _send_eval_state(self, led_item, eval_set, check_diff_and_update = False):
+    def _send_eval_state(self, led_item, eval_set, check_diff_and_update=False):
         pass
 
     def _check_eval_set(self, eval_set) -> EvalState:
