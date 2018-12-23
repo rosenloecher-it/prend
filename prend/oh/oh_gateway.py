@@ -107,17 +107,15 @@ class OhGateway(OhGatewayEventSink):
         channel = Channel.create(ChannelType.ITEM, channel_name)
         self.send(False, channel, state)
 
-    def get_states(self):
+    def get_states(self) -> dict:
         with self._lock_state:
             export = copy.deepcopy(self._states)
         return export
 
     # convenience funtion for get_states
-    def get_channels(self):
+    def get_channels(self) -> list:
         states = self.get_states()
-        channels = []
-        for channel in states:
-            channels.append(channel)
+        channels = [*states]
         return channels
 
     def get_state(self, channel: Channel) -> Optional[State]:

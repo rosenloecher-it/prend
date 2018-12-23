@@ -73,8 +73,10 @@ class Rule(ABC):
         value = Convert.convert_to_float(value_str, fallback)
         return value
 
-    def get_channels(self):
-        return self._oh_gateway.get_channels()
+    def get_channels(self) -> list:
+        states = self.get_states()
+        channels = [*states]
+        return channels
 
     def get_states(self) -> dict:
         return self._oh_gateway.get_states()

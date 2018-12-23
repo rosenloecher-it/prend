@@ -1,14 +1,15 @@
 import copy
 import unittest
 from prend.action import Action
+from prend.channel import Channel, ChannelType
 from prend.config import Config
 from prend.dispatcher import DispatcherActionSink
-from prend.channel import Channel, ChannelType
 from prend.oh.oh_event import OhEvent, OhNotificationType
 from prend.oh.oh_gateway import OhGateway
 from prend.oh.oh_rest import OhRest
 from prend.state import State, StateType
 from prend.values import OnOffValue, ThingStatusValue
+from test.prend.oh.mock_oh_gateway import MockOhGateway
 
 
 class TestRest(OhRest):
@@ -112,5 +113,30 @@ class TestOhGateway(unittest.TestCase):
         gateway.push_event(ev_update)
         self.assertEqual(1, len(dispatcher.queued_actions))
 
+    def test_get_states(self):
+
+        gateway = MockOhGateway()
+        check_channels = []
+
+        channel1 = Channel.create_item('ch1')
+        state1 = State.create(StateType.STRING, channel1.name)
+        gateway.set_state(channel1, state1)
+        check_channels.append(channel1)
+
+        channel2 = Channel.create_item('ch2')
+        state2 = State.create(StateType.STRING, channel2.name)
+        gateway.set_state(channel2, state2)
+        check_channels.append(channel2)
+
+        states = gateway.get_states()
+        self.assertEqual(state1, states.get(channel1))
+        self.assertEqual(state2, states.get(channel2))
+
+        channels = gateway.get_channels()
+        for channel in channels:
+            found = check_channels.index(channel)
+            check_channels.remove(channel)
+
+        self.assertEqual(0, len(check_channels))
 
 
