@@ -1,6 +1,6 @@
 import schedule
 from abc import ABC, abstractmethod
-from prend.channel import Channel
+from prend.channel import Channel, ChannelType
 from prend.state import State
 from prend.tools.convert import Convert
 from typing import Optional
@@ -96,19 +96,21 @@ class Rule(ABC):
 
     # convenience funtion for send
     def send_command(self, channel: Channel, state) -> None:
-        self._oh_gateway.send_command(channel, state)
+        self.send(True, channel, state)
 
     # convenience funtion for send
     def send_update(self, channel: Channel, state) -> None:
-        self._oh_gateway.send_update(channel, state)
+        self.send(False, channel, state)
 
     # convenience funtion for send
-    def send_item_command(self, channel: str, state) -> None:
-        self._oh_gateway.send_item_command(channel, state)
+    def send_item_command(self, channel_name: str, state) -> None:
+        channel = Channel.create(ChannelType.ITEM, channel_name)
+        self.send(True, channel, state)
 
     # convenience funtion for send
-    def send_item_update(self, channel: str, state) -> None:
-        self._oh_gateway.send_item_update(channel, state)
+    def send_item_update(self, channel_name: str, state) -> None:
+        channel = Channel.create(ChannelType.ITEM, channel_name)
+        self.send(False, channel, state)
 
     @abstractmethod
     def register_actions(self) -> None:
