@@ -95,6 +95,5 @@ class TestLoggingHelper(unittest.TestCase):
         LoggingHelper.set_explicit_module_loglevels({})
 
 
-
 if __name__ == '__main__':
     unittest.main()
