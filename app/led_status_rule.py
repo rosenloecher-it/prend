@@ -3,6 +3,7 @@ import schedule
 from enum import Enum
 from prend.channel import Channel, ChannelType
 from prend.rule import Rule
+from prend.state import State, StateType
 
 
 _logger = logging.getLogger(__name__)
@@ -163,7 +164,10 @@ class LedStatusRule(Rule):
             self._send_eval_state(eval_set.led_item, eval_state, check_diff_and_update)
 
     def _send_eval_state(self, led_item, eval_set, check_diff_and_update=False):
-        pass
+        send_command = (not check_diff_and_update)
+        channel = Channel.create_item(led_item)
+        state = State.create(StateType.STRING, eval_set.name)
+        self.send(send_command, channel, state)
 
     def _check_eval_set(self, eval_set) -> EvalState:
         eval_state = EvalState.GREEN
