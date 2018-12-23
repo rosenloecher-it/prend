@@ -87,7 +87,7 @@ class LedStatusRule(Rule):
         EvalSet('r04', 'valLedHall12', [
             EvalItem(EvalType.ELEC, 'valLiOfficeIris'),
             EvalItem(EvalType.ELEC, 'valLiOfficeStripeLower'),
-            EvalItem(EvalType.ELEC, 'valLiOfficeStripeLower'),
+            EvalItem(EvalType.ELEC, 'valLiOfficeStripeUpper'),
             EvalItem(EvalType.ELEC, 'valLiOfficeCeil')
         ]),
 
