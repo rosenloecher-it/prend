@@ -63,11 +63,13 @@ class LedStatusRule(Rule):
             EvalItem(EvalType.ELEC, 'valLiMarcCeil'),
             EvalItem(EvalType.ELEC, 'valLiLaraCeil')
         ]),
+
         EvalSet('l02', 'valLedHall02', [
             EvalItem(EvalType.OPEN, 'valWinGallery'),
             EvalItem(EvalType.OPEN, 'valWinStoreroom')
         ]),
         EvalSet('r02', 'valLedHall10', [EvalItem(EvalType.ELEC, 'valLiStoreroom')]),
+
         EvalSet('l03', 'valLedHall03', [
             EvalItem(EvalType.OPEN, 'valWinBathUp'),
             EvalItem(EvalType.OPEN, 'valWinSleeping')
@@ -77,6 +79,7 @@ class LedStatusRule(Rule):
             EvalItem(EvalType.ELEC, 'valLiBathUpMirror'),
             EvalItem(EvalType.ELEC, 'valLiSleeping')
         ]),
+
         EvalSet('l04', 'valLedHall04', [
             EvalItem(EvalType.OPEN, 'valWinOfficeNorth'),
             EvalItem(EvalType.OPEN, 'valWinOfficeEast')
@@ -87,6 +90,7 @@ class LedStatusRule(Rule):
             EvalItem(EvalType.ELEC, 'valLiOfficeStripeLower'),
             EvalItem(EvalType.ELEC, 'valLiOfficeCeil')
         ]),
+
         EvalSet('l05', 'valLedHall05', [
             EvalItem(EvalType.OPEN, 'valDoorTerrace'),
             EvalItem(EvalType.OPEN, 'valWinLiving'),
@@ -100,15 +104,17 @@ class LedStatusRule(Rule):
             EvalItem(EvalType.ELEC, 'valLiLivingCupboard'),
             EvalItem(EvalType.ELEC, 'valLiKitchen')
         ]),
+
         EvalSet('l06', 'valLedHall06', [
             EvalItem(EvalType.OPEN, 'valWinBathDown'),
             EvalItem(EvalType.OPEN, 'valWinUtilityRoom')
         ]),
-        EvalSet('r06', 'valLedHall07', [
+        EvalSet('r06', 'valLedHall14', [
             EvalItem(EvalType.ELEC, 'valLiBathDownCeil'),
             EvalItem(EvalType.ELEC, 'valLiBathDownMirror'),
             EvalItem(EvalType.ELEC, 'valLiUtilityroom')
         ]),
+
         EvalSet('l07', 'valLedHall07', [EvalItem(EvalType.ELEC, 'valSocketTerrace')]),
         EvalSet('r07', 'valLedHall15', [EvalItem(EvalType.ELEC, 'valLiTerrace')])
     ]
