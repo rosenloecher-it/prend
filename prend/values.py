@@ -15,7 +15,6 @@ class FormatToJson(ABC):
 
 
 class OnOffValue(Enum):
-    __metaclass__ = FormatToJson
 
     ON = 1
     OFF = 2
@@ -40,7 +39,6 @@ class OnOffValue(Enum):
 
 
 class ThingStatusValue(Enum):
-    __metaclass__ = FormatToJson
 
     ONLINE = 1
     OFFLINE = 2
@@ -67,7 +65,6 @@ class ThingStatusValue(Enum):
 
 
 class UpDownValue(Enum):
-    __metaclass__ = FormatToJson
 
     UP = 1
     DOWN = 2
@@ -117,10 +114,10 @@ class HsbValue(FormatToJson):
 
     def is_on(self):
         if self.brightness is None or self.brightness < 0:
-            return None
-        if self.brightness == 0:
-            return False
-        return True
+            raise ValueError()
+        if self.brightness > 0:
+            return True
+        return False
 
     def format_to_json(self) -> str:
         return '{},{},{}'.format(int(self.hue), int(self.saturation), int(self.brightness))
@@ -139,3 +136,29 @@ class HsbValue(FormatToJson):
 
         value = HsbValue(parts[0], parts[1], parts[2])
         return value
+
+
+class OpeningValue(Enum):
+
+    CLOSED = 1
+    TILTED = 2
+    OPEN = 3
+
+    def __str__(self):
+        return self.__repr__()
+
+    def __repr__(self) -> str:
+        return '{}.{}'.format(self.__class__.__name__, self.name)
+
+    def format_to_json(self) -> str:
+        return self.name
+
+    @staticmethod
+    def parse(text):
+        if text:
+            text = text.strip().upper()
+            for e in OpeningValue:
+                if e.name == text:
+                    return e
+        raise ValueError()
+

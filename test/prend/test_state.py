@@ -3,7 +3,7 @@ import datetime
 import unittest
 from dateutil.tz import tzoffset
 from prend.state import State, StateType
-from prend.values import OnOffValue, ThingStatusValue
+from prend.values import OnOffValue, ThingStatusValue, HsbValue
 
 
 class TestStateType(unittest.TestCase):
@@ -163,6 +163,162 @@ class TestState(unittest.TestCase):
         self.check_set_value_check_type(StateType.DECIMAL, 1, 2, True)
         self.check_set_value_check_type(StateType.DECIMAL, 1.23, 2.34, True)
         self.check_set_value_check_type(StateType.DECIMAL, 1.23, 2, True)
+
+    def test_switch(self):
+
+        state = State.create(StateType.SWITCH, OnOffValue.OFF)
+        out = state.is_switched_on()
+        self.assertEqual(False, out)
+        out = state.is_switched_off()
+        self.assertEqual(True, out)
+
+        state = State.create(StateType.SWITCH, OnOffValue.ON)
+        out = state.is_switched_on()
+        self.assertEqual(True, out)
+        out = state.is_switched_off()
+        self.assertEqual(False, out)
+
+        state = State.create(StateType.HSB, HsbValue(42, 78, 0))
+        out = state.is_switched_on()
+        self.assertEqual(False, out)
+        out = state.is_switched_off()
+        self.assertEqual(True, out)
+
+        state = State.create(StateType.HSB, HsbValue(42, 78, 56))
+        out = state.is_switched_on()
+        self.assertEqual(True, out)
+        out = state.is_switched_off()
+        self.assertEqual(False, out)
+
+
+
+        state = State.create(StateType.DIMMER, 0)
+        out = state.is_switched_on()
+        self.assertEqual(False, out)
+        out = state.is_switched_off()
+        self.assertEqual(True, out)
+
+        state = State.create(StateType.DIMMER, 1)
+        out = state.is_switched_on()
+        self.assertEqual(True, out)
+        out = state.is_switched_off()
+        self.assertEqual(False, out)
+
+        state = State.create(StateType.DIMMER, 99.9)
+        out = state.is_switched_on()
+        self.assertEqual(True, out)
+        out = state.is_switched_off()
+        self.assertEqual(False, out)
+
+        state = State.create(StateType.DIMMER, 100.1)
+        out = state.is_switched_on()
+        self.assertEqual(True, out)
+        out = state.is_switched_off()
+        self.assertEqual(False, out)
+
+        try:
+            state = State.create(StateType.DIMMER, -1)
+            out = state.is_switched_on()
+            self.assertFalse(True)
+        except ValueError:
+            pass
+
+        try:
+            state = State.create(StateType.DIMMER, None)
+            out = state.is_switched_on()
+            self.assertFalse(True)
+        except ValueError:
+            pass
+
+        try:
+            state = State.create(StateType.ONOFF, None)
+            out = state.is_switched_on()
+            self.assertFalse(True)
+        except ValueError:
+            pass
+
+        state = State.create(StateType.ONOFF, OnOffValue.OFF)
+        out = state.is_switched_on()
+        self.assertEqual(False, out)
+        out = state.is_switched_off()
+        self.assertEqual(True, out)
+
+        state = State.create(StateType.ONOFF, OnOffValue.ON)
+        out = state.is_switched_on()
+        self.assertEqual(True, out)
+        out = state.is_switched_off()
+        self.assertEqual(False, out)
+
+
+    def test_opening(self):
+
+        state = State.create(StateType.STRING, ' closed ')
+        out = state.is_closed()
+        self.assertEqual(True, out)
+        out = state.is_open()
+        self.assertEqual(False, out)
+        out = state.is_tilted()
+        self.assertEqual(False, out)
+
+        state = State.create(StateType.STRING, ' open  ')
+        out = state.is_closed()
+        self.assertEqual(False, out)
+        out = state.is_open()
+        self.assertEqual(True, out)
+        out = state.is_tilted()
+        self.assertEqual(False, out)
+
+        state = State.create(StateType.STRING, ' tilted  ')
+        out = state.is_closed()
+        self.assertEqual(False, out)
+        out = state.is_open()
+        self.assertEqual(True, out)
+        out = state.is_tilted()
+        self.assertEqual(True, out)
+
+        state = State.create(StateType.DECIMAL, 0)
+        out = state.is_closed()
+        self.assertEqual(True, out)
+        out = state.is_open()
+        self.assertEqual(False, out)
+        out = state.is_tilted()
+        self.assertEqual(False, out)
+
+        state = State.create(StateType.DECIMAL, 1)
+        out = state.is_closed()
+        self.assertEqual(False, out)
+        out = state.is_open()
+        self.assertEqual(True, out)
+        out = state.is_tilted()
+        self.assertEqual(False, out)
+
+        try:
+            state = State.create(StateType.DECIMAL, -1)
+            out = state.is_switched_on()
+            self.assertFalse(True)
+        except ValueError:
+            pass
+
+        try:
+            state = State.create(StateType.DECIMAL, None)
+            out = state.is_switched_on()
+            self.assertFalse(True)
+        except ValueError:
+            pass
+
+        try:
+            state = State.create(StateType.STRING, None)
+            out = state.is_switched_on()
+            self.assertFalse(True)
+        except ValueError:
+            pass
+
+        try:
+            state = State.create(StateType.STRING, 'sfvgscf')
+            out = state.is_switched_on()
+            self.assertFalse(True)
+        except ValueError:
+            pass
 
 
 if __name__ == '__main__':

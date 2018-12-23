@@ -2,7 +2,7 @@ import datetime
 import dateutil.parser
 import logging
 from enum import Enum
-from prend.values import FormatToJson, OnOffValue, ThingStatusValue, UpDownValue, HsbValue
+from prend.values import FormatToJson, OnOffValue, ThingStatusValue, UpDownValue, HsbValue, OpeningValue
 from typing import Optional
 
 
@@ -226,3 +226,67 @@ class State:
             value_out = str(value_in)
 
         return value_out
+
+    def is_switched_off(self) -> bool:
+        return not self.is_switched_on()
+
+    def is_switched_on(self) -> bool:
+        if self.value is None:
+            raise ValueError()
+
+        if isinstance(self.value, OnOffValue):
+            if OnOffValue.OFF == self.value:
+                return False
+            elif OnOffValue.ON == self.value:
+                return True
+            raise ValueError()
+        elif StateType.DIMMER == self.type:
+            conv = int(self.value)
+            if conv == 0:
+                return False
+            elif conv > 0:
+                return True
+            raise ValueError()
+        elif StateType.HSB == self.type:
+            return self.value.is_on()
+        # you should NOT come here, some cases are missing
+        raise ValueError()
+
+    # window, door
+    def is_closed(self) -> bool:
+        if StateType.STRING == self.type:
+            typed_value = OpeningValue.parse(self.value)
+            return typed_value == OpeningValue.CLOSED
+        elif StateType.DECIMAL == self.type:
+            conv = int(self.value)
+            if conv == 0:
+                return True
+            elif conv > 0:
+                return False
+        # you should NOT come here, some cases are missing
+        raise ValueError()
+
+    # window, door
+    def is_open(self) -> bool:
+        if StateType.STRING == self.type:
+            typed_value = OpeningValue.parse(self.value)
+            return typed_value != OpeningValue.CLOSED
+        elif StateType.DECIMAL == self.type:
+            conv = int(self.value)
+            if conv == 0:
+                return False
+            elif conv > 0:
+                return True
+            raise ValueError()
+        # you should NOT come here, some cases are missing
+        raise ValueError()
+
+    # window, door
+    def is_tilted(self) -> bool:
+        if StateType.STRING == self.type:
+            typed_value = OpeningValue.parse(self.value)
+            return typed_value == OpeningValue.TILTED
+        elif StateType.DECIMAL == self.type:
+            return False  # no items exists!
+        # you should NOT come here, some cases are missing
+        raise ValueError()
