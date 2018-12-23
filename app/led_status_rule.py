@@ -9,7 +9,7 @@ _logger = logging.getLogger(__name__)
 
 
 class EvalState(Enum):
-    UNDEF = 0  # shown as RED
+    ERROR = 0  # shown as RED
     GREEN = 1
     ORANGE = 2
     RED = 3
@@ -22,9 +22,9 @@ class EvalState(Enum):
 
 
 class EvalType(Enum):
+    # ELEC
     ELEC = 1  # electrical
-    WINDOW = 2  # opening (door, window)
-    DOOR = 2  # opening (door, window)
+    OPEN = 2  # opening (door, window)
 
     def __str__(self):
         return self.__repr__()
@@ -54,21 +54,21 @@ class LedStatusRule(Rule):
 
     eval_config = [
         EvalSet('l01', 'valLedHall01', [
-            EvalItem(EvalType.WINDOW, 'valWinMarc'),
-            EvalItem(EvalType.WINDOW, 'valWinLara')
+            EvalItem(EvalType.OPEN, 'valWinMarc'),
+            EvalItem(EvalType.OPEN, 'valWinLara')
         ]),
         EvalSet('r01', 'valLedHall09', [
             EvalItem(EvalType.ELEC, 'valLiMarcCeil'),
             EvalItem(EvalType.ELEC, 'valLiLaraCeil')
         ]),
         EvalSet('l02', 'valLedHall02', [
-            EvalItem(EvalType.WINDOW, 'valWinGallery'),
-            EvalItem(EvalType.WINDOW, 'valWinStoreroom')
+            EvalItem(EvalType.OPEN, 'valWinGallery'),
+            EvalItem(EvalType.OPEN, 'valWinStoreroom')
         ]),
         EvalSet('r02', 'valLedHall10', [EvalItem(EvalType.ELEC, 'valLiStoreroom')]),
         EvalSet('l03', 'valLedHall03', [
-            EvalItem(EvalType.WINDOW, 'valWinBathUp'),
-            EvalItem(EvalType.WINDOW, 'valWinSleeping')
+            EvalItem(EvalType.OPEN, 'valWinBathUp'),
+            EvalItem(EvalType.OPEN, 'valWinSleeping')
         ]),
         EvalSet('r03', 'valLedHall11', [
             EvalItem(EvalType.ELEC, 'valLiBathUpCeil'),
@@ -76,8 +76,8 @@ class LedStatusRule(Rule):
             EvalItem(EvalType.ELEC, 'valLiSleeping')
         ]),
         EvalSet('l04', 'valLedHall04', [
-            EvalItem(EvalType.WINDOW, 'valWinOfficeNorth'),
-            EvalItem(EvalType.WINDOW, 'valWinOfficeEast')
+            EvalItem(EvalType.OPEN, 'valWinOfficeNorth'),
+            EvalItem(EvalType.OPEN, 'valWinOfficeEast')
         ]),
         EvalSet('r04', 'valLedHall12', [
             EvalItem(EvalType.ELEC, 'valLiOfficeIris'),
@@ -86,9 +86,9 @@ class LedStatusRule(Rule):
             EvalItem(EvalType.ELEC, 'valLiOfficeCeil')
         ]),
         EvalSet('l05', 'valLedHall05', [
-            EvalItem(EvalType.DOOR, 'valDoorTerrace'),
-            EvalItem(EvalType.WINDOW, 'valWinLiving'),
-            EvalItem(EvalType.WINDOW, 'valWinKitchen')
+            EvalItem(EvalType.OPEN, 'valDoorTerrace'),
+            EvalItem(EvalType.OPEN, 'valWinLiving'),
+            EvalItem(EvalType.OPEN, 'valWinKitchen')
         ]),
         EvalSet('r05', 'valLedHall13', [
             EvalItem(EvalType.ELEC, 'valLiLivingIris'),
@@ -99,8 +99,8 @@ class LedStatusRule(Rule):
             EvalItem(EvalType.ELEC, 'valLiKitchen')
         ]),
         EvalSet('l06', 'valLedHall06', [
-            EvalItem(EvalType.WINDOW, 'valWinBathDown'),
-            EvalItem(EvalType.WINDOW, 'valWinUtilityRoom')
+            EvalItem(EvalType.OPEN, 'valWinBathDown'),
+            EvalItem(EvalType.OPEN, 'valWinUtilityRoom')
         ]),
         EvalSet('r06', 'valLedHall07', [
             EvalItem(EvalType.ELEC, 'valLiBathDownCeil'),
@@ -172,10 +172,33 @@ class LedStatusRule(Rule):
             return eval_state_in
 
         state = self.get_item_state(eval_item.item_name)
+        if state is None:
+            _logger.warning('_check_eval_item - item (%s) does not exists!', eval_item.item_name)
+            return EvalState.ERROR
 
-        _logger.debug('_check_eval_item: %s = %s', eval_item, state)
+        eval_state_out = None
+        try:
+            if eval_item.eval_type == EvalType.ELEC:
+                if state.is_switched_on():
+                    eval_state_out = EvalState.RED
+            elif eval_item.eval_type == EvalType.OPEN:
+                if state.is_tilted():
+                    eval_state_out = EvalState.ORANGE
+                elif state.is_open():
+                    eval_state_out = EvalState.RED
+            elif eval_item.eval_type == EvalType.DOOR:
+                if state.is_open():
+                    eval_state_out = EvalState.RED
+        except ValueError:
+            eval_state_out = None
+            _logger.warning('_check_eval_item failed - cannot evaluate %s for %s', state, eval_item)
 
-        eval_state_out = eval_state_in
+        if eval_state_out is None:
+            eval_state_out = EvalState.ERROR
+        if eval_state_out < eval_state_in:
+            eval_state_out = eval_state_in
+
+        _logger.debug('_check_eval_item: %s = %s => %s', eval_item, state, eval_state_out)
 
         return eval_state_out
 
