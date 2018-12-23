@@ -81,17 +81,29 @@ class Rule(ABC):
     def get_states(self) -> dict:
         return self._oh_gateway.get_states()
 
+    # convenience funtion for get_state
+    def get_item_state(self, channel_name: str) -> State:
+        channel = Channel.create(ChannelType.ITEM, channel_name)
+        state = self.get_state(channel)
+        return state
+
+    # convenience funtion for get_state
+    def get_item_state_value(self, channel_name: str):
+        channel = Channel.create(ChannelType.ITEM, channel_name)
+        state = self.get_state(channel)
+        if state:
+            return state.value
+        return None
+
     def get_state(self, channel: Channel) -> State:
         return self._oh_gateway.get_state(channel)
 
+    # convenience funtion for get_state
     def get_state_value(self, channel: Channel):
-        return self._oh_gateway.get_state_value(channel)
-
-    def get_item_state(self, channel_name: str) -> State:
-        return self._oh_gateway.get_item_state(channel_name)
-
-    def get_item_state_value(self, channel_name: str):
-        return self._oh_gateway.get_item_state_value(channel_name)
+        state = self.get_state(channel)
+        if state:
+            return state.value
+        return None
 
     def send(self, send_command: bool, channel: Channel, state):
         self._oh_gateway.send(send_command, channel, state)

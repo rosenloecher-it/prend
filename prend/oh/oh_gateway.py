@@ -80,8 +80,7 @@ class OhGateway(OhGatewayEventSink):
             raise TypeError()
         if not isinstance(channel, Channel):
             raise TypeError()
-        # if not isinstance(state, State):
-        #     raise TypeError()
+        # state can be any value or None!
 
         send_data = SendData()
         send_data.send_command = send_command
@@ -118,6 +117,20 @@ class OhGateway(OhGatewayEventSink):
         channels = [*states]
         return channels
 
+    # convenience funtion for get_state
+    def get_item_state(self, channel_name: str):
+        channel = Channel.create(ChannelType.ITEM, channel_name)
+        state = self.get_state(channel)
+        return state
+
+    # convenience funtion for get_state
+    def get_item_state_value(self, channel_name: str):
+        channel = Channel.create(ChannelType.ITEM, channel_name)
+        state = self.get_state(channel)
+        if state:
+            return state.value
+        return None
+
     def get_state(self, channel: Channel) -> Optional[State]:
         state_out = None
         if channel:
@@ -128,21 +141,7 @@ class OhGateway(OhGatewayEventSink):
         return state_out
 
     # convenience funtion for get_state
-    def get_item_state(self, channel_name: str):
-        channel = Channel.create(ChannelType.ITEM, channel_name)
-        state = self.get_state(channel)
-        return state
-
-    # convenience funtion for get_state
     def get_state_value(self, channel: Channel):
-        state = self.get_state(channel)
-        if state:
-            return state.value
-        return None
-
-    # convenience funtion for get_state
-    def get_item_state_value(self, channel_name: str):
-        channel = Channel.create(ChannelType.ITEM, channel_name)
         state = self.get_state(channel)
         if state:
             return state.value
