@@ -5,24 +5,35 @@ from prend.channel import Channel, ChannelType
 from prend.config import Config
 from prend.dispatcher import DispatcherActionSink
 from prend.oh.oh_event import OhEvent, OhNotificationType
-from prend.oh.oh_gateway import OhGateway
+from prend.oh.oh_gateway import OhGateway, SendData
 from prend.oh.oh_rest import OhRest
 from prend.state import State, StateType
 from prend.values import OnOffValue, ThingStatusValue
 from test.prend.oh.mock_oh_gateway import MockOhGateway
 
 
-class TestRest(OhRest):
+class MockRest(OhRest):
     def __init__(self):
         super().__init__(Config())
         self.dummy_events = []
+        self.dummy_send = []
 
     def fetch_all(self):
         events = copy.deepcopy(self.dummy_events)
         return events
 
+    def send(self, send_command: bool, channel: Channel, state_in):
+        send_data = SendData()
+        send_data.send_command = send_command
+        send_data.channel = copy.deepcopy(channel)
+        if state_in is None:
+            send_data.state = None
+        else:
+            send_data.state = copy.deepcopy(state_in)
+        self.dummy_send.append(send_data)
 
-class TestDispatcher(DispatcherActionSink):
+
+class MockDispatcher(DispatcherActionSink):
     def __init__(self):
         self.queued_actions = {}
 
@@ -34,8 +45,8 @@ class TestOhGateway(unittest.TestCase):
 
     # pylint: disable:too-many-statements
     def test_fetch_items(self):
-        dispatcher = TestDispatcher()
-        rest = TestRest()
+        dispatcher = MockDispatcher()
+        rest = MockRest()
         gateway = OhGateway()
         gateway.set_dispatcher(dispatcher)
         gateway.set_rest(rest)
@@ -139,4 +150,57 @@ class TestOhGateway(unittest.TestCase):
 
         self.assertEqual(0, len(check_channels))
 
+    def test_send(self):
+
+        send_list = []
+        rest = MockRest()
+        gateway = OhGateway()
+        gateway.set_rest(rest)
+
+        send_data = SendData()
+        send_data.send_command = True
+        send_data.channel = Channel.create(ChannelType.ITEM, 'test1-send_command')
+        send_data.state = State.create(StateType.STRING, send_data.channel.name)
+        send_list.append(send_data)
+        gateway.send_command(send_data.channel, send_data.state)
+
+        send_data = SendData()
+        send_data.send_command = False
+        send_data.channel = Channel.create(ChannelType.ITEM, 'test2-send_update')
+        send_data.state = State.create(StateType.STRING, send_data.channel.name)
+        send_list.append(send_data)
+        gateway.send_update(send_data.channel, send_data.state)
+
+        send_data = SendData()
+        send_data.send_command = True
+        send_data.channel = Channel.create(ChannelType.ITEM, 'test3-send_item_command')
+        send_data.state = State.create(StateType.STRING, send_data.channel.name)
+        send_list.append(send_data)
+        gateway.send_item_command(send_data.channel.name, send_data.state)
+
+        send_data = SendData()
+        send_data.send_command = False
+        send_data.channel = Channel.create(ChannelType.ITEM, 'test4-send_item_update')
+        send_data.state = State.create(StateType.STRING, send_data.channel.name)
+        send_list.append(send_data)
+        gateway.send_item_update(send_data.channel.name, send_data.state)
+
+        send_data = SendData()
+        send_data.send_command = False
+        send_data.channel = Channel.create(ChannelType.ITEM, 'test5-send_item_update(None)')
+        send_data.state = None
+        send_list.append(send_data)
+        gateway.send_item_update(send_data.channel.name, send_data.state)
+
+        gateway.send_queued()
+
+        self.assertEqual(len(send_list), len(rest.dummy_send))
+
+        for i in range(0, len(send_list)):
+            sent = rest.dummy_send[i]
+            comp = send_list[i]
+
+            self.assertEqual(comp.send_command, sent.send_command)
+            self.assertEqual(comp.channel, sent.channel)
+            self.assertEqual(comp.state, sent.state)
 

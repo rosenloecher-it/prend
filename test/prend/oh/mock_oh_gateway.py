@@ -24,12 +24,7 @@ class MockOhGateway(OhGateway):
         self.sent_actions_list.append(sent_action)
         self.sent_actions_dict[sent_action.channel] = sent_action
 
-        get_back = self.sent_actions_dict.get(sent_action.channel)
-        if not get_back:
-            raise Exception('xxx')
-        get_back = self.sent_actions_dict.get(copy.deepcopy(sent_action.channel))
-        if not get_back:
-            raise Exception('xxx')
+        super().send(send_command, channel, state)
 
     def is_connected(self):
         return self.mock_is_connected
@@ -41,6 +36,7 @@ class MockOhGateway(OhGateway):
             self._states[channel] = state
 
     def clear(self):
+        self._send_queue.empty()
         self.sent_actions_list.clear()
         self.sent_actions_dict.clear()
         with self._lock_state:
