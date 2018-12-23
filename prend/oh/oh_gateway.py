@@ -80,8 +80,7 @@ class OhGateway(OhGatewayEventSink):
             raise TypeError()
         if not isinstance(channel, Channel):
             raise TypeError()
-        # if not isinstance(state, State):
-        #     raise TypeError()
+        # state can be any value or None!
 
         send_data = SendData()
         send_data.send_command = send_command
@@ -107,18 +106,30 @@ class OhGateway(OhGatewayEventSink):
         channel = Channel.create(ChannelType.ITEM, channel_name)
         self.send(False, channel, state)
 
-    def get_states(self):
+    def get_states(self) -> dict:
         with self._lock_state:
             export = copy.deepcopy(self._states)
         return export
 
     # convenience funtion for get_states
-    def get_channels(self):
+    def get_channels(self) -> list:
         states = self.get_states()
-        channels = []
-        for channel in states:
-            channels.append(channel)
+        channels = [*states]
         return channels
+
+    # convenience funtion for get_state
+    def get_item_state(self, channel_name: str):
+        channel = Channel.create(ChannelType.ITEM, channel_name)
+        state = self.get_state(channel)
+        return state
+
+    # convenience funtion for get_state
+    def get_item_state_value(self, channel_name: str):
+        channel = Channel.create(ChannelType.ITEM, channel_name)
+        state = self.get_state(channel)
+        if state:
+            return state.value
+        return None
 
     def get_state(self, channel: Channel) -> Optional[State]:
         state_out = None
@@ -130,21 +141,7 @@ class OhGateway(OhGatewayEventSink):
         return state_out
 
     # convenience funtion for get_state
-    def get_item_state(self, channel_name: str):
-        channel = Channel.create(ChannelType.ITEM, channel_name)
-        state = self.get_state(channel)
-        return state
-
-    # convenience funtion for get_state
     def get_state_value(self, channel: Channel):
-        state = self.get_state(channel)
-        if state:
-            return state.value
-        return None
-
-    # convenience funtion for get_state
-    def get_item_state_value(self, channel_name: str):
-        channel = Channel.create(ChannelType.ITEM, channel_name)
         state = self.get_state(channel)
         if state:
             return state.value

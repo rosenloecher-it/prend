@@ -1,6 +1,6 @@
 import schedule
 from abc import ABC, abstractmethod
-from prend.channel import Channel
+from prend.channel import Channel, ChannelType
 from prend.state import State
 from prend.tools.convert import Convert
 from typing import Optional
@@ -73,42 +73,58 @@ class Rule(ABC):
         value = Convert.convert_to_float(value_str, fallback)
         return value
 
-    def get_channels(self):
-        return self._oh_gateway.get_channels()
+    def get_channels(self) -> list:
+        states = self.get_states()
+        channels = [*states]
+        return channels
 
     def get_states(self) -> dict:
         return self._oh_gateway.get_states()
 
+    # convenience funtion for get_state
+    def get_item_state(self, channel_name: str) -> State:
+        channel = Channel.create(ChannelType.ITEM, channel_name)
+        state = self.get_state(channel)
+        return state
+
+    # convenience funtion for get_state
+    def get_item_state_value(self, channel_name: str):
+        channel = Channel.create(ChannelType.ITEM, channel_name)
+        state = self.get_state(channel)
+        if state:
+            return state.value
+        return None
+
     def get_state(self, channel: Channel) -> State:
         return self._oh_gateway.get_state(channel)
 
+    # convenience funtion for get_state
     def get_state_value(self, channel: Channel):
-        return self._oh_gateway.get_state_value(channel)
-
-    def get_item_state(self, channel_name: str) -> State:
-        return self._oh_gateway.get_item_state(channel_name)
-
-    def get_item_state_value(self, channel_name: str):
-        return self._oh_gateway.get_item_state_value(channel_name)
+        state = self.get_state(channel)
+        if state:
+            return state.value
+        return None
 
     def send(self, send_command: bool, channel: Channel, state):
         self._oh_gateway.send(send_command, channel, state)
 
     # convenience funtion for send
     def send_command(self, channel: Channel, state) -> None:
-        self._oh_gateway.send_command(channel, state)
+        self.send(True, channel, state)
 
     # convenience funtion for send
     def send_update(self, channel: Channel, state) -> None:
-        self._oh_gateway.send_update(channel, state)
+        self.send(False, channel, state)
 
     # convenience funtion for send
-    def send_item_command(self, channel: str, state) -> None:
-        self._oh_gateway.send_item_command(channel, state)
+    def send_item_command(self, channel_name: str, state) -> None:
+        channel = Channel.create(ChannelType.ITEM, channel_name)
+        self.send(True, channel, state)
 
     # convenience funtion for send
-    def send_item_update(self, channel: str, state) -> None:
-        self._oh_gateway.send_item_update(channel, state)
+    def send_item_update(self, channel_name: str, state) -> None:
+        channel = Channel.create(ChannelType.ITEM, channel_name)
+        self.send(False, channel, state)
 
     @abstractmethod
     def register_actions(self) -> None:
