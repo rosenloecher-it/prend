@@ -123,10 +123,10 @@ class OhRest:
         if not (200 <= req.status_code < 300):
             req.raise_for_status()
 
-    def send(self, send_command: bool, oh_channel: Channel, state_in):
-        if not oh_channel or not oh_channel.is_valid():
+    def send(self, send_command: bool, channel: Channel, state_in):
+        if not channel or not channel.is_valid():
             raise ValueError()
-        if oh_channel.type not in [ChannelType.ITEM, ChannelType.GROUP]:
+        if channel.type not in [ChannelType.ITEM, ChannelType.GROUP]:
             raise ValueError()
 
         if type(state_in) is State:
@@ -139,7 +139,7 @@ class OhRest:
             # noinspection PyUnusedLocal
             send_command = False
 
-        item_name = oh_channel.name
+        item_name = channel.name
         value_json = self.format_for_request(value_state)
 
         if send_command:
