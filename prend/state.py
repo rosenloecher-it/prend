@@ -233,7 +233,6 @@ class State:
     def is_switched_on(self) -> bool:
         if self.value is None:
             raise ValueError()
-
         if isinstance(self.value, OnOffValue):
             if OnOffValue.OFF == self.value:
                 return False
@@ -254,6 +253,8 @@ class State:
 
     # window, door
     def is_closed(self) -> bool:
+        if self.value is None:
+            raise ValueError()
         if StateType.STRING == self.type:
             typed_value = OpeningValue.parse(self.value)
             return typed_value == OpeningValue.CLOSED
@@ -268,6 +269,8 @@ class State:
 
     # window, door
     def is_open(self) -> bool:
+        if self.value is None:
+            raise ValueError()
         if StateType.STRING == self.type:
             typed_value = OpeningValue.parse(self.value)
             return typed_value != OpeningValue.CLOSED
@@ -283,6 +286,8 @@ class State:
 
     # window, door
     def is_tilted(self) -> bool:
+        if self.value is None:
+            raise ValueError()
         if StateType.STRING == self.type:
             typed_value = OpeningValue.parse(self.value)
             return typed_value == OpeningValue.TILTED
