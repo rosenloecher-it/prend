@@ -146,10 +146,12 @@ class LedStatusRule(Rule):
 
         _logger.debug('notify_action - %s', action)
 
-        if action.channel.type == ChannelType.ITEM:
+        if ChannelType.ITEM == action.channel.type:
             self._update_action_item(action)
-        elif action.channel.type in [ChannelType.CRON, ChannelType.STARTUP]:
-            self._update_diff()
+        elif ChannelType.CRON == action.channel.type:
+            self._update_diff(False)  # issues with homematic - hm thinks that the led are green, but they are not!
+        elif ChannelType.STARTUP == action.channel.type:
+            self._update_diff(True)
 
     def _update_action_item(self, action):
         eval_set = self._child_to_eval.get(action.channel.name)
@@ -158,9 +160,9 @@ class LedStatusRule(Rule):
             return
         self._handle_eval_set(eval_set)
 
-    def _update_diff(self) -> None:
+    def _update_diff(self, check_diff_and_update) -> None:
         for eval_set in self.eval_config:
-            self._handle_eval_set(eval_set, True)
+            self._handle_eval_set(eval_set, check_diff_and_update)
 
     def _handle_eval_set(self, eval_set, check_diff_and_update=False) -> None:
         eval_state = self._check_eval_set(eval_set)

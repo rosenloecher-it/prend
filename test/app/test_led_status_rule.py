@@ -269,12 +269,12 @@ class TestLedStatusRule(unittest.TestCase):
                 else:
                     raise NotImplementedError()
 
-    def test_cron_no_changes(self):
+    def test_startup_no_changes(self):
 
         rule = MockLedStatusRule()
         self.prepare_system(rule, False, False)
 
-        action = Action.create_cron_action('no_matter')
+        action = Action.create_startup_action()
         rule.notify_action(action)
 
         self.assertEqual(0, len(rule.sent_list))
@@ -293,7 +293,7 @@ class TestLedStatusRule(unittest.TestCase):
             eval_set = rule.eval_config[i]
             sent = rule.sent_list[i]
             self.assertEqual(eval_set.led_item, sent.led_item)
-            self.assertEqual(sent.check_diff_and_update, True)
+            self.assertEqual(sent.check_diff_and_update, False)
             self.assertEqual(sent.eval_set, EvalState.GREEN)
 
     def test_cron_single_change(self):
