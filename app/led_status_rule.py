@@ -204,7 +204,7 @@ class LedStatusRule(Rule):
                     eval_state_out = EvalState.RED
                 else:
                     eval_state_out = EvalState.GREEN
-        except ValueError:
+        except (TypeError, ValueError):
             eval_state_out = None
             _logger.warning('_check_eval_item failed - cannot evaluate %s for %s', state, eval_item)
 
