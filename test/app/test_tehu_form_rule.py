@@ -64,7 +64,7 @@ class TestTehuFormRule(unittest.TestCase):
         self.assertEqual(1, len(self.mock_gateway.sent_actions_list))
         self.assertEqual(1, len(self.mock_gateway.sent_actions_dict))
 
-        text_value = '1,2°C / 0%'
+        text_value = '1,2 °C / 0 %'
         self.check_sent_item('showTempHumiBathDown', StateType.STRING, text_value)
 
     def test_action_startup(self):
@@ -78,7 +78,7 @@ class TestTehuFormRule(unittest.TestCase):
         self.assertEqual(len(self.mock_gateway.sent_actions_list), 7)
         self.assertEqual(len(self.mock_gateway.sent_actions_dict), 7)
 
-        text_value = '0,0°C / 0%'
+        text_value = '0,0 °C / 0 %'
 
         for item_set in self.rule._item_set_list:
             self.check_sent_item(item_set.show, StateType.STRING, text_value)
@@ -90,22 +90,22 @@ class TestTehuFormRule(unittest.TestCase):
         state.value = 11.123
         out = TehuFormRule._format_number(state, False)
         print(out)
-        self.assertEqual(out, '11,1°C')
+        self.assertEqual(out, '11,1 °C')
 
         state.value = 9
         out = TehuFormRule._format_number(state, False)
         print(out)
-        self.assertEqual(out, '9,0°C')
+        self.assertEqual(out, '9,0 °C')
 
         state.value = 11.123
         out = TehuFormRule._format_number(state, True)
         print(out)
-        self.assertEqual(out, '11%')
+        self.assertEqual(out, '11 %')
 
         state.value = 8.75  # round up
         out = TehuFormRule._format_number(state, True)
         print(out)
-        self.assertEqual(out, '9%')
+        self.assertEqual(out, '9 %')
 
         # old value warning
 
@@ -115,12 +115,12 @@ class TestTehuFormRule(unittest.TestCase):
         state.value = 11.123
         out = TehuFormRule._format_number(state, False)
         print(out)
-        self.assertEqual(out, '!11,1°C')
+        self.assertEqual(out, '!11,1 °C')
 
         state.value = 8.75  # round up
         out = TehuFormRule._format_number(state, True)
         print(out)
-        self.assertEqual(out, '!9%')
+        self.assertEqual(out, '!9 %')
 
         # invalid state
 

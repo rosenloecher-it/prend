@@ -90,10 +90,10 @@ class TehuFormRule(Rule):
 
                 if is_humi:
                     text_number = locale.format("%.0f", state.value)
-                    text = '{}{}%'.format(warn, text_number)
+                    text = '{}{} %'.format(warn, text_number)
                 else:
                     text_number = locale.format("%.1f", state.value)
-                    text = '{}{}°C'.format(warn, text_number)
+                    text = '{}{} °C'.format(warn, text_number)
 
         except ValueError:
             text = None
