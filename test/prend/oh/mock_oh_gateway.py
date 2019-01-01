@@ -46,3 +46,7 @@ class MockOhGateway(OhGateway):
         # prepare chache in test setup
         pass
 
+    def exists_sent_item(self, channel, state_expected) -> bool:
+        sent_item = self.sent_actions_dict.get(channel)
+        return state_expected == sent_item
+
