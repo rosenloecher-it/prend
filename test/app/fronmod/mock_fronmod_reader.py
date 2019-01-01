@@ -10,7 +10,7 @@ class MockData:
 class MockFronmodReader(FronmodReader):
 
     def __init__(self):
-        super().__init__()
+        super().__init__(None, None)
         self._is_open = False
         self.mock_reads = {}
         pass
