@@ -2,6 +2,7 @@ import copy
 from collections import namedtuple
 from prend.channel import Channel
 from prend.oh.oh_gateway import OhGateway
+from prend.oh.oh_send_data import OhSendData, OhSendFlags
 from prend.state import State
 
 
@@ -17,14 +18,15 @@ class MockOhGateway(OhGateway):
     def send_queued(self):
         pass  # do nothing
 
-    def send(self, send_command: bool, channel: Channel, state):
-        SentAction = namedtuple('SentAction', ['channel', 'state', 'send_command'])
+    def send(self, flags: OhSendFlags, channel, state):
+        send_data = OhSendData(flags, channel, state)
+        send_data.check()
+        self._send_queue.put(send_data)
 
-        sent_action = SentAction(copy.deepcopy(channel), copy.deepcopy(state), send_command)
-        self.sent_actions_list.append(sent_action)
-        self.sent_actions_dict[sent_action.channel] = sent_action
+        self.sent_actions_list.append(send_data)
+        self.sent_actions_dict[send_data.get_channel()] = send_data
 
-        super().send(send_command, channel, state)
+        super().send(flags, channel, state)
 
     def is_connected(self):
         return self.mock_is_connected
@@ -47,6 +49,8 @@ class MockOhGateway(OhGateway):
         pass
 
     def exists_sent_item(self, channel, state_expected) -> bool:
-        sent_item = self.sent_actions_dict.get(channel)
-        return state_expected == sent_item
+        sent_data = self.sent_actions_dict.get(channel)
+        if sent_data is None:
+            return False
+        return state_expected == sent_data.state
 

@@ -2,6 +2,7 @@ import datetime
 import logging
 import schedule
 from prend.channel import Channel, ChannelType
+from prend.oh.oh_send_data import OhSendFlags
 from prend.rule import Rule
 
 
@@ -49,18 +50,17 @@ class SampleRule(Rule):
 
             if dummy_number is None:
                 dummy_number = 1
-                self.send_item_command('dummy_number', dummy_number)
+                self.send(OhSendFlags.COMMAND | OhSendFlags.CHANNEL_AS_ITEM, 'dummy_number', dummy_number)
 
             dummy_number_2 = dummy_number
             if dummy_number % 5 == 0:
                 dummy_number_2 = None
 
-            # send command to another item (there is also a "send_item_update")
-            self.send_item_command('dummy_number_2', dummy_number_2)
+            self.send(OhSendFlags.COMMAND | OhSendFlags.CHANNEL_AS_ITEM, 'dummy_number_2', dummy_number_2)
 
             # send another command
             text = '{} ({})'.format(dummy_number, datetime.datetime.now().isoformat())
-            self.send_item_command('dummy_string', text)
+            self.send(OhSendFlags.COMMAND | OhSendFlags.CHANNEL_AS_ITEM, 'dummy_string', text)
 
         # in general: see "State" for values and "Channel" for channels of items + things
 
