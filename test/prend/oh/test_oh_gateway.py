@@ -7,6 +7,7 @@ from prend.dispatcher import DispatcherActionSink
 from prend.oh.oh_event import OhEvent, OhNotificationType
 from prend.oh.oh_gateway import OhGateway
 from prend.oh.oh_rest import OhRest
+from prend.oh.oh_send_data import OhSendData
 from prend.state import State, StateType
 from prend.values import OnOffValue, ThingStatusValue
 from test.prend.oh.mock_oh_gateway import MockOhGateway
