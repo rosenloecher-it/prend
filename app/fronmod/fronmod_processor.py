@@ -1,9 +1,10 @@
 import logging
-from pymodbus.constants import Endian
-from .fronmod_reader import ModbusReadItem, ModbusRead, ModbusType, ModbusResultItem
 from .fronmod_constants import FronmodConstants
 from .fronmod_exception import FronmodException
+from .fronmod_reader import ModbusReadItem, ModbusRead, ModbusType, ModbusResultItem
 from prend.channel import Channel, ChannelType
+from prend.oh.oh_send_data import OhSendFlags
+from pymodbus.constants import Endian
 
 
 # /home/mnt/nextcloud/ebooks/Technik/Haus/Fronius/Fronius_Datamanager_Modbus_TCP-RTU_DE_20181025.pdf
@@ -114,8 +115,6 @@ class FronmodProcessor:
 
     def read_storage_model(self):
 
-        # [124, 24, 3328, 100, 100, 0, 65535, 0, 300, 65535, 65535, 2, 10000, 10000, 65535, 65535, 65535, 1, 0, 0, 32768, 65534, 65534, 65534, 65534, 65534]
-
         results = self._reader.read(self.FETCH_STORAGE)
 
         raw_state = results[FronmodConstants.RAW_BAT_FILL_STATE]
@@ -148,7 +147,7 @@ class FronmodProcessor:
             raise FronmodException('no state for "{}" found!'.format(FronmodConstants.ITEM_BAT_FILL_STATE))
         elif state.value != fill_state:
             state.value = fill_state
-            self._oh_gateway.send_command(channel, state)
+            self._oh_gateway.send(OhSendFlags.COMMAND, channel, state)
         else:
             # do nothing
             pass

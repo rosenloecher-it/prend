@@ -72,7 +72,6 @@ class TestFronmodProcessor(unittest.TestCase):
             pass
 
 
-
 class TestFronmodProcessorProcessing(unittest.TestCase):
 
     def setUp(self):
@@ -83,7 +82,6 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
         self.processor = FronmodProcessor()
         self.processor.set_oh_gateway(self.mock_gateway)
         self.processor.set_reader(self.mock_reader)
-
 
     def test_process_storage(self):
 
