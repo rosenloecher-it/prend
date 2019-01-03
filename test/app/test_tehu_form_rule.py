@@ -30,7 +30,7 @@ class TestTehuFormRule(unittest.TestCase):
         for item_set in self.rule._item_set_list:
             self.mock_gateway.set_state(Channel.create_item(item_set.humi), state_num)
             self.mock_gateway.set_state(Channel.create_item(item_set.temp), state_num)
-            self.mock_gateway.set_state(Channel.create_item(item_set.temp)
+            self.mock_gateway.set_state(Channel.create_item(item_set.show)
                                         , State.create(StateType.STRING, self.DEFAULT_VALUE))
 
     def check_sent_item(self, item_name, state_type_expected, value_expected):
@@ -43,9 +43,11 @@ class TestTehuFormRule(unittest.TestCase):
         self.assertEqual(sent_item.state.value, value_expected)
 
     def test_action_single(self):
-        item_set = ItemSet('showTempHumiBathDown', 'valTempBathDown', 'valHumiBathDown')
+        ITEM_TARGET = 'showTempHumiBathDown'
+        item_set = ItemSet(ITEM_TARGET, 'valTempBathDown', 'valHumiBathDown')
         state_num = State.create(StateType.DECIMAL, self.DEFAULT_VALUE)
 
+        self.mock_gateway.set_state(Channel.create_item(ITEM_TARGET), State.create(StateType.DECIMAL, None))
         self.mock_gateway.set_state(Channel.create_item(item_set.humi), state_num)
         self.mock_gateway.set_state(Channel.create_item(item_set.temp), state_num)
 
