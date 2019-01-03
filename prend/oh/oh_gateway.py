@@ -72,7 +72,16 @@ class OhGateway(OhGatewayEventSink):
     def send(self, flags: OhSendFlags, channel, state):
         send_data = OhSendData(flags, channel, state)
         send_data.check()
-        self._send_queue.put(send_data)
+
+        do_send = True
+        if send_data.is_flag(OhSendFlags.SEND_ONLY_IF_DIFFER):
+            channel = send_data.get_channel()
+            state = self.get_state(channel)
+            if not send_data.does_state_value_differ(state):
+                do_send = False
+
+        if do_send:
+            self._send_queue.put(send_data)
 
     def get_states(self) -> dict:
         with self._lock_state:

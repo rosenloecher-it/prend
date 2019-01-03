@@ -56,3 +56,23 @@ class TestOhSendData(unittest.TestCase):
             self.assertTrue(False)
         except (TypeError, ValueError):
             self.assertTrue(True)
+
+    def test_does_state_value_differ(self):
+        channel = Channel.create_item('abc')
+        state = State.create(StateType.DECIMAL, 1.23)
+        state_differ = State.create(StateType.DECIMAL, 1.21)
+
+        data = OhSendData(OhSendFlags.COMMAND | OhSendFlags.SEND_ONLY_IF_DIFFER, channel, state)
+        data.check()  # no raise
+        out = data.does_state_value_differ(state)
+        self.assertEqual(False, out)
+        out = data.does_state_value_differ(state_differ)
+        self.assertEqual(True, out)
+
+        data = OhSendData(OhSendFlags.COMMAND | OhSendFlags.SEND_ONLY_IF_DIFFER, channel, state.value)
+        data.check()  # no raise
+        out = data.does_state_value_differ(state)
+        self.assertEqual(False, out)
+        out = data.does_state_value_differ(state_differ)
+        self.assertEqual(True, out)
+
