@@ -3,12 +3,13 @@ import logging
 import requests
 import threading
 import typing
+from .oh_event import OhEvent, OhIllegalEventException
+from .oh_send_data import OhSendData
+from prend.channel import ChannelType
+from prend.config import Config
+from prend.state import State
 from requests.auth import HTTPBasicAuth
 from typing import Optional
-from prend.config import Config
-from prend.channel import Channel, ChannelType
-from prend.oh.oh_event import OhEvent, OhIllegalEventException
-from prend.state import State
 
 
 """
@@ -123,18 +124,16 @@ class OhRest:
         if not (200 <= req.status_code < 300):
             req.raise_for_status()
 
-    def send(self, send_command: bool, channel: Channel, state_in):
-        if not channel or not channel.is_valid():
-            raise ValueError()
-        if channel.type not in [ChannelType.ITEM, ChannelType.GROUP]:
-            raise ValueError()
+    def send(self, data: OhSendData):
 
-        if type(state_in) is State:
-            value_state = state_in.value
-        else:
-            value_state = state_in
+        if data is None:
+            raise ValueError()
+        data.check()  # raise *
 
-        if send_command and value_state is None:
+        channel = data.get_channel()
+        value_state = data.get_state_value()
+
+        if data.is_send() and value_state is None:
             _logger.warning('cannot send None/UNDEF via COMMAND => use UPDATE instead!')
             # noinspection PyUnusedLocal
             send_command = False
@@ -142,14 +141,14 @@ class OhRest:
         item_name = channel.name
         value_json = self.format_for_request(value_state)
 
-        if send_command:
+        if data.is_send():
             url = '/items/{}'.format(item_name)
             if self._simulate_sending:
                 _logger.info('SIMULATE post command: "%s" = %s', url, value_json)
             else:
                 _logger.info('send POST COMMAND: "%s" = %s', url, value_json)
                 self._req_post(url, data=value_json)
-        else:
+        elif data.is_update():
             url = '/items/{}/state'.format(item_name)
             if self._simulate_sending:
                 _logger.info('SIMULATE put update: "%s" = %s', url, value_json)

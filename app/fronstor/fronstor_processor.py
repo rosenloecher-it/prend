@@ -1,6 +1,7 @@
 import logging
 import threading
 from prend.channel import Channel
+from prend.oh.oh_send_data import OhSendFlags
 from .fronstor_exception import FronstorException
 from .fronstor_extracter import FronstorStatus
 
@@ -83,4 +84,4 @@ class FronstorProcessor(threading.Thread):
 
         for item in items:
             # logging is done in OhRest
-            self._oh_gateway.send_command(item.channel, item.state)
+            self._oh_gateway.send(OhSendFlags.COMMAND, item.channel, item.state)

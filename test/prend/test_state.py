@@ -260,8 +260,6 @@ class TestState(unittest.TestCase):
         except ValueError:
             pass
 
-
-
         state = State.create(StateType.ONOFF, OnOffValue.OFF)
         out = state.is_switched_on()
         self.assertEqual(False, out)

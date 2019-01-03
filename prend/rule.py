@@ -1,6 +1,7 @@
 import schedule
 from abc import ABC, abstractmethod
 from prend.channel import Channel, ChannelType
+from prend.oh.oh_send_data import OhSendFlags
 from prend.state import State
 from prend.tools.convert import Convert
 from typing import Optional
@@ -81,13 +82,13 @@ class Rule(ABC):
     def get_states(self) -> dict:
         return self._oh_gateway.get_states()
 
-    # convenience funtion for get_state
+    # convenience function for get_state
     def get_item_state(self, channel_name: str) -> State:
         channel = Channel.create(ChannelType.ITEM, channel_name)
         state = self.get_state(channel)
         return state
 
-    # convenience funtion for get_state
+    # convenience function for get_state
     def get_item_state_value(self, channel_name: str):
         channel = Channel.create(ChannelType.ITEM, channel_name)
         state = self.get_state(channel)
@@ -98,33 +99,15 @@ class Rule(ABC):
     def get_state(self, channel: Channel) -> State:
         return self._oh_gateway.get_state(channel)
 
-    # convenience funtion for get_state
+    # convenience function for get_state
     def get_state_value(self, channel: Channel):
         state = self.get_state(channel)
         if state:
             return state.value
         return None
 
-    def send(self, send_command: bool, channel: Channel, state):
-        self._oh_gateway.send(send_command, channel, state)
-
-    # convenience funtion for send
-    def send_command(self, channel: Channel, state) -> None:
-        self.send(True, channel, state)
-
-    # convenience funtion for send
-    def send_update(self, channel: Channel, state) -> None:
-        self.send(False, channel, state)
-
-    # convenience funtion for send
-    def send_item_command(self, channel_name: str, state) -> None:
-        channel = Channel.create(ChannelType.ITEM, channel_name)
-        self.send(True, channel, state)
-
-    # convenience funtion for send
-    def send_item_update(self, channel_name: str, state) -> None:
-        channel = Channel.create(ChannelType.ITEM, channel_name)
-        self.send(False, channel, state)
+    def send(self, flags: OhSendFlags, channel, state):
+        self._oh_gateway.send(flags, channel, state)
 
     @abstractmethod
     def register_actions(self) -> None:

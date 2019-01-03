@@ -3,6 +3,7 @@ import locale
 import logging
 import schedule
 from prend.channel import Channel, ChannelType
+from prend.oh.oh_send_data import OhSendFlags
 from prend.rule import Rule
 from prend.state import State, StateType
 
@@ -111,7 +112,7 @@ class TehuFormRule(Rule):
 
         state = State.create(StateType.STRING, None)
         state.value = '{} / {}'.format(text_temp, text_humi)
-        self.send_item_command(item_set.show, state)
+        self.send(OhSendFlags.COMMAND | OhSendFlags.CHANNEL_AS_ITEM, item_set.show, state)
 
         item_set.last_update = datetime.datetime.now()
 

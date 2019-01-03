@@ -3,9 +3,10 @@ import datetime
 import logging
 import requests
 import threading
+from .oh_event import OhEvent, OhIllegalEventException, OhNotificationType
+from .oh_send_data import OhSendData, OhSendFlags
 from prend.action import Action
 from prend.channel import Channel, ChannelType, OhIllegalChannelException
-from prend.oh.oh_event import OhEvent, OhIllegalEventException, OhNotificationType
 from prend.state import State
 from queue import Queue, Empty
 from typing import Optional
@@ -24,13 +25,6 @@ class OhGatewayEventSink:
         :param event:
         """
         pass
-
-
-class SendData:
-    def __init__(self):
-        self.send_command = None
-        self.channel = None
-        self.state = None
 
 
 class OhGateway(OhGatewayEventSink):
@@ -67,7 +61,7 @@ class OhGateway(OhGatewayEventSink):
 
             if send_data:
                 try:
-                    self._rest.send(send_data.send_command, send_data.channel, send_data.state)
+                    self._rest.send(send_data)
                 except Exception as ex:
                     _logger.error('send failed (%s: %s)!', ex.__class__.__name__, ex)
                     self._cache_states_last_fetch = None
@@ -75,55 +69,29 @@ class OhGateway(OhGatewayEventSink):
 
         return something_processed
 
-    def send(self, send_command: bool, channel: Channel, state):
-        if not isinstance(send_command, bool):
-            raise TypeError()
-        if not isinstance(channel, Channel):
-            raise TypeError()
-        # state can be any value or None!
-
-        send_data = SendData()
-        send_data.send_command = send_command
-        send_data.channel = copy.deepcopy(channel)
-        send_data.state = copy.deepcopy(state)
+    def send(self, flags: OhSendFlags, channel, state):
+        send_data = OhSendData(flags, channel, state)
+        send_data.check()
         self._send_queue.put(send_data)
-
-    # convenience funtion for send
-    def send_command(self, channel: Channel, state) -> None:
-        self.send(True, channel, state)
-
-    # convenience funtion for send
-    def send_update(self, channel: Channel, state) -> None:
-        self.send(False, channel, state)
-
-    # convenience funtion for send
-    def send_item_command(self, channel_name: str, state) -> None:
-        channel = Channel.create(ChannelType.ITEM, channel_name)
-        self.send(True, channel, state)
-
-    # convenience funtion for send
-    def send_item_update(self, channel_name: str, state) -> None:
-        channel = Channel.create(ChannelType.ITEM, channel_name)
-        self.send(False, channel, state)
 
     def get_states(self) -> dict:
         with self._lock_state:
             export = copy.deepcopy(self._states)
         return export
 
-    # convenience funtion for get_states
+    # convenience function for get_states
     def get_channels(self) -> list:
         states = self.get_states()
         channels = [*states]
         return channels
 
-    # convenience funtion for get_state
+    # convenience function for get_state
     def get_item_state(self, channel_name: str):
         channel = Channel.create(ChannelType.ITEM, channel_name)
         state = self.get_state(channel)
         return state
 
-    # convenience funtion for get_state
+    # convenience function for get_state
     def get_item_state_value(self, channel_name: str):
         channel = Channel.create(ChannelType.ITEM, channel_name)
         state = self.get_state(channel)
@@ -140,7 +108,7 @@ class OhGateway(OhGatewayEventSink):
                     state_out = copy.deepcopy(state)
         return state_out
 
-    # convenience funtion for get_state
+    # convenience function for get_state
     def get_state_value(self, channel: Channel):
         state = self.get_state(channel)
         if state:

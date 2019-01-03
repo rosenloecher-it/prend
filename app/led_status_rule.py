@@ -2,6 +2,7 @@ import logging
 import schedule
 from enum import Enum
 from prend.channel import Channel, ChannelType
+from prend.oh.oh_send_data import OhSendFlags
 from prend.rule import Rule
 from prend.state import State, StateType
 
@@ -175,7 +176,7 @@ class LedStatusRule(Rule):
         send_command = (not check_diff_and_update)
         channel = Channel.create_item(led_item)
         state = State.create(StateType.STRING, eval_set.name)
-        self.send(send_command, channel, state)
+        self.send(OhSendFlags.COMMAND, channel, state)
 
     def _check_eval_set(self, eval_set) -> EvalState:
         eval_state = EvalState.GREEN
