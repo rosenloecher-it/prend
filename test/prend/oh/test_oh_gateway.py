@@ -8,6 +8,7 @@ from prend.oh.oh_event import OhEvent, OhNotificationType
 from prend.oh.oh_gateway import OhGateway
 from prend.oh.oh_rest import OhRest
 from prend.oh.oh_send_data import OhSendData
+from prend.oh.oh_send_data import OhSendFlags
 from prend.state import State, StateType
 from prend.values import OnOffValue, ThingStatusValue
 from test.prend.oh.mock_oh_gateway import MockOhGateway
@@ -144,6 +145,34 @@ class TestOhGateway(unittest.TestCase):
 
         self.assertEqual(0, len(check_channels))
 
-    def test_send(self):
-        pass
+    def test_send_only_if_differ(self):
 
+        rest = MockRest()
+        gateway = MockOhGateway()
+        gateway.set_rest(rest)
+
+        channel = Channel.create_item('ch1')
+
+        # test 1
+        state = State.create(StateType.DECIMAL, 1.11)
+        gateway.set_state(channel, state)
+
+        rest.dummy_send.clear()
+        self.assertEqual(0, len(rest.dummy_send))
+        gateway.send(OhSendFlags.COMMAND | OhSendFlags.SEND_ONLY_IF_DIFFER, channel, state)
+        gateway.send_queued()
+
+        self.assertEqual(0, len(rest.dummy_send))
+
+        # test 2
+        rest.dummy_send.clear()
+        self.assertEqual(0, len(rest.dummy_send))
+
+        gateway.set_state(channel, State.create(StateType.DECIMAL, 1.11))
+
+        state = State.create(StateType.DECIMAL, 1.23)
+        gateway.send(OhSendFlags.COMMAND | OhSendFlags.SEND_ONLY_IF_DIFFER, channel, state)
+        gateway.send_queued()
+
+        self.assertEqual(1, len(rest.dummy_send))
+        self.assertEqual(state.value, rest.dummy_send[0].state.value)

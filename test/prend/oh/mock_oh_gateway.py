@@ -14,13 +14,9 @@ class MockOhGateway(OhGateway):
         self.sent_actions_dict = {}
         self.mock_is_connected = True
 
-    def send_queued(self):
-        pass  # do nothing
-
     def send(self, flags: OhSendFlags, channel, state):
         send_data = OhSendData(flags, channel, state)
         send_data.check()
-        self._send_queue.put(send_data)
 
         self.sent_actions_list.append(send_data)
         self.sent_actions_dict[send_data.get_channel()] = send_data
