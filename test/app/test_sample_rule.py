@@ -23,6 +23,10 @@ class TestSampleRule(unittest.TestCase):
         expected_num = 2
         self.mock_gateway.set_state(Channel.create_item(SampleRule.ITEM_DUMMY_1)
                                     , State.create(StateType.DECIMAL, expected_num))
+        self.mock_gateway.set_state(Channel.create_item(SampleRule.ITEM_DUMMY_2)
+                                    , State.create(StateType.DECIMAL, None))
+        self.mock_gateway.set_state(Channel.create_item(SampleRule.ITEM_STRING)
+                                    , State.create(StateType.STRING, None))
 
         action = Action.create_cron_action(SampleRule.CRON_NAME)
         self.rule.notify_action(action)
