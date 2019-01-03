@@ -5,7 +5,7 @@ import threading
 import typing
 from .oh_event import OhEvent, OhIllegalEventException
 from .oh_send_data import OhSendData
-from prend.channel import Channel, ChannelType
+from prend.channel import ChannelType
 from prend.config import Config
 from prend.state import State
 from requests.auth import HTTPBasicAuth
