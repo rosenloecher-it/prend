@@ -82,13 +82,13 @@ class Rule(ABC):
     def get_states(self) -> dict:
         return self._oh_gateway.get_states()
 
-    # convenience funtion for get_state
+    # convenience function for get_state
     def get_item_state(self, channel_name: str) -> State:
         channel = Channel.create(ChannelType.ITEM, channel_name)
         state = self.get_state(channel)
         return state
 
-    # convenience funtion for get_state
+    # convenience function for get_state
     def get_item_state_value(self, channel_name: str):
         channel = Channel.create(ChannelType.ITEM, channel_name)
         state = self.get_state(channel)
@@ -99,7 +99,7 @@ class Rule(ABC):
     def get_state(self, channel: Channel) -> State:
         return self._oh_gateway.get_state(channel)
 
-    # convenience funtion for get_state
+    # convenience function for get_state
     def get_state_value(self, channel: Channel):
         state = self.get_state(channel)
         if state:

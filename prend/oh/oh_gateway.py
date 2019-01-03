@@ -79,19 +79,19 @@ class OhGateway(OhGatewayEventSink):
             export = copy.deepcopy(self._states)
         return export
 
-    # convenience funtion for get_states
+    # convenience function for get_states
     def get_channels(self) -> list:
         states = self.get_states()
         channels = [*states]
         return channels
 
-    # convenience funtion for get_state
+    # convenience function for get_state
     def get_item_state(self, channel_name: str):
         channel = Channel.create(ChannelType.ITEM, channel_name)
         state = self.get_state(channel)
         return state
 
-    # convenience funtion for get_state
+    # convenience function for get_state
     def get_item_state_value(self, channel_name: str):
         channel = Channel.create(ChannelType.ITEM, channel_name)
         state = self.get_state(channel)
@@ -108,7 +108,7 @@ class OhGateway(OhGatewayEventSink):
                     state_out = copy.deepcopy(state)
         return state_out
 
-    # convenience funtion for get_state
+    # convenience function for get_state
     def get_state_value(self, channel: Channel):
         state = self.get_state(channel)
         if state:

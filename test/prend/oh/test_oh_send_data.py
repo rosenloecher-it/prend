@@ -1,5 +1,5 @@
 import unittest
-from prend.channel import Channel, ChannelType
+from prend.channel import Channel
 from prend.oh.oh_send_data import OhSendData, OhSendFlags
 from prend.state import State, StateType
 
@@ -10,7 +10,6 @@ class TestOhSendData(unittest.TestCase):
 
         channel = Channel.create_item('abc')
         state = State.create(StateType.DECIMAL, 1.23)
-        flags = OhSendFlags.COMMAND | OhSendFlags.SEND_ONLY_IF_DIFFER
 
         data = OhSendData(OhSendFlags.COMMAND | OhSendFlags.SEND_ONLY_IF_DIFFER, channel, state)
         data.check()  # no raise
@@ -32,4 +31,28 @@ class TestOhSendData(unittest.TestCase):
         self.assertEqual(data.get_channel(), channel)
         self.assertEqual(data.get_state_value(), state.value)
 
+    def test_check_fails(self):
 
+        channel = Channel.create_item('abc')
+        state = State.create(StateType.DECIMAL, 1.23)
+
+        try:
+            data = OhSendData(OhSendFlags.COMMAND | OhSendFlags.UPDATE, channel, state)
+            data.check()  # no raise
+            self.assertTrue(False)
+        except (TypeError, ValueError):
+            self.assertTrue(True)
+
+        try:
+            data = OhSendData(OhSendFlags.COMMAND | OhSendFlags.CHANNEL_AS_ITEM, 123, state)
+            data.check()  # no raise
+            self.assertTrue(False)
+        except (TypeError, ValueError):
+            self.assertTrue(True)
+
+        try:
+            data = OhSendData(OhSendFlags.COMMAND | OhSendFlags.CHANNEL_AS_ITEM, None, state)
+            data.check()  # no raise
+            self.assertTrue(False)
+        except (TypeError, ValueError):
+            self.assertTrue(True)

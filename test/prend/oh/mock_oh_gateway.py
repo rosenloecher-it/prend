@@ -1,5 +1,4 @@
 import copy
-from collections import namedtuple
 from prend.channel import Channel
 from prend.oh.oh_gateway import OhGateway
 from prend.oh.oh_send_data import OhSendData, OhSendFlags
@@ -32,6 +31,8 @@ class MockOhGateway(OhGateway):
         return self.mock_is_connected
 
     def set_state(self, channel_in: Channel, state_in: State):
+        if not isinstance(state_in, State):
+            raise TypeError()
         channel = copy.deepcopy(channel_in)
         state = copy.deepcopy(state_in)
         with self._lock_state:
@@ -48,9 +49,15 @@ class MockOhGateway(OhGateway):
         # prepare chache in test setup
         pass
 
-    def exists_sent_item(self, channel, state_expected) -> bool:
+    def get_sent_data(self, channel):
+        sent_data = self.sent_actions_dict.get(channel)
+        if sent_data is None:
+            return None
+        return sent_data.state
+
+    def exists_sent_item(self, channel, data_expected) -> bool:
         sent_data = self.sent_actions_dict.get(channel)
         if sent_data is None:
             return False
-        return state_expected == sent_data.state
+        return data_expected == sent_data.state
 
