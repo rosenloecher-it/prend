@@ -82,6 +82,7 @@ class OhGateway(OhGatewayEventSink):
         if send_data.is_flag(OhSendFlags.SEND_ONLY_IF_DIFFER):
             if not send_data.does_state_value_differ(state):
                 do_send = False
+                _logger.debug('send skipped ({}) - {}'.format(OhSendFlags.SEND_ONLY_IF_DIFFER, send_data))
 
         if do_send:
             self._send_queue.put(send_data)

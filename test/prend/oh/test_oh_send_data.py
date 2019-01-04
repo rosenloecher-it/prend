@@ -6,6 +6,19 @@ from prend.state import State, StateType
 
 class TestOhSendData(unittest.TestCase):
 
+    def test__repr__(self):
+        channel = Channel.create_item('abc')
+        state = State.create(StateType.DECIMAL, 1.23)
+
+        data = OhSendData(OhSendFlags.COMMAND, channel, state)
+        print(str(data))
+
+        data = OhSendData(OhSendFlags.UPDATE | OhSendFlags.CHANNEL_AS_ITEM, channel.name, state.value)
+        print(str(data))
+
+        data = OhSendData(None, None, None)
+        print(str(data))
+
     def test_common(self):
 
         channel = Channel.create_item('abc')
