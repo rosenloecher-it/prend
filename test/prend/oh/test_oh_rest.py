@@ -1,13 +1,15 @@
+import datetime
 import requests
 import unittest
-from prend.config import Config
 from prend.channel import Channel, ChannelType
+from prend.config import Config
 from prend.oh.oh_event import OhEvent, OhNotificationType
 from prend.oh.oh_gateway import OhGatewayEventSink
 from prend.oh.oh_rest import OhRest
+from prend.oh.oh_send_data import OhSendData, OhSendFlags
 from prend.state import State, StateType
 from prend.values import OnOffValue, ThingStatusValue
-import datetime
+
 
 
 class TestEventSink(OhGatewayEventSink):
@@ -133,6 +135,35 @@ class TestOhRest(unittest.TestCase):
         out = OhRest.format_for_request('3,4°C / 56%')
         print(out)
         self.assertEqual(b'3,4\xc2\xb0C / 56%', out)
+
+    def test_send_change_command_to_update(self):
+        class MockOhRest(OhRest):
+            def __init__(self):
+                super().__init__(Config())
+                self.send_type = None
+                pass
+
+            def _req_post(self, uri_path: str, data=None) -> None:
+                self.send_type = 'post'
+
+            def _req_put(self, uri_path: str, data=None) -> None:
+                self.send_type = 'put'
+
+            def clear(self):
+                self.send_type = None
+
+        channel = Channel.create_item('abc')
+        rest = MockOhRest()
+
+        rest.clear()
+        data = OhSendData(OhSendFlags.COMMAND, channel, 123)
+        rest.send(data)
+        self.assertEqual('post', rest.send_type)
+
+        rest.clear()
+        data = OhSendData(OhSendFlags.COMMAND, channel, None)
+        rest.send(data)
+        self.assertEqual('put', rest.send_type)
 
 
 if __name__ == '__main__':
