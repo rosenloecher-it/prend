@@ -133,6 +133,7 @@ class OhRest:
         channel = data.get_channel()
         value_state = data.get_state_value()
 
+        send_command = data.is_send()
         if data.is_send() and value_state is None:
             _logger.warning('cannot send None/UNDEF via COMMAND => use UPDATE instead!')
             # noinspection PyUnusedLocal
@@ -141,14 +142,14 @@ class OhRest:
         item_name = channel.name
         value_json = self.format_for_request(value_state)
 
-        if data.is_send():
+        if send_command:
             url = '/items/{}'.format(item_name)
             if self._simulate_sending:
                 _logger.info('SIMULATE post command: "%s" = %s', url, value_json)
             else:
                 _logger.info('send POST COMMAND: "%s" = %s', url, value_json)
                 self._req_post(url, data=value_json)
-        elif data.is_update():
+        else:
             url = '/items/{}/state'.format(item_name)
             if self._simulate_sending:
                 _logger.info('SIMULATE put update: "%s" = %s', url, value_json)
