@@ -51,9 +51,28 @@ class MockOhGateway(OhGateway):
             return None
         return sent_data.state
 
-    def exists_sent_item(self, channel, data_expected) -> bool:
+    def exists_sent_item(self, channel_in, data_compare) -> bool:
+        if isinstance(channel_in, Channel):
+            channel = channel_in
+        elif isinstance(channel_in, str):
+            channel = Channel.create_item(channel_in)
+        else:
+            raise TypeError()
+
         sent_data = self.sent_actions_dict.get(channel)
         if sent_data is None:
             return False
-        return data_expected == sent_data.state
+
+        if isinstance(sent_data.state, State):
+            sent_value = sent_data.state.value
+        else:
+            sent_value = sent_data.state
+
+        if isinstance(data_compare, State):
+            comp_value = data_compare.value
+        else:
+            comp_value = data_compare
+
+        return sent_value == comp_value
+
 
