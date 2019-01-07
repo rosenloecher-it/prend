@@ -71,6 +71,9 @@ class OhGateway(OhGatewayEventSink):
 
     def send(self, flags: OhSendFlags, channel, state):
         send_data = OhSendData(flags, channel, state)
+        self.send_data(send_data)
+
+    def send_data(self, send_data: OhSendData):
         send_data.check()
 
         channel = send_data.get_channel()  # get converted channel back
