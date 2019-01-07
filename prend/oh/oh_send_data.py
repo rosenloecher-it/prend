@@ -5,6 +5,7 @@ from prend.state import State
 
 
 class OhSendFlags(IntFlag):
+    NONE = 0
     COMMAND = 0x01
     UPDATE = 0x02
     SEND_ONLY_IF_DIFFER = 0x04

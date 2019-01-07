@@ -16,7 +16,7 @@ class TestOhSendData(unittest.TestCase):
         data = OhSendData(OhSendFlags.UPDATE | OhSendFlags.CHANNEL_AS_ITEM, channel.name, state.value)
         print(str(data))
 
-        data = OhSendData(None, None, None)
+        data = OhSendData(OhSendFlags.NONE, None, None)
         print(str(data))
 
     def test_common(self):
