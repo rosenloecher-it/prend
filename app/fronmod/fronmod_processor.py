@@ -1,10 +1,7 @@
 import logging
-from .fronmod_constants import FronmodConstants
-from .fronmod_exception import FronmodException
-from .fronmod_reader import MobuItem, MobuBulk, MobuFlag, MobuResult
+from . import *
 from prend.channel import Channel, ChannelType
-from prend.oh.oh_send_data import OhSendFlags
-from pymodbus.constants import Endian
+from prend.oh.oh_send_data import OhSendFlags, OhSendData
 
 
 # /home/mnt/nextcloud/ebooks/Technik/Haus/Fronius/Fronius_Datamanager_Modbus_TCP-RTU_DE_20181025.pdf
@@ -14,94 +11,26 @@ _logger = logging.getLogger(__name__)
 
 
 class FronmodProcessor:
-    BYTEORDER = Endian.Big
-
-    # Common & Inverter Model (ab Seite 29)
-    START_INVERTER = 40070  # start pos
-    FETCH_INVERTER = MobuBulk(1, START_INVERTER, 60, [
-        # fronius: 40092 40093 2 R 0x03 W float32 W AC Power value
-        # openhab: "WR-Ausgangsleistung  (AC) [%,.0f W]"
-        MobuItem(40092 - START_INVERTER, MobuFlag.FLOAT32, FronmodConstants.ITEM_INV_AC_POWER),
-        # fronius: 40102 40103 2 R 0x03 WH float32 Wh AC Lifetime
-        # openhab: "valPvInvAcEnergyTot [%,.0f Wh]"
-
-# todo 0.001
-        MobuItem(40102 - START_INVERTER, MobuFlag.FLOAT32, FronmodConstants.ITEM_INV_AC_ENERGY_TOT),
-        # fronius: 40108 40109 2 R 0x03 DCW float32 W DC Power value | Total DC power of all available MPPT
-        # openhab: "WR-Eingangsleistung (DC) [%,.0f W]
-        MobuItem(40108 - START_INVERTER, MobuFlag.FLOAT32, FronmodConstants.ITEM_INV_DC_POWER),
-        # fronius: 40118 40118 1 R 0x03 St enum16 Enumerated Operating State 1)
-        # openhab: Number valPvInvSunSpecState "WR-SunSpec-Status [MAP(pv_state_inv_sunspec.map):%s]"
-        MobuItem(40118 - START_INVERTER, MobuFlag.INT16, FronmodConstants.ITEM_INV_STATE_SUNSPEC),
-        # fronius: 40119 40119 1 R 0x03 StVnd enum16 Enumerated Vendor Defined Operating State 2)
-        # openhab: Number valPvInvFroniusState   "WR-Fronius-Status [MAP(pv_state_inv_fronius.map):%s]"
-        MobuItem(40119 - START_INVERTER, MobuFlag.INT16, FronmodConstants.ITEM_INV_STATE_FRONIUS),
-    ])
-
-    # Basic Storage Control Model (IC124) (ab Seite 52)
-    START_STORAGE = 40313
-    FETCH_STORAGE = MobuBulk(1, START_STORAGE, 26, [
-        # fronius: 9 9 1 R 0x03 ChaState uint16 % AhrRtg ChaState_SF
-        #       Currently available energy as a percent of the capacity rating
-        # openhab: Number rawPvBatFillState  "rawPvBatFillState [%d]"   {modbus="<[storage:8]"} // 40303 + 9
-        # openhab: Number valPvBatState  "Batterie-Status [MAP(pv_state_batt.map):%s]"
-        #       {modbus="<[storage:11:valueType=uint16]"} // 40303 + 12
-        MobuItem(9, MobuFlag.UINT16 | MobuFlag.RAW, FronmodConstants.RAW_BAT_FILL_STATE),
-        # fronius: 23 23 1 R 0x03 0x06 0x10 ChaState_SF sunssf Scale factor for available energy percent.
-        MobuItem(23, MobuFlag.INT16 | MobuFlag.RAW, FronmodConstants.RAW_BAT_FILL_STATE_SF),
-    ])
-
-    # Multiple MPPT Inverter Extension Model (I160) (ab Seite 57)
-    START_MPPT = 40263
-    FETCH_MPPT = MobuBulk(1, START_MPPT, 48, [
-        # fronius: 4 4 1 R 0x03 DCV_SF sunssf Voltage Scale Factor
-        # openhab: Number rawPvMpptVoltageSfBase   "rawPvMpptVoltageSfBase [%d]" {modbus="<[mppt:3:valueType=int16]"}
-        MobuItem(4, MobuFlag.INT16 | MobuFlag.RAW, FronmodConstants.RAW_MPPT_VOLTAGE_SF),
-        # fronius: 5 5 1 R 0x03 DCW_SF sunssf Power Scale Factor
-        # openhab: Number rawPvMpptPowerSfBase     "rawPvMpptPowerSfBase [%d]" {modbus="<[mppt:4:valueType=int16]"}
-        MobuItem(5, MobuFlag.INT16 | MobuFlag.RAW, FronmodConstants.RAW_MPPT_POWER_SF),
-        # fronius: 21 21 1 R 0x03 1_DCV uint16 V DCV_SF DC Voltage
-        # Number rawPvMpptModVoltage "rawPvMpptModVoltage [%d]"   {modbus="<[mppt:20:valueType=uint16]"}
-        MobuItem(21, MobuFlag.UINT16 | MobuFlag.RAW, FronmodConstants.RAW_MPPT_MOD_VOLTAGE),
-        # fronius: 22 22 1 R 0x03 1_DCW uint16 W DCW_SF DC Power
-        # Number rawPvMpptModPower "rawPvMpptModPower [%d]"  {modbus="<[mppt:21:valueType=uint16]"}
-        MobuItem(22, MobuFlag.UINT16 | MobuFlag.RAW, FronmodConstants.RAW_MPPT_MOD_POWER),
-        # fronius: 28 28 1 R 0x03 1_DCSt enum16 Operating State
-        # Number valPvMpptModState "MPPT-Modul-Status [MAP(pv_state_mppt.map):%s]" {modbus="<[mppt:27]"}
-        MobuItem(28, MobuFlag.INT16, FronmodConstants.ITEM_MPPT_MOD_STATE),
-        # fronius: 42 42 1 R 0x03 - 2_DCW - uint16 - W - DCW_SF - DC Power
-        # Number rawPvMpptBattPower  "rawPvMpptBattPower [%d]"  {modbus="<[mppt:41:valueType=uint16]"}
-        MobuItem(42, MobuFlag.UINT16 | MobuFlag.RAW, FronmodConstants.RAW_MPPT_BAT_POWER),
-        # fronius: 8 48 1 R 0x03 2_DCSt enum16 Operating State
-        # openhab: Number valPvMpptBatState "MPPT-Batterie-Status [MAP(pv_state_mppt.map):%s]" {modbus="<[mppt:47]"}
-        MobuItem(48, MobuFlag.INT16, FronmodConstants.ITEM_MPPT_BAT_STATE),
-    ])
-
-    # Meter Model (ab Seite 62)
-    START_METER = 40070
-    FETCH_METER = MobuBulk(240, START_METER, 124, [
-        # 40096 40097 2 R 0x03 Hz float32 Hz AC Frequency value
-        # Number valPvMetAcFrequency   "valPvMetAcFrequency [%.2f]"  {modbus="<[met_40096:0:valueType=float32]"}
-        MobuItem(40096 - START_METER, MobuFlag.FLOAT32, FronmodConstants.ITEM_MET_AC_FREQUENCY),
-        # 40098 40099 2 R 0x03 W float32 W AC Power value
-        # Number valPvMetAcPower  "Netz-Leistung (- Einspeisen) [%,.0f W]"  {modbus="<[met_40098:0:valueType=float32]"}
-        MobuItem(40098 - START_METER, MobuFlag.FLOAT32, FronmodConstants.ITEM_MET_AC_POWER),
-        # 40130 40131 2 R 0x03 TotWhExp float32 Wh Total Watt-hours Exported
-        # Number valPvMetEnergyExpTot "valPvMetEnergyExpTot [%d Wh]"   {modbus="<[met_40130:0:valueType=float32]"}
-        MobuItem(40130 - START_METER, MobuFlag.FLOAT32, FronmodConstants.ITEM_MET_ENERGY_EXP_TOT),
-        # 40138 40139 2 R 0x03 TotWhImp float32 Wh Total Watt-hours Imported
-        # Number valPvMetEnergyImpTot    "valPvMetEnergyImpTot [%d Wh]"  {modbus="<[met_40138:0:valueType=float32]"}
-        MobuItem(40138 - START_METER, MobuFlag.FLOAT32, FronmodConstants.ITEM_MET_ENERGY_IMP_TOT),
-    ])
 
     def __init__(self):
-        self._oh_gateway = None
         self._reader = None
-        pass
 
-    def set_oh_gateway(self, oh_gateway):
-        self._oh_gateway = oh_gateway
-        pass
+        self._send_quick = {}  # 10s
+        self._send_medium = {}  # 60s
+        self._send_slow = {}  # 300s
+
+        self.eflow_inv_dc = EflowChannel(FronmodConfig.TEMP_INV_DC_POWER,
+                                         EflowAggregate(FronmodConfig.EFLOW_INV_DC_OUT),
+                                         EflowAggregate(FronmodConfig.EFLOW_INV_DC_IN))
+        self.eflow_inv_ac = EflowChannel(FronmodConfig.TEMP_INV_AC_POWER,
+                                         EflowAggregate(FronmodConfig.EFLOW_INV_AC_OUT),
+                                         EflowAggregate(FronmodConfig.EFLOW_INV_AC_IN))
+        self.eflow_bat = EflowChannel(FronmodConfig.TEMP_MPPT_BAT_POWER,
+                                      EflowAggregate(FronmodConfig.EFLOW_BAT_OUT),
+                                      EflowAggregate(FronmodConfig.EFLOW_BAT_IN))
+        self.eflow_mod = EflowChannel(FronmodConfig.ITEM_MPPT_MOD_POWER,
+                                      EflowAggregate(FronmodConfig.EFLOW_MOD_OUT),
+                                      None)
 
     def set_reader(self, reader):
         self._reader = reader
@@ -112,59 +41,157 @@ class FronmodProcessor:
     def close(self):
         self._reader.close()
 
-    def process_model(self, read_conf: MobuBulk):
+    def _get_queue_dict(self, flags):
+        if flags is None:
+            return
+
+        queue_dict = None
+        if flags & MobuFlag.Q_QUICK:
+            queue_dict = self._send_quick
+        elif flags & MobuFlag.Q_MEDIUM:
+            queue_dict = self._send_medium
+        elif flags & MobuFlag.Q_SLOW:
+            queue_dict = self._send_slow
+
+        return queue_dict
+
+    def get_send_data(self, flags):
+        send_data_list = []
+        queue_dict = self._get_queue_dict(flags)
+        for key, send_data in queue_dict.items():
+            send_data_list.append(send_data)
+        return send_data_list
+
+    def process_model(self, read_conf: MobuBatch):
         try:
             results = self._reader.read(read_conf)
-        except FronmodConstants as ex:
+        except FronmodException as ex:
             _logger.error('read_model failed ({})!'.format(read_conf))
             _logger.exception(ex)
             results = {}
 
-        for item in read_conf.items:
-            if not item.flags & MobuFlag.RAW:
-                channel = Channel.create(ChannelType.ITEM, item.name)
-                result = results[item.name]
-                self._oh_gateway.send(OhSendFlags.COMMAND | OhSendFlags.SEND_ONLY_IF_DIFFER, channel, result.value)
+        for key, result in results.items():
+            self.queue_send(result)
 
         return results  # used for loading and analysing real values from test context
 
     def process_inverter_model(self):
+        results = self.process_model(FronmodConfig.INVERTER_BATCH)
 
-        # todo
-        # FronmodConstants.ITEM_MPPT_MOD_VOLTAGE = 'valPvModVoltage'
-        # FronmodConstants.ITEM_MPPT_BAT_POWER = 'valPvBatPower'
-        # valPvModVoltage <= rawPvMpptModVoltage + rawPvMpptVoltageSfReal <= rawPvMpptVoltageSfBase)
-        # valPvBatPower <= rawPvMpptBattPower + rawPvMpptPowerSfReal <= rawPvMpptPowerSfBase
+        self.process_factor_scale(results, FronmodConfig.ITEM_INV_AC_ENERGY_TOT
+                                  , 0.001, FronmodConfig.SHOW_INV_AC_ENERGY_TOT),
+        self.process_factor_scale(results, FronmodConfig.TEMP_INV_AC_POWER
+                                  , 0.001, FronmodConfig.SHOW_INV_AC_POWER),
+        self.process_factor_scale(results, FronmodConfig.TEMP_INV_DC_POWER
+                                  , 0.001, FronmodConfig.SHOW_INV_DC_POWER),
 
-
-        # todo eflow: valPvInvDcPower => valPvEflowInvDcIn, valPvEflowInvDcOut (gEflowInvDcOutTemp, gEflowInvDcInTemp)
-        # todo eflow: valPvInvAcPower => valPvEflowInvAcIn, valPvEflowInvAcOut (gEflowInvAcOutTemp, gEflowInvAcInTemp)
-        #
-        return self.process_model(self.FETCH_INVERTER)
-
-    def process_storage_model(self):
-        try:
-            results = self._reader.read(self.FETCH_STORAGE)
-
-            raw_state = results[FronmodConstants.RAW_BAT_FILL_STATE]
-            raw_state_sf = results[FronmodConstants.RAW_BAT_FILL_STATE_SF]
-
-            fill_state = self.scale_item(raw_state, raw_state_sf)
-
-        except FronmodConstants as ex:
-            _logger.exception(ex)
-            fill_state = None
-
-        channel = Channel.create(ChannelType.ITEM, FronmodConstants.ITEM_BAT_FILL_STATE)
-        self._oh_gateway.send(OhSendFlags.COMMAND | OhSendFlags.SEND_ONLY_IF_DIFFER, channel, fill_state)
+        self.push_eflow(results, FronmodConfig.TEMP_INV_DC_POWER, self.eflow_inv_dc)
+        self.push_eflow(results, FronmodConfig.TEMP_INV_AC_POWER, self.eflow_inv_ac)
 
         return results
 
+    def process_storage_model(self):
+        results = self.process_model(FronmodConfig.STORAGE_BATCH)
+
+        self.process_modbus_scale(results, FronmodConfig.RAW_BAT_FILL_STATE, FronmodConfig.RAW_BAT_FILL_STATE_SF
+                                  , FronmodConfig.ITEM_BAT_FILL_STATE)
+        return results
+
     def process_mppt_model(self):
-        return self.process_model(self.FETCH_MPPT)
+        results = self.process_model(FronmodConfig.MPPT_BATCH)
+
+        self.process_modbus_scale(results, FronmodConfig.RAW_MPPT_MOD_VOLTAGE, FronmodConfig.RAW_MPPT_VOLTAGE_SF
+                                  , FronmodConfig.ITEM_MPPT_MOD_VOLTAGE)
+
+        self.process_modbus_scale(results, FronmodConfig.RAW_MPPT_MOD_POWER, FronmodConfig.RAW_MPPT_POWER_SF
+                                  , FronmodConfig.ITEM_MPPT_MOD_POWER)
+
+        self.process_modbus_scale(results, FronmodConfig.RAW_MPPT_BAT_POWER, FronmodConfig.RAW_MPPT_POWER_SF
+                                  , FronmodConfig.TEMP_MPPT_BAT_POWER)
+
+        self.process_factor_scale(results, FronmodConfig.TEMP_MPPT_BAT_POWER
+                                  , 0.001, FronmodConfig.SHOW_MPPT_BAT_POWER),
+
+        self.process_factor_scale(results, FronmodConfig.ITEM_MPPT_MOD_POWER
+                                  , 0.001, FronmodConfig.SHOW_MPPT_MOD_POWER),
+
+        self.push_eflow(results, FronmodConfig.TEMP_MPPT_BAT_POWER, self.eflow_bat)
+        self.push_eflow(results, FronmodConfig.ITEM_MPPT_MOD_POWER, self.eflow_mod)
+
+        return results
 
     def process_meter_model(self):
-        return self.process_model(self.FETCH_METER)
+        results = self.process_model(FronmodConfig.METER_BATCH)
+
+        self.process_factor_scale(results, FronmodConfig.ITEM_MET_AC_POWER
+                                  , 0.001, FronmodConfig.SHOW_MET_AC_POWER),
+        self.process_factor_scale(results, FronmodConfig.ITEM_MET_ENERGY_EXP_TOT
+                                  , 0.001, FronmodConfig.SHOW_MET_ENERGY_EXP_TOT),
+        self.process_factor_scale(results, FronmodConfig.ITEM_MET_ENERGY_IMP_TOT
+                                  , 0.001, FronmodConfig.SHOW_MET_ENERGY_IMP_TOT),
+
+        return results
+
+    def process_modbus_scale(self, results: dict, value_name: str, scale_name: str, target_name: str):
+
+        try:
+            value_temp = results[value_name]
+            scale_temp = results[scale_name]
+            value_target = self.scale_item(value_temp, scale_temp)
+        except (FronmodException, TypeError, ValueError) as ex:
+            _logger.error('process_modbus_scale failed (%s + %s => %s)!', value_name, scale_name, target_name)
+            _logger.exception(ex)
+            value_target = None
+
+        target_result = results[target_name]
+        target_result.value = value_target
+        target_result.ready = True
+        self.queue_send(target_result)
+
+    def process_factor_scale(self, results: dict, value_name: str, scale_factor: float, target_name: str):
+
+        value_target = None
+        try:
+            result = results.get(value_name)
+            if result:
+                value_target = result.value * scale_factor
+        except (TypeError, ValueError) as ex:
+            _logger.error('process_factor_scale failed (%s + %s => %s)!', value_name, scale_factor, target_name)
+            _logger.exception(ex)
+            value_target = None
+
+        target_result = results[target_name]
+        target_result.value = value_target
+        target_result.ready = True
+        self.queue_send(target_result)
+
+    @classmethod
+    def push_eflow(cls, results, value_name, eflow):
+        result = results[value_name]
+        if not result.ready:
+            raise FronmodException('can only push ready values!')
+        eflow.push_value(result.value)
+
+    def persist_eflow_aggregates(self):
+        eflow_list = [self.eflow_inv_dc, self.eflow_inv_ac, self.eflow_bat, self.eflow_mod]
+        for eflow in eflow_list:
+            agg_list = eflow.get_aggregates_and_reset()
+            for agg in agg_list:
+                if agg.value_agg != 0:
+                    # todo
+                    channel = Channel.create(ChannelType.ITEM, agg.item_name)
+                    self._oh_gateway.send(OhSendFlags.COMMAND | OhSendFlags.SEND_ONLY_IF_DIFFER, channel, agg.value_agg)
+                    # self.queue_send(item_name, value)
+
+    def queue_send(self, result: MobuResult):
+        if not result or not result.ready:
+            return
+
+        queue_dict = self._get_queue_dict(result.item.flags)
+        if queue_dict is not None:
+            channel = Channel.create(ChannelType.ITEM, result.name)
+            send_data = OhSendData(OhSendFlags.COMMAND | OhSendFlags.SEND_ONLY_IF_DIFFER, channel, result.value)
+            queue_dict[result.name] = send_data
 
     @classmethod
     def scale_item(cls, value_item: MobuResult, scale_item: MobuResult):

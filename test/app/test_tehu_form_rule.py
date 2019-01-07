@@ -43,11 +43,11 @@ class TestTehuFormRule(unittest.TestCase):
         self.assertEqual(sent_item.state.value, value_expected)
 
     def test_action_single(self):
-        ITEM_TARGET = 'showTempHumiBathDown'
-        item_set = ItemSet(ITEM_TARGET, 'valTempBathDown', 'valHumiBathDown')
+        item_target = 'showTempHumiBathDown'
+        item_set = ItemSet(item_target, 'valTempBathDown', 'valHumiBathDown')
         state_num = State.create(StateType.DECIMAL, self.DEFAULT_VALUE)
 
-        self.mock_gateway.set_state(Channel.create_item(ITEM_TARGET), State.create(StateType.DECIMAL, None))
+        self.mock_gateway.set_state(Channel.create_item(item_target), State.create(StateType.DECIMAL, None))
         self.mock_gateway.set_state(Channel.create_item(item_set.humi), state_num)
         self.mock_gateway.set_state(Channel.create_item(item_set.temp), state_num)
 

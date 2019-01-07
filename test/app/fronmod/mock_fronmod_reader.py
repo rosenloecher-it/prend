@@ -1,8 +1,8 @@
-from app.fronmod.fronmod_reader import FronmodReader, MobuBulk
+from app.fronmod.fronmod_reader import FronmodReader, MobuBatch
 
 
 class MockData:
-    def __init__(self, read: MobuBulk, registers):
+    def __init__(self, read: MobuBatch, registers):
         self.read = read
         self.registers = registers
 
@@ -24,7 +24,7 @@ class MockFronmodReader(FronmodReader):
     def close(self):
         self._is_open = False
 
-    def _read_remote_registers(self, read: MobuBulk):
+    def _read_remote_registers(self, read: MobuBatch):
         mock_data = self.mock_reads.get(read)
         if mock_data is None:
             raise ValueError('no mock data configured!')

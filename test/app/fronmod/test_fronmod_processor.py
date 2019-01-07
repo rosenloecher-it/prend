@@ -1,7 +1,9 @@
 import unittest
-from app.fronmod.fronmod_constants import FronmodConstants
+import math
+from app.fronmod import *
+from app.fronmod.fronmod_config import FronmodConfig
 from app.fronmod.fronmod_processor import FronmodProcessor
-from app.fronmod.fronmod_reader import FronmodReader, MobuResult
+from app.fronmod.fronmod_reader import FronmodReader, MobuResult, MobuFlag
 from prend.channel import Channel, ChannelType
 from prend.state import State, StateType
 from test.app.fronmod.mock_fronmod_reader import MockFronmodReader
@@ -74,24 +76,56 @@ class TestFronmodProcessor(unittest.TestCase):
 
 class TestFronmodProcessorProcessing(unittest.TestCase):
 
+    class FronmodProcessorExt(FronmodProcessor):
+
+        def get_sent_count(self, flags: MobuFlag) -> int:
+            queue_dict = self._get_queue_dict(flags)
+            return len(queue_dict)
+
+        def check_sent_count(self, exp_quick, exp_medium, exp_slow) -> int:
+            result = 0
+            if exp_quick != self.get_sent_count(MobuFlag.Q_QUICK):
+                result |= MobuFlag.Q_QUICK
+            if exp_medium != self.get_sent_count(MobuFlag.Q_MEDIUM):
+                result |= MobuFlag.Q_MEDIUM
+            if exp_slow != self.get_sent_count(MobuFlag.Q_SLOW):
+                result |= MobuFlag.Q_SLOW
+            return result
+
+        def exist_sent(self, flags: MobuFlag, item_name: str, data_compare) -> bool:
+            queue_dict = self._get_queue_dict(flags)
+            if queue_dict is None:
+                return False
+            sent_data = queue_dict.get(item_name)
+            if sent_data is None:
+                return False
+
+            if isinstance(sent_data.state, State):
+                sent_value = sent_data.state.value
+            else:
+                sent_value = sent_data.state
+
+            if isinstance(data_compare, State):
+                comp_value = data_compare.value
+            else:
+                comp_value = data_compare
+
+            if isinstance(sent_value, float) and isinstance(comp_value, float):
+                if sent_value == comp_value:
+                    return True
+                return math.isclose(sent_value, comp_value, rel_tol=1e-9)
+            else:
+                return sent_value == comp_value
+
     def setUp(self):
 
-        self.mock_gateway = MockOhGateway()
         self.mock_reader = MockFronmodReader()
-
-        self.processor = FronmodProcessor()
-        self.processor.set_oh_gateway(self.mock_gateway)
+        self.processor = self.FronmodProcessorExt()
         self.processor.set_reader(self.mock_reader)
 
     def test_process_inverter(self):
-        def_state_type = StateType.DECIMAL
-        read_conf = FronmodProcessor.FETCH_INVERTER
-        for item in read_conf.items:
-            channel = Channel.create_item(item.name)
-            state_in = State.create(def_state_type, None)
-            self.mock_gateway.set_state(channel, state_in)
 
-        self.mock_reader.set_mock_read(read_conf, [
+        self.mock_reader.set_mock_read(FronmodConfig.INVERTER_BATCH, [
             60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32704, 0, 32704, 0, 32704, 0,
             19157, 42320, 32704, 0, 32704, 0, 0, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0
@@ -99,75 +133,66 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
 
         self.processor.process_inverter_model()
 
-        self.assertEqual(len(self.mock_gateway.sent_actions_list), len(read_conf.items))
-        self.assertEqual(len(self.mock_gateway.sent_actions_dict), len(read_conf.items))
+        out = self.processor.check_sent_count(2, 4, 0)
+        self.assertEqual(0, 0)
 
-        # todo state_comp = State.create(def_state_type, 7000.744)
-        state_comp = State.create(def_state_type, 7000744)
-        out = self.mock_gateway.exists_sent_item(FronmodConstants.ITEM_INV_AC_ENERGY_TOT, state_comp)
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_INV_STATE_FRONIUS, 3)
+        self.assertEqual(True, out)
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_INV_STATE_SUNSPEC, 3)
+        self.assertEqual(True, out)
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_INV_AC_ENERGY_TOT, 7000744)
+        self.assertEqual(True, out)
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.SHOW_INV_AC_ENERGY_TOT, 7000.744)
         self.assertEqual(True, out)
 
-        out = self.mock_gateway.exists_sent_item(FronmodConstants.ITEM_INV_AC_POWER, 0.0)
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_INV_AC_POWER, 0)
         self.assertEqual(True, out)
-
-        out = self.mock_gateway.exists_sent_item(FronmodConstants.ITEM_INV_DC_POWER, 0.0)
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_INV_DC_POWER, 0)
         self.assertEqual(True, out)
-
-        state_comp = State.create(def_state_type, 1.1)
-        out = self.mock_gateway.exists_sent_item(FronmodConstants.ITEM_INV_STATE_FRONIUS, 3)
-        self.assertEqual(True, out)
-
-        out = self.mock_gateway.exists_sent_item(FronmodConstants.ITEM_INV_STATE_SUNSPEC, 3)
-        self.assertEqual(True, out)
-
 
     def test_process_storage(self):
 
-        channel = Channel.create_item(FronmodConstants.ITEM_BAT_FILL_STATE)
-        state_in = State.create(StateType.DECIMAL, 99)
-        self.mock_gateway.set_state(channel, state_in)
-
-        self.mock_reader.set_mock_read(FronmodProcessor.FETCH_STORAGE, [
+        self.mock_reader.set_mock_read(FronmodConfig.STORAGE_BATCH, [
             124, 24, 3328, 100, 100, 0, 65535, 0, 300, 65535, 65535, 2, 10000, 10000, 65535, 65535, 65535, 1, 0, 0
             , 32768, 65534, 65534, 65534, 65534, 65534
         ])
 
         self.processor.process_storage_model()
 
-        self.assertEqual(len(self.mock_gateway.sent_actions_list), 1)
-        self.assertEqual(len(self.mock_gateway.sent_actions_dict), 1)
-        state_comp = State.create(StateType.DECIMAL, 3)
-        out = self.mock_gateway.exists_sent_item(channel, state_comp)
+        out = self.processor.check_sent_count(0, 1, 0)
+        self.assertEqual(0, 0)
+
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_BAT_FILL_STATE, 3)
         self.assertEqual(True, out)
 
     def test_mppt_storage(self):
 
-        channel = Channel.create_item(FronmodConstants.ITEM_BAT_FILL_STATE)
-        # state_in = State.create(StateType.DECIMAL, 99)
-        # self.mock_gateway.set_state(channel, state_in)
-        #
-        # self.mock_reader.set_mock_read(FronmodProcessor.FETCH_STORAGE, [
-        #     124, 24, 3328, 100, 100, 0, 65535, 0, 300, 65535, 65535, 2, 10000, 10000, 65535, 65535, 65535, 1, 0, 0
-        #     , 32768, 65534, 65534, 65534, 65534, 65534
-        # ])
-        #
-        # self.processor.process_storage_model()
-        #
-        # self.assertEqual(len(self.mock_gateway.sent_actions_list), 1)
-        # self.assertEqual(len(self.mock_gateway.sent_actions_dict), 1)
-        # state_comp = State.create(StateType.DECIMAL, 3)
-        # out = self.mock_gateway.exists_sent_item(channel, state_comp)
-        # self.assertEqual(True, out)
+        self.mock_reader.set_mock_read(FronmodConfig.MPPT_BATCH, [
+            160, 48, 65534, 65534, 65534, 32768, 0, 0, 2, 65535, 1, 21364, 29289, 28263, 8241, 0, 0, 0, 0, 55, 56620,
+            31141, 0, 0, 9155, 20421, 32768, 4, 65535, 65535, 2, 21364, 29289, 28263, 8242, 0, 0, 0, 0, 2, 18320, 366,
+            0, 0, 9155, 20421, 32768, 4
+        ])
+
+        self.processor.process_mppt_model()
+
+        out = self.processor.check_sent_count(3, 2, 0)
+        self.assertEqual(0, 0)
+
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_MPPT_MOD_STATE, 4)
+        self.assertEqual(True, out)
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_MPPT_BAT_STATE, 4)
+        self.assertEqual(True, out)
+
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.ITEM_MPPT_MOD_VOLTAGE, 566.2)
+        self.assertEqual(True, out)
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_MPPT_BAT_POWER, 0.00366)
+        self.assertEqual(True, out)
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_MPPT_MOD_POWER, 0.31141)
+        self.assertEqual(True, out)
 
     def test_process_meter(self):
-        def_state_type = StateType.DECIMAL
-        read_conf = FronmodProcessor.FETCH_METER
-        for item in read_conf.items:
-            channel = Channel.create_item(item.name)
-            state_in = State.create(def_state_type, None)
-            self.mock_gateway.set_state(channel, state_in)
 
-        self.mock_reader.set_mock_read(FronmodProcessor.FETCH_METER, [
+        self.mock_reader.set_mock_read(FronmodConfig.METER_BATCH, [
             124, 16440, 62915, 16249, 39322, 16208, 41943, 16268, 52429, 17259, 56798, 17259, 13107, 17259, 58982,
             17260, 32768, 17356, 17476, 17356, 0, 17356, 36045, 17356, 16384, 16968, 0, 17402, 33096, 17195, 57672,
             17073, 51118, 17264, 15729, 17428, 16384, 17253, 20972, 17216, 16941, 17282, 4915, 50079, 11469, 49888,
@@ -179,39 +204,43 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
 
         self.processor.process_meter_model()
 
-        self.assertEqual(len(self.mock_gateway.sent_actions_list), len(read_conf.items))
-        self.assertEqual(len(self.mock_gateway.sent_actions_dict), len(read_conf.items))
+        out = self.processor.check_sent_count(1, 5, 0)
+        self.assertEqual(0, 0)
 
-        # ITEM_MET_AC_FREQUENCY = 'valPvMetAcFrequency'
-        # ITEM_MET_AC_POWER = 'valPvMetAcPower'
-        # ITEM_MET_ENERGY_EXP_TOT = 'valPvMetEnergyExpTot'
-        # ITEM_MET_ENERGY_IMP_TOT = 'valPvMetEnergyImpTot'
-
-        out = self.mock_gateway.exists_sent_item(FronmodConstants.ITEM_MET_AC_FREQUENCY, 50.0)
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_MET_AC_FREQUENCY, 50.0)
         self.assertEqual(True, out)
 
-        out = self.mock_gateway.exists_sent_item(FronmodConstants.ITEM_MET_AC_POWER, 501.010009765625)
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_MET_ENERGY_EXP_TOT, 4431805.0)
+        self.assertEqual(True, out)
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.SHOW_MET_ENERGY_EXP_TOT, 4431.805)
         self.assertEqual(True, out)
 
-        state_comp = State.create(def_state_type, 1.1)
-        out = self.mock_gateway.exists_sent_item(FronmodConstants.ITEM_MET_ENERGY_EXP_TOT, 4431805.0)
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_MET_ENERGY_IMP_TOT, 798550.0)
+        self.assertEqual(True, out)
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.SHOW_MET_ENERGY_IMP_TOT, 798.55)
         self.assertEqual(True, out)
 
-        out = self.mock_gateway.exists_sent_item(FronmodConstants.ITEM_MET_ENERGY_IMP_TOT, 798550.0)
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_MET_AC_POWER, 0.501010009765625)
         self.assertEqual(True, out)
+
 
 class TestFronmodProcessorReadReal(unittest.TestCase):
 
     URL = '192.168.12.42'
     PORT = 502
 
-    # def print_read_result(self, desc, results):
-    #     print(desc)
-    #     if results is None:
-    #         print('    None')
-    #     else:
-    #         for key, val in results.items():
-    #             print('    {} = {}'.format(key, val))
+    @classmethod
+    def print_read_result(cls, desc, results):
+        print(desc)
+        if results is None:
+            print('    None')
+        else:
+            for key, val in results.items():
+                print('    {} = {}'.format(key, val))
+
+    def test_print_read_result(self):
+        self.print_read_result('test', None)
+
     #
     # def test_process_inverter_model(self):
     #     reader = FronmodReader(self.URL, self.PORT)
