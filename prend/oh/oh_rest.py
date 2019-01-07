@@ -148,14 +148,14 @@ class OhRest:
                 _logger.info('SIMULATE post command: "%s" = %s', url, value_json)
             else:
                 _logger.info('send POST COMMAND: "%s" = %s', url, value_json)
-                self._req_post(url, data=value_json)
+                self._req_post(url, payload=value_json)
         else:
             url = '/items/{}/state'.format(item_name)
             if self._simulate_sending:
                 _logger.info('SIMULATE put update: "%s" = %s', url, value_json)
             else:
                 _logger.info('send PUT UPDATE: "%s" = %s', url, value_json)
-                self._req_put(url, data=value_json)
+                self._req_put(url, payload=value_json)
 
     def _req_get(self, uri_path: str) -> typing.Any:
         with self._lock_session:
