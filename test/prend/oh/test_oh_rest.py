@@ -11,7 +11,6 @@ from prend.state import State, StateType
 from prend.values import OnOffValue, ThingStatusValue
 
 
-
 class TestEventSink(OhGatewayEventSink):
     def __init__(self):
         self.list = []
@@ -143,10 +142,10 @@ class TestOhRest(unittest.TestCase):
                 self.send_type = None
                 pass
 
-            def _req_post(self, uri_path: str, data=None) -> None:
+            def _req_post(self, uri_path: str, payload=None) -> None:
                 self.send_type = 'post'
 
-            def _req_put(self, uri_path: str, data=None) -> None:
+            def _req_put(self, uri_path: str, payload=None) -> None:
                 self.send_type = 'put'
 
             def clear(self):
