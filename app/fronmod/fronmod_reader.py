@@ -63,7 +63,7 @@ class FronmodReader:
 
     def _read_remote_registers(self, read: MobuBatch):
         if self._client is None or not self.is_open():
-            raise FronmodException('ModbusClient not open!')
+            raise FronmodException('ModbusClient is not open!')
 
         response = self._client.read_holding_registers(read.pos, read.length, unit=read.unit_id)
         if response.isError():
