@@ -14,6 +14,7 @@ class EflowAggregate:
 
 
 class EflowChannel:
+    MIN_NULL = 1e-9
 
     def __init__(self, source_name: str, agg_plus: Optional[EflowAggregate], agg_minus: Optional[EflowAggregate]):
         self.source_name = source_name
@@ -47,20 +48,21 @@ class EflowChannel:
     def calc(self, curr_time, curr_value):
         last_bias = self.get_bias(self.last_value)
         curr_bias = self.get_bias(curr_value)
-        factor_full = self.last_time - curr_time
+        factor_full = (curr_time - self.last_time).total_seconds() / 60.0 / 60.0
 
-        if last_bias + curr_bias == 0:
-            factor_last = self.get_normed_intercept(self.last_value, curr_value)
-            factor_curr = factor_full - factor_last
+        if factor_full > 0:
+            if last_bias + curr_bias == 0 and last_bias != curr_bias:
+                factor_last = self.get_normed_intercept(self.last_value, curr_value)
+                factor_curr = factor_full - factor_last
 
-            agg_last = self.last_value * factor_last / 2.0
-            agg_curr = self.last_value * factor_curr / 2.0
+                agg_last = self.last_value * factor_last / 2.0
+                agg_curr = curr_value * factor_curr / 2.0
 
-            self._add_value(agg_last)
-            self._add_value(agg_curr)
-        else:
-            value_agg = (self.last_value + curr_value) / 2 * factor_full
-            self._add_value(value_agg)
+                self._add_value(agg_last)
+                self._add_value(agg_curr)
+            else:
+                value_agg = (self.last_value + curr_value) / 2 * factor_full
+                self._add_value(value_agg)
 
     def get_aggregates_and_reset(self):
         aggregates = []
@@ -74,9 +76,9 @@ class EflowChannel:
 
         return aggregates
 
-    @staticmethod
-    def get_bias(value):
-        if abs(value) < 1e-9:
+    @classmethod
+    def get_bias(cls, value):
+        if abs(value) < cls.MIN_NULL:
             return 0
         if value >= 0:
             return 1
