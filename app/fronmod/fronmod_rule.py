@@ -1,7 +1,6 @@
 import logging
 import schedule
 from . import *
-from .fronmod_reader import FronmodReader
 from prend.channel import Channel, ChannelType
 from prend.rule import Rule
 
@@ -39,11 +38,20 @@ class FronmodRule(Rule):
             return
 
         self._reader = FronmodReader(url, port)
-        self._processor = self.FronmodProcessor()
+        self._reader.open()
+
+        self._processor = FronmodProcessor()
         self._processor.set_reader(self._reader)
 
         super().open()
         self._is_open = True
+
+    def close(self):
+        self._is_open = False
+        self._processor = None
+        if self._reader:
+            self._reader.close()
+            self._reader = None
 
     def register_actions(self) -> None:
         cron_job = schedule.every(5).seconds
