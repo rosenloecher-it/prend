@@ -9,6 +9,7 @@ from prend.oh.oh_rest import OhRest
 from prend.oh.oh_send_data import OhSendData, OhSendFlags
 from prend.state import State, StateType
 from prend.values import OnOffValue, ThingStatusValue
+from test.setup_test import SetupTest
 
 
 class TestEventSink(OhGatewayEventSink):
@@ -76,7 +77,7 @@ class TestOhRest(unittest.TestCase):
 
     # pylint: disable=line-too-long, protected-access
     def test_fetch_item(self):
-        rest = OhRest(Config())
+        rest = OhRest(SetupTest.get_config())
         time_start_loading = datetime.datetime.now()
 
         # test item
@@ -106,7 +107,7 @@ class TestOhRest(unittest.TestCase):
         self.check_fetch_event(ev_out, ev_cmp)
 
     def test_fetch_thing(self):
-        rest = OhRest(Config())
+        rest = OhRest(SetupTest.get_config())
         time_start_loading = datetime.datetime.now()
 
         # noinspection PyPep8
@@ -138,7 +139,7 @@ class TestOhRest(unittest.TestCase):
     def test_send_change_command_to_update(self):
         class MockOhRest(OhRest):
             def __init__(self):
-                super().__init__(Config())
+                super().__init__(SetupTest.get_config())
                 self.send_type = None
                 pass
 
