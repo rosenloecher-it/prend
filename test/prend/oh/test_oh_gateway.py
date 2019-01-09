@@ -12,11 +12,11 @@ from prend.oh.oh_send_data import OhSendFlags
 from prend.state import State, StateType
 from prend.values import OnOffValue, ThingStatusValue
 from test.prend.oh.mock_oh_gateway import MockOhGateway
-
+from test.setup_test import SetupTest
 
 class MockRest(OhRest):
     def __init__(self):
-        super().__init__(Config())
+        super().__init__(SetupTest.get_config())
         self.dummy_events = []
         self.dummy_send = []
 
