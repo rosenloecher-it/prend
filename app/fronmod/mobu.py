@@ -4,13 +4,13 @@ from typing import Optional
 
 class MobuFlag(IntFlag):
     NONE = 0
-    INT16 = 0x01
-    UINT16 = 0x02
-    FLOAT32 = 0x04
-    STRING8 = 0x08
-    Q_QUICK = 0x10  # 10s
-    Q_MEDIUM = 0x40  # 60s
-    Q_SLOW = 0x80  # 300s
+    INT16 = 0x0001
+    UINT16 = 0x0002
+    FLOAT32 = 0x0004
+    STRING8 = 0x0008
+    Q_QUICK = 0x0010  # 10s
+    Q_MEDIUM = 0x0020  # 60s
+    Q_SLOW = 0x0040  # 300s
 
     def __str__(self):
         return self.__repr__()

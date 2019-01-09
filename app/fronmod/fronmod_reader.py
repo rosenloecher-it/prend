@@ -29,7 +29,6 @@ class FronmodReader:
 
     def _extract(self, read_item: MobuItem, registers):
         if read_item.offset == 0:
-            buffer = registers
             decoder = BinaryPayloadDecoder.fromRegisters(registers, byteorder=FronmodConfig.BYTEORDER)
         else:
             offset = read_item.offset
@@ -51,6 +50,8 @@ class FronmodReader:
             result.value = decoder.decode_16bit_int()
         elif read_item.flags & MobuFlag.UINT16:
             result.value = decoder.decode_16bit_uint()
+            if result.value == 0xffff:
+                result.value = 0  # strange behavior with RAW_MPPT_MOD_POWER + RAW_MPPT_BAT_POWER
         elif read_item.flags & MobuFlag.FLOAT32:
             result.value = decoder.decode_32bit_float()
         elif read_item.flags & MobuFlag.STRING8:

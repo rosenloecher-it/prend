@@ -41,9 +41,11 @@ class EflowChannel:
 
     def _add_value(self, value_agg):
         if value_agg > 0:
-            self.plus.value_agg += value_agg
+            if self.plus:
+                self.plus.value_agg += value_agg
         else:
-            self.minus.value_agg += value_agg
+            if self.minus:
+                self.minus.value_agg += value_agg
 
     def calc(self, curr_time, curr_value):
         last_bias = self.get_bias(self.last_value)
@@ -68,8 +70,9 @@ class EflowChannel:
         aggregates = []
 
         def add_aggregate(agg: EflowAggregate):
-            aggregates.append(copy.deepcopy(agg))
-            agg.value_agg = 0
+            if agg:
+                aggregates.append(copy.deepcopy(agg))
+                agg.value_agg = 0
 
         add_aggregate(self.plus)
         add_aggregate(self.minus)

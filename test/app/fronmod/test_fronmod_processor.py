@@ -1,13 +1,10 @@
 import unittest
 import math
-from app.fronmod import *
 from app.fronmod.fronmod_config import FronmodConfig
 from app.fronmod.fronmod_processor import FronmodProcessor
-from app.fronmod.fronmod_reader import FronmodReader, MobuResult, MobuFlag
-from prend.channel import Channel, ChannelType
-from prend.state import State, StateType
+from app.fronmod.fronmod_reader import MobuResult, MobuFlag
+from prend.state import State
 from test.app.fronmod.mock_fronmod_reader import MockFronmodReader
-from test.prend.oh.mock_oh_gateway import MockOhGateway
 
 
 class TestFronmodProcessor(unittest.TestCase):
@@ -48,27 +45,27 @@ class TestFronmodProcessor(unittest.TestCase):
 
         try:
             item.value = -11
-            out = FronmodProcessor.convert_scale_factor(item)
+            FronmodProcessor.convert_scale_factor(item)
             self.assertTrue(False)
         except ValueError:
             pass
 
         try:
             item.value = 11
-            out = FronmodProcessor.convert_scale_factor(item)
+            FronmodProcessor.convert_scale_factor(item)
             self.assertTrue(False)
         except ValueError:
             pass
 
         try:
             item.value = None
-            out = FronmodProcessor.convert_scale_factor(item)
+            FronmodProcessor.convert_scale_factor(item)
             self.assertTrue(False)
         except ValueError:
             pass
 
         try:
-            out = FronmodProcessor.convert_scale_factor(None)
+            FronmodProcessor.convert_scale_factor(None)
             self.assertTrue(False)
         except ValueError:
             pass
@@ -85,11 +82,11 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
         def check_sent_count(self, exp_quick, exp_medium, exp_slow) -> int:
             result = 0
             if exp_quick != self.get_sent_count(MobuFlag.Q_QUICK):
-                result |= MobuFlag.Q_QUICK
+                result += MobuFlag.Q_QUICK
             if exp_medium != self.get_sent_count(MobuFlag.Q_MEDIUM):
-                result |= MobuFlag.Q_MEDIUM
+                result += MobuFlag.Q_MEDIUM
             if exp_slow != self.get_sent_count(MobuFlag.Q_SLOW):
-                result |= MobuFlag.Q_SLOW
+                result += MobuFlag.Q_SLOW
             return result
 
         def exist_sent(self, flags: MobuFlag, item_name: str, data_compare) -> bool:
@@ -133,8 +130,8 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
 
         self.processor.process_inverter_model()
 
-        out = self.processor.check_sent_count(2, 4, 0)
-        self.assertEqual(0, 0)
+        out = self.processor.check_sent_count(3, 4, 0)
+        self.assertEqual(0, out)
 
         out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_INV_STATE_FRONIUS, 3)
         self.assertEqual(True, out)
@@ -150,6 +147,9 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
         out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_INV_DC_POWER, 0)
         self.assertEqual(True, out)
 
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_SELF_CONSUMPTION, None)
+        self.assertEqual(True, out)
+
     def test_process_storage(self):
 
         self.mock_reader.set_mock_read(FronmodConfig.STORAGE_BATCH, [
@@ -160,7 +160,7 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
         self.processor.process_storage_model()
 
         out = self.processor.check_sent_count(0, 1, 0)
-        self.assertEqual(0, 0)
+        self.assertEqual(0, out)
 
         out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_BAT_FILL_STATE, 3)
         self.assertEqual(True, out)
@@ -176,7 +176,7 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
         self.processor.process_mppt_model()
 
         out = self.processor.check_sent_count(3, 2, 0)
-        self.assertEqual(0, 0)
+        self.assertEqual(0, out)
 
         out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_MPPT_MOD_STATE, 4)
         self.assertEqual(True, out)
@@ -188,6 +188,32 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
         out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_MPPT_BAT_POWER, 0.00366)
         self.assertEqual(True, out)
         out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_MPPT_MOD_POWER, 0.31141)
+        self.assertEqual(True, out)
+
+    def test_mppt_storage_ffff_equals_0(self):
+        # fronius delivers 0xffff for *MPPT_MOD_STATE + MPPT_BAT_POWER !!!
+
+        self.mock_reader.set_mock_read(FronmodConfig.MPPT_BATCH, [
+            160, 48, 65534, 65534, 65534, 32768, 0, 0, 2, 65535, 1, 21364, 29289, 28263, 8241, 0, 0, 0, 0, 0, 350,
+            65535, 0, 0, 9161, 6067, 32768, 3, 65535, 65535, 2, 21364, 29289, 28263, 8242, 0, 0, 0, 0, 0, 260, 0, 0, 0,
+            9161, 6067, 32768, 3
+        ])
+
+        self.processor.process_mppt_model()
+
+        out = self.processor.check_sent_count(3, 2, 0)
+        self.assertEqual(0, out)
+
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_MPPT_MOD_STATE, 3)
+        self.assertEqual(True, out)
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_MPPT_BAT_STATE, 3)
+        self.assertEqual(True, out)
+
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.ITEM_MPPT_MOD_VOLTAGE, 3.5)
+        self.assertEqual(True, out)
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_MPPT_BAT_POWER, 0.0)
+        self.assertEqual(True, out)
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_MPPT_MOD_POWER, 0.0)
         self.assertEqual(True, out)
 
     def test_process_meter(self):
@@ -204,8 +230,8 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
 
         self.processor.process_meter_model()
 
-        out = self.processor.check_sent_count(1, 5, 0)
-        self.assertEqual(0, 0)
+        out = self.processor.check_sent_count(2, 5, 0)
+        self.assertEqual(0, out)
 
         out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_MET_AC_FREQUENCY, 50.0)
         self.assertEqual(True, out)
@@ -221,6 +247,40 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
         self.assertEqual(True, out)
 
         out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_MET_AC_POWER, 0.501010009765625)
+        self.assertEqual(True, out)
+
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_SELF_CONSUMPTION, None)
+        self.assertEqual(True, out)
+
+    def test_process_self_consumption(self):
+
+        self.mock_reader.set_mock_read(FronmodConfig.INVERTER_BATCH, [
+            60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32704, 0, 32704, 0, 32704, 0,
+            19157, 42320, 32704, 0, 32704, 0, 0, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0
+        ])
+
+        self.processor.process_inverter_model()
+
+        self.mock_reader.set_mock_read(FronmodConfig.METER_BATCH, [
+            124, 16440, 62915, 16249, 39322, 16208, 41943, 16268, 52429, 17259, 56798, 17259, 13107, 17259, 58982,
+            17260, 32768, 17356, 17476, 17356, 0, 17356, 36045, 17356, 16384, 16968, 0, 17402, 33096, 17195, 57672,
+            17073, 51118, 17264, 15729, 17428, 16384, 17253, 20972, 17216, 16941, 17282, 4915, 50079, 11469, 49888,
+            11796, 49931, 64881, 49796, 35389, 16215, 2621, 16212, 31457, 16135, 44564, 16245, 49807, 19079, 16250,
+            32704, 0, 32704, 0, 32704, 0, 18754, 62816, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0,
+            32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704,
+            0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 0
+        ])
+
+        self.processor.process_meter_model()
+
+        out = self.processor.check_sent_count(4, 9, 0)
+        self.assertEqual(0, out)
+
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_MET_AC_POWER, 0.501010009765625)
+        self.assertEqual(True, out)
+
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_SELF_CONSUMPTION, -0.501010009765625)
         self.assertEqual(True, out)
 
 

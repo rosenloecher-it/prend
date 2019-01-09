@@ -1,7 +1,7 @@
 import datetime
 import unittest
 from app.fronmod import *
-from typing import Optional
+
 
 class TestEflow(unittest.TestCase):
 
@@ -128,7 +128,6 @@ class TestEflow(unittest.TestCase):
         eflow.push_value(last_value)
         self.assertEqual(1.25, eflow.plus.value_agg)
         self.assertEqual(-2.25, eflow.minus.value_agg)
-
 
         # next step
 

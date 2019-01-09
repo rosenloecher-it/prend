@@ -1,5 +1,4 @@
-from . import *
-from .mobu import MobuBatch, MobuFlag, MobuItem, MobuResult
+from .mobu import MobuBatch, MobuFlag, MobuItem
 from pymodbus.constants import Endian
 
 
@@ -52,6 +51,10 @@ class FronmodConfig:
     EFLOW_INV_DC_IN = 'valPvEflowInvDcIn'
     EFLOW_INV_DC_OUT = 'valPvEflowInvDcOut'
     EFLOW_MOD_OUT = 'valPvEflowModOut'
+
+    # comprehensive
+    SHOW_SELF_CONSUMPTION = 'showPvSelfConsumption'  # = -1.0 * (TEMP_INV_AC_POWER + ITEM_MET_AC_POWER)
+    MOBU_SELF_CONSUMPTION = MobuItem(None, MobuFlag.NONE | MobuFlag.Q_QUICK, SHOW_SELF_CONSUMPTION)
 
     # Common & Inverter Model (ab Seite 29)
     INVERTER_START = 40070  # start pos
@@ -119,6 +122,11 @@ class FronmodConfig:
         MobuItem(None, MobuFlag.Q_QUICK, ITEM_MPPT_MOD_VOLTAGE),
         MobuItem(None, MobuFlag.Q_QUICK, SHOW_MPPT_BAT_POWER),
         MobuItem(None, MobuFlag.Q_QUICK, SHOW_MPPT_MOD_POWER),
+
+
+
+
+
     ])
 
     # Meter Model (ab Seite 62)

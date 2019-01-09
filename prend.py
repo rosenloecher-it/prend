@@ -1,8 +1,9 @@
 import sys
-from prend.process import Process
+from app.fronmod.fronmod_rule import FronmodRule
 from app.fronstor.fronstor_rule import FronstorRule
-from app.tehu_form_rule import TehuFormRule
 from app.led_status_rule import LedStatusRule
+from app.tehu_form_rule import TehuFormRule
+from prend.process import Process
 
 
 def main():
@@ -15,6 +16,7 @@ def main():
     process.register_rule(FronstorRule())
     process.register_rule(TehuFormRule())
     process.register_rule(LedStatusRule())
+    process.register_rule(FronmodRule())
 
     # run endless loop
     return process.run()

@@ -12,6 +12,8 @@ _logger = logging.getLogger(__name__)
 
 class FronmodProcessor:
 
+    SENDFLAGS = OhSendFlags.COMMAND | OhSendFlags.SEND_ONLY_IF_DIFFER
+
     def __init__(self):
         self._reader = None
 
@@ -31,6 +33,9 @@ class FronmodProcessor:
         self.eflow_mod = EflowChannel(FronmodConfig.ITEM_MPPT_MOD_POWER,
                                       EflowAggregate(FronmodConfig.EFLOW_MOD_OUT),
                                       None)
+
+        self.value_inv_ac_power = None
+        self.value_met_ac_power = None
 
     def set_reader(self, reader):
         self._reader = reader
@@ -54,13 +59,6 @@ class FronmodProcessor:
             queue_dict = self._send_slow
 
         return queue_dict
-
-    def get_send_data(self, flags):
-        send_data_list = []
-        queue_dict = self._get_queue_dict(flags)
-        for key, send_data in queue_dict.items():
-            send_data_list.append(send_data)
-        return send_data_list
 
     def process_model(self, read_conf: MobuBatch):
         try:
@@ -87,6 +85,9 @@ class FronmodProcessor:
 
         self.push_eflow(results, FronmodConfig.TEMP_INV_DC_POWER, self.eflow_inv_dc)
         self.push_eflow(results, FronmodConfig.TEMP_INV_AC_POWER, self.eflow_inv_ac)
+
+        self.value_inv_ac_power = self.get_value(results, FronmodConfig.TEMP_INV_AC_POWER)
+        self.process_self_consumption()
 
         return results
 
@@ -130,6 +131,9 @@ class FronmodProcessor:
         self.process_factor_scale(results, FronmodConfig.ITEM_MET_ENERGY_IMP_TOT
                                   , 0.001, FronmodConfig.SHOW_MET_ENERGY_IMP_TOT),
 
+        self.value_met_ac_power = self.get_value(results, FronmodConfig.ITEM_MET_AC_POWER)
+        self.process_self_consumption()
+
         return results
 
     def process_modbus_scale(self, results: dict, value_name: str, scale_name: str, target_name: str):
@@ -165,6 +169,16 @@ class FronmodProcessor:
         target_result.ready = True
         self.queue_send(target_result)
 
+    def process_self_consumption(self):
+        mobu_item = FronmodConfig.MOBU_SELF_CONSUMPTION
+        target_result = MobuResult(mobu_item.name)
+        target_result.item = mobu_item
+        target_result.value = None
+        target_result.ready = True
+        if self.value_inv_ac_power is not None and self.value_met_ac_power is not None:
+            target_result.value = -0.001 * (self.value_inv_ac_power + self.value_met_ac_power)
+        self.queue_send(target_result)
+
     @classmethod
     def push_eflow(cls, results, value_name, eflow):
         result = results[value_name]
@@ -172,16 +186,23 @@ class FronmodProcessor:
             raise FronmodException('can only push ready values!')
         eflow.push_value(result.value)
 
-    def persist_eflow_aggregates(self):
-        eflow_list = [self.eflow_inv_dc, self.eflow_inv_ac, self.eflow_bat, self.eflow_mod]
-        for eflow in eflow_list:
-            agg_list = eflow.get_aggregates_and_reset()
-            for agg in agg_list:
-                if agg.value_agg != 0:
-                    # todo
-                    channel = Channel.create(ChannelType.ITEM, agg.item_name)
-                    self._oh_gateway.send(OhSendFlags.COMMAND | OhSendFlags.SEND_ONLY_IF_DIFFER, channel, agg.value_agg)
-                    # self.queue_send(item_name, value)
+    def get_send_data(self, flags):
+        send_data_list = []
+        queue_dict = self._get_queue_dict(flags)
+        for key, send_data in queue_dict.items():
+            send_data_list.append(send_data)
+
+        if flags & MobuFlag.Q_MEDIUM:
+            eflow_list = [self.eflow_inv_dc, self.eflow_inv_ac, self.eflow_bat, self.eflow_mod]
+            for eflow in eflow_list:
+                agg_list = eflow.get_aggregates_and_reset()
+                for agg in agg_list:
+                    if agg.value_agg != 0:
+                        channel = Channel.create(ChannelType.ITEM, agg.item_name)
+                        send_data = OhSendData(self.SENDFLAGS, channel, agg.value_agg)
+                        send_data_list.append(send_data)
+
+        return send_data_list
 
     def queue_send(self, result: MobuResult):
         if not result or not result.ready:
@@ -190,7 +211,7 @@ class FronmodProcessor:
         queue_dict = self._get_queue_dict(result.item.flags)
         if queue_dict is not None:
             channel = Channel.create(ChannelType.ITEM, result.name)
-            send_data = OhSendData(OhSendFlags.COMMAND | OhSendFlags.SEND_ONLY_IF_DIFFER, channel, result.value)
+            send_data = OhSendData(self.SENDFLAGS, channel, result.value)
             queue_dict[result.name] = send_data
 
     @classmethod
@@ -203,8 +224,7 @@ class FronmodProcessor:
         return value
 
     @classmethod
-    def convert_scale_factor(cls, data_in, default_value=None):
-        sunssf = None
+    def convert_scale_factor(cls, data_in):
         if isinstance(data_in, MobuResult):
             sunssf = data_in.value
         else:
@@ -219,5 +239,12 @@ class FronmodProcessor:
         scale_factor = pow(10, sunssf)
         return scale_factor
 
-
+    @classmethod
+    def get_value(cls, results, value_name, default_value=None):
+        result = results[value_name]
+        if not result.ready:
+            raise FronmodException('can only deliver ready values!')
+        if result.value is not None:
+            return result.value
+        return default_value
 

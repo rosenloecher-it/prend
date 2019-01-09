@@ -33,7 +33,7 @@ class FronmodRule(Rule):
         try:
             port_text = self.get_config('fronmod', 'port')
             port = int(port_text)
-        except (ValueError, TypeError) as ex:
+        except (ValueError, TypeError):
             _logger.error('no port => disable!')
             return
 
