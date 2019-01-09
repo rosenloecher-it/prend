@@ -27,6 +27,8 @@ class OhRestException(Exception):
 class OhRest:
     def __init__(self, config: Config):
         self._rest_base_url = config.oh_rest_base_url
+        if not self._rest_base_url:
+            raise OhRestException('no openhab url!')
         self._username = config.oh_username
         self._password = config.oh_password
         self._simulate_sending = config.oh_simulate_sending

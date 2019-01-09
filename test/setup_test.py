@@ -82,5 +82,6 @@ class SetupTest:
         config.work_dir = cls.get_work_dir()
         config.logfile = os.path.join(config.work_dir, 'test.log')
         config.loglevel = 'debug'
+        config.oh_rest_base_url = 'dummy_url'
         return config
 
