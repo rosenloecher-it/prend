@@ -2,7 +2,6 @@ import copy
 import unittest
 from prend.action import Action
 from prend.channel import Channel, ChannelType
-from prend.config import Config
 from prend.dispatcher import DispatcherActionSink
 from prend.oh.oh_event import OhEvent, OhNotificationType
 from prend.oh.oh_gateway import OhGateway
@@ -13,6 +12,7 @@ from prend.state import State, StateType
 from prend.values import OnOffValue, ThingStatusValue
 from test.prend.oh.mock_oh_gateway import MockOhGateway
 from test.setup_test import SetupTest
+
 
 class MockRest(OhRest):
     def __init__(self):
@@ -140,7 +140,7 @@ class TestOhGateway(unittest.TestCase):
 
         channels = gateway.get_channels()
         for channel in channels:
-            found = check_channels.index(channel)
+            check_channels.index(channel)  # raises
             check_channels.remove(channel)
 
         self.assertEqual(0, len(check_channels))
