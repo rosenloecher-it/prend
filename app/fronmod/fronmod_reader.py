@@ -70,7 +70,7 @@ class FronmodReader:
         if response.isError():
             raise FronmodException('read_holding_registers failed!')
 
-        print('response.registers: ', response.registers)
+        #todo reactivate: print('response.registers: ', response.registers)
         return response.registers
 
     def read(self, read: MobuBatch):
