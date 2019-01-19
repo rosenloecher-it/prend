@@ -69,6 +69,7 @@ class RuleManager(Daemon):
     def shutdown_rest(self):
         try:
             if self._rest:
+                self._oh_gateway.send_queued()
                 self._rest.close()
                 self._rest = None
         except Exception as ex:
