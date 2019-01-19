@@ -3,6 +3,9 @@ from app.fronmod.fronmod_processor import FronmodProcessor
 from app.fronmod.fronmod_reader import FronmodReader
 
 
+# manual read inverter data
+
+
 class TestFronmodProcessorReadReal(unittest.TestCase):
 
     URL = '192.168.12.42'

@@ -188,7 +188,7 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
         out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.ITEM_SELF_CONSUMPTION, None)
         self.assertEqual(True, out)
 
-    def test_process_storage(self):
+    def test_process_storage_empty3(self):
 
         self.mock_reader.set_mock_read(FronmodConfig.STORAGE_BATCH, [
             124, 24, 3328, 100, 100, 0, 65535, 0, 300, 65535, 65535, 2, 10000, 10000, 65535, 65535, 65535, 1, 0, 0
@@ -206,7 +206,7 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
         out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_BAT_STATE, 2)
         self.assertEqual(True, out)
 
-    def test_process_storage_2(self):
+    def test_process_storage_discharge(self):
 
         self.mock_reader.set_mock_read(FronmodConfig.STORAGE_BATCH, [
             124, 24, 3328, 100, 100, 0, 65535, 0, 2400, 65535, 65535, 3, 10000, 10000, 65535, 65535, 65535, 1, 0, 0,
@@ -223,6 +223,27 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
 
         out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_BAT_STATE, 3)
         self.assertEqual(True, out)
+
+    def test_process_storage_loading(self):
+
+        # todo: wrong state from inverter
+
+        # self.mock_reader.set_mock_read(FronmodConfig.STORAGE_BATCH, [
+        #     124, 24, 3328, 100, 100, 0, 65535, 0, 1100, 65535, 65535, 2, 10000, 10000, 65535, 65535, 65535, 1, 0, 0,
+        #     32768, 65534, 65534, 65534, 65534, 65534
+        # ])
+        #
+        # self.processor.process_storage_model()
+        #
+        # out = self.processor.check_sent_count(0, 2, 0)
+        # self.assertEqual(0, out)
+        #
+        # out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_BAT_FILL_STATE, 11)
+        # self.assertEqual(True, out)
+        #
+        # out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_BAT_STATE, 2)
+        # self.assertEqual(True, out)
+        pass
 
     def test_process_mppt(self):
 
