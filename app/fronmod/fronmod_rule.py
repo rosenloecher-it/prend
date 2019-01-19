@@ -2,6 +2,7 @@ import logging
 import schedule
 from . import *
 from prend.channel import Channel, ChannelType
+from prend.oh.oh_send_data import OhSendFlags, OhSendData
 from prend.rule import Rule
 
 
@@ -47,11 +48,21 @@ class FronmodRule(Rule):
         self._is_open = True
 
     def close(self):
+        if self._is_open:
+            self.reset_items()
+
         self._is_open = False
         self._processor = None
         if self._reader:
             self._reader.close()
             self._reader = None
+
+        super().close()
+
+    def reset_items(self):
+        for item_name in FronmodConfig.RESET_ITEM_LIST:
+            data = OhSendData(OhSendFlags.UPDATE | OhSendFlags.CHANNEL_AS_ITEM, item_name, None)
+            self._oh_gateway.send_data(data)
 
     def register_actions(self) -> None:
         cron_job = schedule.every(5).seconds

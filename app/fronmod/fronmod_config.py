@@ -152,3 +152,45 @@ class FronmodConfig:
         MobuItem(None, MobuFlag.Q_MEDIUM, SHOW_MET_ENERGY_EXP_TOT),
         MobuItem(None, MobuFlag.Q_MEDIUM, SHOW_MET_ENERGY_IMP_TOT),
     ])
+
+    RESET_ITEM_LIST = [
+        # inverter
+        ITEM_INV_EFFICIENCY,
+        ITEM_INV_STATE_FRONIUS,
+        ITEM_INV_STATE_SUNSPEC,
+        SHOW_INV_AC_ENERGY_TOT,
+        SHOW_INV_AC_POWER,
+        SHOW_INV_DC_POWER,
+
+        # storage
+        ITEM_BAT_FILL_STATE,
+        ITEM_BAT_STATE,
+
+        # mppt
+        ITEM_MPPT_BAT_STATE,
+        ITEM_MPPT_MOD_POWER,
+        ITEM_MPPT_MOD_STATE,
+        ITEM_MPPT_MOD_VOLTAGE,
+        SHOW_MPPT_BAT_POWER,
+        SHOW_MPPT_MOD_POWER,
+
+        # meter
+        ITEM_MET_AC_FREQUENCY,
+        ITEM_MET_AC_POWER,
+        ITEM_MET_ENERGY_EXP_TOT,
+        ITEM_MET_ENERGY_IMP_TOT,
+        SHOW_MET_AC_POWER,
+        SHOW_MET_ENERGY_EXP_TOT,
+        SHOW_MET_ENERGY_IMP_TOT,
+
+        # eflow
+        EFLOW_BAT_IN,
+        EFLOW_BAT_OUT,
+        EFLOW_INV_AC_IN,
+        EFLOW_INV_AC_OUT,
+        EFLOW_INV_DC_IN,
+        EFLOW_INV_DC_OUT,
+        EFLOW_MOD_OUT,
+
+        ITEM_SELF_CONSUMPTION
+    ]
