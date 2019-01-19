@@ -60,8 +60,10 @@ class FronmodRule(Rule):
         super().close()
 
     def reset_items(self):
+        _logger.debug('reset_items')
+        flags = OhSendFlags.UPDATE | OhSendFlags.CHANNEL_AS_ITEM | OhSendFlags.SKIP_CHANNEL_CHECK
         for item_name in FronmodConfig.RESET_ITEM_LIST:
-            data = OhSendData(OhSendFlags.UPDATE | OhSendFlags.CHANNEL_AS_ITEM, item_name, None)
+            data = OhSendData(flags, item_name, None)
             self._oh_gateway.send_data(data)
 
     def register_actions(self) -> None:

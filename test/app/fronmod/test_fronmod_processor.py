@@ -2,7 +2,6 @@ import unittest
 import math
 from app.fronmod.fronmod_config import FronmodConfig
 from app.fronmod.fronmod_processor import FronmodProcessor
-from app.fronmod.fronmod_reader import FronmodReader
 from app.fronmod.fronmod_reader import MobuResult, MobuFlag
 from prend.state import State
 from test.app.fronmod.mock_fronmod_reader import MockFronmodReader
@@ -244,6 +243,23 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
         # out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_BAT_STATE, 2)
         # self.assertEqual(True, out)
         pass
+
+    def test_process_storage_holding(self):
+        self.mock_reader.set_mock_read(FronmodConfig.STORAGE_BATCH, [
+            124, 24, 3328, 100, 100, 0, 65535, 0, 2900, 65535, 65535, 6, 10000, 10000, 65535, 65535, 65535, 1, 0, 0,
+            32768, 65534, 65534, 65534, 65534, 65534
+        ])
+
+        self.processor.process_storage_model()
+
+        out = self.processor.check_sent_count(0, 2, 0)
+        self.assertEqual(0, out)
+
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_BAT_FILL_STATE, 29)
+        self.assertEqual(True, out)
+
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_BAT_STATE, 6)
+        self.assertEqual(True, out)
 
     def test_process_mppt(self):
 
