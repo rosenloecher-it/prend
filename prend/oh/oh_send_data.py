@@ -10,6 +10,7 @@ class OhSendFlags(IntFlag):
     UPDATE = 0x02
     SEND_ONLY_IF_DIFFER = 0x04
     CHANNEL_AS_ITEM = 0x08
+    SKIP_CHANNEL_CHECK = 0x10
 
 
 class OhSendData:
