@@ -2,6 +2,7 @@ import unittest
 import math
 from app.fronmod.fronmod_config import FronmodConfig
 from app.fronmod.fronmod_processor import FronmodProcessor
+from app.fronmod.fronmod_reader import FronmodReader
 from app.fronmod.fronmod_reader import MobuResult, MobuFlag
 from prend.state import State
 from test.app.fronmod.mock_fronmod_reader import MockFronmodReader
@@ -120,7 +121,7 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
         self.processor = self.FronmodProcessorExt()
         self.processor.set_reader(self.mock_reader)
 
-    def test_process_inverter(self):
+    def test_process_inverter_no_sun(self):
 
         self.mock_reader.set_mock_read(FronmodConfig.INVERTER_BATCH, [
             60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32704, 0, 32704, 0, 32704, 0,
@@ -130,7 +131,7 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
 
         self.processor.process_inverter_model()
 
-        out = self.processor.check_sent_count(3, 4, 0)
+        out = self.processor.check_sent_count(4, 4, 0)
         self.assertEqual(0, out)
 
         out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_INV_STATE_FRONIUS, 3)
@@ -142,12 +143,49 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
         out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.SHOW_INV_AC_ENERGY_TOT, 7000.744)
         self.assertEqual(True, out)
 
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.ITEM_INV_EFFICIENCY, 0)
+        self.assertEqual(True, out)
         out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_INV_AC_POWER, 0)
         self.assertEqual(True, out)
         out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_INV_DC_POWER, 0)
         self.assertEqual(True, out)
 
-        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_SELF_CONSUMPTION, None)
+        # FronmodProcessor.value_met_ac_power is None (set by "meter")
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.ITEM_SELF_CONSUMPTION, None)
+        self.assertEqual(True, out)
+
+    def test_process_inverter_sun(self):
+
+        self.mock_reader.set_mock_read(FronmodConfig.INVERTER_BATCH, [
+            60, 16280, 20972, 16076, 52429, 16076, 52429, 16071, 44564, 17354, 45875, 17355, 39322, 17355, 58982, 17258,
+            13107, 17258, 39322, 17259, 58982, 17293, 0, 16967, 55050, 17293, 58, 16256, 0, 49863, 65454, 19158, 29366,
+            32704, 0, 32704, 0, 17310, 22938, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0
+        ])
+
+        self.processor.process_inverter_model()
+
+        out = self.processor.check_sent_count(4, 4, 0)
+        self.assertEqual(0, out)
+
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_INV_STATE_FRONIUS, 4)
+        self.assertEqual(True, out)
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_INV_STATE_SUNSPEC, 4)
+        self.assertEqual(True, out)
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_INV_AC_ENERGY_TOT, 7027035)
+        self.assertEqual(True, out)
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.SHOW_INV_AC_ENERGY_TOT, 7027.035)
+        self.assertEqual(True, out)
+
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.ITEM_INV_EFFICIENCY, 89.04325517223303)
+        self.assertEqual(True, out)
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_INV_AC_POWER, 0.28200000000000003)
+        self.assertEqual(True, out)
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_INV_DC_POWER, 0.31670001220703126)
+        self.assertEqual(True, out)
+
+        # FronmodProcessor.value_met_ac_power is None (set by "meter")
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.ITEM_SELF_CONSUMPTION, None)
         self.assertEqual(True, out)
 
     def test_process_storage(self):
@@ -159,13 +197,34 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
 
         self.processor.process_storage_model()
 
-        out = self.processor.check_sent_count(0, 1, 0)
+        out = self.processor.check_sent_count(0, 2, 0)
         self.assertEqual(0, out)
 
         out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_BAT_FILL_STATE, 3)
         self.assertEqual(True, out)
 
-    def test_mppt_storage(self):
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_BAT_STATE, 2)
+        self.assertEqual(True, out)
+
+    def test_process_storage_2(self):
+
+        self.mock_reader.set_mock_read(FronmodConfig.STORAGE_BATCH, [
+            124, 24, 3328, 100, 100, 0, 65535, 0, 2400, 65535, 65535, 3, 10000, 10000, 65535, 65535, 65535, 1, 0, 0,
+            32768, 65534, 65534, 65534, 65534, 65534
+        ])
+
+        self.processor.process_storage_model()
+
+        out = self.processor.check_sent_count(0, 2, 0)
+        self.assertEqual(0, out)
+
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_BAT_FILL_STATE, 24)
+        self.assertEqual(True, out)
+
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_BAT_STATE, 3)
+        self.assertEqual(True, out)
+
+    def test_process_mppt(self):
 
         self.mock_reader.set_mock_read(FronmodConfig.MPPT_BATCH, [
             160, 48, 65534, 65534, 65534, 32768, 0, 0, 2, 65535, 1, 21364, 29289, 28263, 8241, 0, 0, 0, 0, 55, 56620,
@@ -188,6 +247,32 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
         out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_MPPT_BAT_POWER, 0.00366)
         self.assertEqual(True, out)
         out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_MPPT_MOD_POWER, 0.31141)
+        self.assertEqual(True, out)
+
+    def test_process_mppt_ffff_equals_0(self):
+        # fronius delivers 0xffff for *MPPT_MOD_STATE + MPPT_BAT_POWER !!!
+
+        self.mock_reader.set_mock_read(FronmodConfig.MPPT_BATCH, [
+            160, 48, 65534, 65534, 65534, 32768, 0, 0, 2, 65535, 1, 21364, 29289, 28263, 8241, 0, 0, 0, 0, 0, 350,
+            65535, 0, 0, 9161, 6067, 32768, 3, 65535, 65535, 2, 21364, 29289, 28263, 8242, 0, 0, 0, 0, 0, 260, 0, 0, 0,
+            9161, 6067, 32768, 3
+        ])
+
+        self.processor.process_mppt_model()
+
+        out = self.processor.check_sent_count(3, 2, 0)
+        self.assertEqual(0, out)
+
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_MPPT_MOD_STATE, 3)
+        self.assertEqual(True, out)
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_MPPT_BAT_STATE, 3)
+        self.assertEqual(True, out)
+
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.ITEM_MPPT_MOD_VOLTAGE, 3.5)
+        self.assertEqual(True, out)
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_MPPT_BAT_POWER, 0.0)
+        self.assertEqual(True, out)
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_MPPT_MOD_POWER, 0.0)
         self.assertEqual(True, out)
 
     def test_mppt_storage_ffff_equals_0(self):
@@ -249,7 +334,7 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
         out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_MET_AC_POWER, 0.501010009765625)
         self.assertEqual(True, out)
 
-        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_SELF_CONSUMPTION, None)
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.ITEM_SELF_CONSUMPTION, None)
         self.assertEqual(True, out)
 
     def test_process_self_consumption(self):
@@ -274,92 +359,91 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
 
         self.processor.process_meter_model()
 
-        out = self.processor.check_sent_count(4, 9, 0)
+        out = self.processor.check_sent_count(5, 9, 0)
         self.assertEqual(0, out)
 
         out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_MET_AC_POWER, 0.501010009765625)
         self.assertEqual(True, out)
 
-        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_SELF_CONSUMPTION, -0.501010009765625)
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.ITEM_SELF_CONSUMPTION, -0.501010009765625)
         self.assertEqual(True, out)
 
 
-class TestFronmodProcessorReadReal(unittest.TestCase):
-
-    URL = '192.168.12.42'
-    PORT = 502
-
-    @classmethod
-    def print_read_result(cls, desc, results):
-        print(desc)
-        if results is None:
-            print('    None')
-        else:
-            for key, val in results.items():
-                print('    {} = {}'.format(key, val))
-
-    def test_print_read_result(self):
-        self.print_read_result('test', None)
-
-    #
-    # def test_process_inverter_model(self):
-    #     reader = FronmodReader(self.URL, self.PORT)
-    #     processor = FronmodProcessor()
-    #     processor.set_reader(reader)
-    #
-    #     try:
-    #         processor.open()
-    #         results = processor.process_inverter_model()
-    #         self.print_read_result('process_inverter_model', results)
-    #
-    #         print('succeed')
-    #         self.assertTrue(True)
-    #     finally:
-    #         processor.close()
-    #
-    # def test_process_storage_model(self):
-    #     reader = FronmodReader(self.URL, self.PORT)
-    #     processor = FronmodProcessor()
-    #     processor.set_reader(reader)
-    #
-    #     try:
-    #         processor.open()
-    #         results = processor.process_storage_model()
-    #         self.print_read_result('process_storage_model', results)
-    #
-    #         print('succeed')
-    #         self.assertTrue(True)
-    #     finally:
-    #         processor.close()
-    #
-    # def test_process_mppt_model(self):
-    #     reader = FronmodReader(self.URL, self.PORT)
-    #     processor = FronmodProcessor()
-    #     processor.set_reader(reader)
-    #
-    #     try:
-    #         processor.open()
-    #         results = processor.process_mppt_model()
-    #         self.print_read_result('process_mppt_model', results)
-    #
-    #         print('succeed')
-    #         self.assertTrue(True)
-    #     finally:
-    #         processor.close()
-    #
-    # def test_process_meter_model(self):
-    #     reader = FronmodReader(self.URL, self.PORT)
-    #     processor = FronmodProcessor()
-    #     processor.set_reader(reader)
-    #
-    #     try:
-    #         processor.open()
-    #         results = processor.process_meter_model()
-    #         self.print_read_result('process_meter_model', results)
-    #
-    #         print('succeed')
-    #         self.assertTrue(True)
-    #     finally:
-    #         processor.close()
-
-
+# class TestFronmodProcessorReadReal(unittest.TestCase):
+#
+#     URL = '192.168.12.42'
+#     PORT = 502
+#
+#     @classmethod
+#     def print_read_result(cls, desc, results):
+#         print(desc)
+#         if results is None:
+#             print('    None')
+#         else:
+#             for key, val in results.items():
+#                 print('    {} = {}'.format(key, val))
+#
+#     def test_print_read_result(self):
+#         self.print_read_result('test', None)
+#
+#     def test_process_inverter_model(self):
+#         reader = FronmodReader(self.URL, self.PORT)
+#         processor = FronmodProcessor()
+#         processor.set_reader(reader)
+#
+#         try:
+#             processor.open()
+#             results = processor.process_inverter_model()
+#             self.print_read_result('process_inverter_model', results)
+#
+#             print('succeed')
+#             self.assertTrue(True)
+#         finally:
+#             processor.close()
+#
+#     def test_process_storage_model(self):
+#         reader = FronmodReader(self.URL, self.PORT)
+#         processor = FronmodProcessor()
+#         processor.set_reader(reader)
+#
+#         try:
+#             processor.open()
+#             results = processor.process_storage_model()
+#             self.print_read_result('process_storage_model', results)
+#
+#             print('succeed')
+#             self.assertTrue(True)
+#         finally:
+#             processor.close()
+#
+#     def test_process_mppt_model(self):
+#         reader = FronmodReader(self.URL, self.PORT)
+#         processor = FronmodProcessor()
+#         processor.set_reader(reader)
+#
+#         try:
+#             processor.open()
+#             results = processor.process_mppt_model()
+#             self.print_read_result('process_mppt_model', results)
+#
+#             print('succeed')
+#             self.assertTrue(True)
+#         finally:
+#             processor.close()
+#
+#     def test_process_meter_model(self):
+#         reader = FronmodReader(self.URL, self.PORT)
+#         processor = FronmodProcessor()
+#         processor.set_reader(reader)
+#
+#         try:
+#             processor.open()
+#             results = processor.process_meter_model()
+#             self.print_read_result('process_meter_model', results)
+#
+#             print('succeed')
+#             self.assertTrue(True)
+#         finally:
+#             processor.close()
+#
+#

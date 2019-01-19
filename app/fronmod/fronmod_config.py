@@ -7,16 +7,18 @@ class FronmodConfig:
 
     # inverter
     ITEM_INV_AC_ENERGY_TOT = 'valPvInvAcEnergyTot'
+    ITEM_INV_EFFICIENCY = 'valPvInvEfficiency'
     ITEM_INV_STATE_FRONIUS = 'valPvInvFroniusState'
     ITEM_INV_STATE_SUNSPEC = 'valPvInvSunSpecState'
-    TEMP_INV_AC_POWER = 'tempPvInvAcPower'
-    TEMP_INV_DC_POWER = 'tempPvInvDcPower'
     SHOW_INV_AC_ENERGY_TOT = 'showPvInvAcEnergyTot'
     SHOW_INV_AC_POWER = 'showPvInvAcPower'
     SHOW_INV_DC_POWER = 'showPvInvDcPower'
+    TEMP_INV_AC_POWER = 'tempPvInvAcPower'
+    TEMP_INV_DC_POWER = 'tempPvInvDcPower'
 
     # storage
     ITEM_BAT_FILL_STATE = 'valPvBatFillState'
+    ITEM_BAT_STATE = 'valPvBatState'
     RAW_BAT_FILL_STATE = 'rawPvBatFillState'
     RAW_BAT_FILL_STATE_SF = 'rawPvBatFillStateSf'
 
@@ -53,8 +55,8 @@ class FronmodConfig:
     EFLOW_MOD_OUT = 'valPvEflowModOut'
 
     # comprehensive
-    SHOW_SELF_CONSUMPTION = 'showPvSelfConsumption'  # = -1.0 * (TEMP_INV_AC_POWER + ITEM_MET_AC_POWER)
-    MOBU_SELF_CONSUMPTION = MobuItem(None, MobuFlag.NONE | MobuFlag.Q_QUICK, SHOW_SELF_CONSUMPTION)
+    ITEM_SELF_CONSUMPTION = 'valPvSelfConsumption'  # = -1.0 * (TEMP_INV_AC_POWER + ITEM_MET_AC_POWER)
+    MOBU_SELF_CONSUMPTION = MobuItem(None, MobuFlag.NONE | MobuFlag.Q_QUICK, ITEM_SELF_CONSUMPTION)
 
     # Common & Inverter Model (ab Seite 29)
     INVERTER_START = 40070  # start pos
@@ -75,6 +77,7 @@ class FronmodConfig:
         # openhab: Number valPvInvFroniusState   "WR-Fronius-Status [MAP(pv_state_inv_fronius.map):%s]"
         MobuItem(40119 - INVERTER_START, MobuFlag.INT16 | MobuFlag.Q_MEDIUM, ITEM_INV_STATE_FRONIUS),
 
+        MobuItem(None, MobuFlag.Q_QUICK, ITEM_INV_EFFICIENCY),
         MobuItem(None, MobuFlag.Q_MEDIUM, SHOW_INV_AC_ENERGY_TOT),
         MobuItem(None, MobuFlag.Q_QUICK, SHOW_INV_AC_POWER),
         MobuItem(None, MobuFlag.Q_QUICK, SHOW_INV_DC_POWER),
@@ -90,6 +93,11 @@ class FronmodConfig:
         MobuItem(23, MobuFlag.INT16, RAW_BAT_FILL_STATE_SF),
         # openhab: Number valPvBatFillState "Batterie-Ladung [%.0f %%]" <battery> (gRawPvMod, gPers5Minutes)
         MobuItem(None, MobuFlag.Q_MEDIUM, ITEM_BAT_FILL_STATE),
+        # Number valPvBatState "Batterie-Status [MAP(pv_state_batt.map):%s]"
+        #  {modbus = "<[storage:11:valueType=uint16]"} // 40303 + 12
+        MobuItem(12, MobuFlag.UINT16 | MobuFlag.Q_MEDIUM, ITEM_BAT_STATE),
+
+
     ])
 
     # Multiple MPPT Inverter Extension Model (I160) (ab Seite 57)
@@ -122,11 +130,6 @@ class FronmodConfig:
         MobuItem(None, MobuFlag.Q_QUICK, ITEM_MPPT_MOD_VOLTAGE),
         MobuItem(None, MobuFlag.Q_QUICK, SHOW_MPPT_BAT_POWER),
         MobuItem(None, MobuFlag.Q_QUICK, SHOW_MPPT_MOD_POWER),
-
-
-
-
-
     ])
 
     # Meter Model (ab Seite 62)

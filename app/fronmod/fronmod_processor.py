@@ -88,6 +88,7 @@ class FronmodProcessor:
 
         self.value_inv_ac_power = self.get_value(results, FronmodConfig.TEMP_INV_AC_POWER)
         self.process_self_consumption()
+        self.process_inv_efficiency(results)
 
         return results
 
@@ -177,6 +178,27 @@ class FronmodProcessor:
         target_result.ready = True
         if self.value_inv_ac_power is not None and self.value_met_ac_power is not None:
             target_result.value = -0.001 * (self.value_inv_ac_power + self.value_met_ac_power)
+        self.queue_send(target_result)
+
+    def process_inv_efficiency(self, results: dict):
+        value_target = None
+        try:
+            ac_power = results.get(FronmodConfig.TEMP_INV_AC_POWER)
+            dc_power = results.get(FronmodConfig.TEMP_INV_DC_POWER)
+            if ac_power and ac_power.ready and dc_power and dc_power.ready:
+                if dc_power.value == 0:
+                    value_target = 0
+                else:
+                    value_target = 100.0 * ac_power.value / dc_power.value
+
+        except (TypeError, ValueError) as ex:
+            _logger.error('process_inv_efficiency failed!')
+            _logger.exception(ex)
+            value_target = None
+
+        target_result = results[FronmodConfig.ITEM_INV_EFFICIENCY]
+        target_result.value = value_target
+        target_result.ready = True
         self.queue_send(target_result)
 
     @classmethod
