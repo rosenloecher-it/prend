@@ -269,6 +269,11 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
             0, 0, 9155, 20421, 32768, 4
         ])
 
+        bat_power_expected = -0.00366
+        mod_power_expected = 0.31141
+
+        self.processor.value_inv_dc_power = (mod_power_expected + bat_power_expected) * 1000
+
         self.processor.process_mppt_model()
 
         out = self.processor.check_sent_count(3, 2, 0)
@@ -281,9 +286,9 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
 
         out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.ITEM_MPPT_MOD_VOLTAGE, 566.2)
         self.assertEqual(True, out)
-        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_MPPT_BAT_POWER, 0.00366)
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_MPPT_BAT_POWER, bat_power_expected)
         self.assertEqual(True, out)
-        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_MPPT_MOD_POWER, 0.31141)
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_MPPT_MOD_POWER, mod_power_expected)
         self.assertEqual(True, out)
 
     def test_process_mppt_ffff_equals_0(self):

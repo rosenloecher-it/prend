@@ -27,7 +27,7 @@ class FronmodProcessor:
         self.eflow_inv_ac = EflowChannel(FronmodConfig.TEMP_INV_AC_POWER,
                                          EflowAggregate(FronmodConfig.EFLOW_INV_AC_OUT),
                                          EflowAggregate(FronmodConfig.EFLOW_INV_AC_IN))
-        self.eflow_bat = EflowChannel(FronmodConfig.TEMP_MPPT_BAT_POWER,
+        self.eflow_bat = EflowChannel(FronmodConfig.RAW2_MPPT_BAT_POWER,
                                       EflowAggregate(FronmodConfig.EFLOW_BAT_OUT),
                                       EflowAggregate(FronmodConfig.EFLOW_BAT_IN))
         self.eflow_mod = EflowChannel(FronmodConfig.ITEM_MPPT_MOD_POWER,
@@ -35,6 +35,7 @@ class FronmodProcessor:
                                       None)
 
         self.value_inv_ac_power = None
+        self.value_inv_dc_power = None
         self.value_met_ac_power = None
 
     def set_reader(self, reader):
@@ -87,6 +88,8 @@ class FronmodProcessor:
         self.push_eflow(results, FronmodConfig.TEMP_INV_AC_POWER, self.eflow_inv_ac)
 
         self.value_inv_ac_power = self.get_value(results, FronmodConfig.TEMP_INV_AC_POWER)
+        self.value_inv_dc_power = self.get_value(results, FronmodConfig.TEMP_INV_DC_POWER)
+
         self.process_self_consumption()
         self.process_inv_efficiency(results)
 
@@ -109,7 +112,9 @@ class FronmodProcessor:
                                   , FronmodConfig.ITEM_MPPT_MOD_POWER)
 
         self.process_modbus_scale(results, FronmodConfig.RAW_MPPT_BAT_POWER, FronmodConfig.RAW_MPPT_POWER_SF
-                                  , FronmodConfig.TEMP_MPPT_BAT_POWER)
+                                  , FronmodConfig.RAW2_MPPT_BAT_POWER)
+
+        self.process_bat_power_sign(results)  # RAW2_MPPT_BAT_POWER => TEMP_MPPT_BAT_POWER
 
         self.process_factor_scale(results, FronmodConfig.TEMP_MPPT_BAT_POWER
                                   , 0.001, FronmodConfig.SHOW_MPPT_BAT_POWER),
@@ -180,16 +185,43 @@ class FronmodProcessor:
             target_result.value = -0.001 * (self.value_inv_ac_power + self.value_met_ac_power)
         self.queue_send(target_result)
 
+    def process_bat_power_sign(self, results: dict):
+        value_target = None
+        try:
+            raw_bat_power = results.get(FronmodConfig.RAW2_MPPT_BAT_POWER)
+
+            if raw_bat_power and raw_bat_power.ready:
+                mod_power = results.get(FronmodConfig.ITEM_MPPT_MOD_POWER)
+                if mod_power and mod_power.ready:
+                    charge_factor = 0
+                    if self.value_inv_dc_power is not None:
+                        power_abs_1 = abs(0.0 + self.value_inv_dc_power - mod_power.value + raw_bat_power.value)
+                        power_abs_2 = abs(0.0 + self.value_inv_dc_power - mod_power.value - raw_bat_power.value)
+                        if power_abs_1 < power_abs_2:
+                            charge_factor = -1.0
+                        else:
+                            charge_factor = 1.0
+
+                    value_target = raw_bat_power.value * charge_factor
+
+        except (TypeError, ValueError) as ex:
+            _logger.error('process_bat_power_sign failed!')
+            _logger.exception(ex)
+            value_target = None
+
+        target_result = results[FronmodConfig.TEMP_MPPT_BAT_POWER]
+        target_result.value = value_target
+        target_result.ready = True
+        self.queue_send(target_result)
+
     def process_inv_efficiency(self, results: dict):
         value_target = None
         try:
-            ac_power = results.get(FronmodConfig.TEMP_INV_AC_POWER)
-            dc_power = results.get(FronmodConfig.TEMP_INV_DC_POWER)
-            if ac_power and ac_power.ready and dc_power and dc_power.ready:
-                if dc_power.value == 0:
+            if self.value_inv_ac_power is not None and self.value_inv_dc_power is not None:
+                if self.value_inv_dc_power == 0:
                     value_target = 0
                 else:
-                    value_target = 100.0 * ac_power.value / dc_power.value
+                    value_target = 100.0 * self.value_inv_ac_power / self.value_inv_dc_power
 
         except (TypeError, ValueError) as ex:
             _logger.error('process_inv_efficiency failed!')

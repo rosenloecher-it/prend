@@ -23,8 +23,8 @@ class TestFronmodProcessorReadReal(unittest.TestCase):
     def test_print_read_result(self):
         self.print_read_result('test', None)
 
-    def test_process_inverter_model(self):
-        reader = FronmodReader(self.URL, self.PORT)
+    def test_process_all(self):
+        reader = FronmodReader(self.URL, self.PORT, print_registers=True)
         processor = FronmodProcessor()
         processor.set_reader(reader)
 
@@ -33,33 +33,12 @@ class TestFronmodProcessorReadReal(unittest.TestCase):
             results = processor.process_inverter_model()
             self.print_read_result('process_inverter_model', results)
 
-            print('succeed')
-            self.assertTrue(True)
-        finally:
-            processor.close()
-
-    def test_process_storage_model(self):
-        reader = FronmodReader(self.URL, self.PORT)
-        processor = FronmodProcessor()
-        processor.set_reader(reader)
-
-        try:
-            processor.open()
             results = processor.process_storage_model()
             self.print_read_result('process_storage_model', results)
 
-            print('succeed')
-            self.assertTrue(True)
-        finally:
-            processor.close()
+            results = processor.process_meter_model()
+            self.print_read_result('process_meter_model', results)
 
-    def test_process_mppt_model(self):
-        reader = FronmodReader(self.URL, self.PORT)
-        processor = FronmodProcessor()
-        processor.set_reader(reader)
-
-        try:
-            processor.open()
             results = processor.process_mppt_model()
             self.print_read_result('process_mppt_model', results)
 
@@ -68,18 +47,63 @@ class TestFronmodProcessorReadReal(unittest.TestCase):
         finally:
             processor.close()
 
-    def test_process_meter_model(self):
-        reader = FronmodReader(self.URL, self.PORT)
-        processor = FronmodProcessor()
-        processor.set_reader(reader)
-
-        try:
-            processor.open()
-            results = processor.process_meter_model()
-            self.print_read_result('process_meter_model', results)
-
-            print('succeed')
-            self.assertTrue(True)
-        finally:
-            processor.close()
+    # def test_process_inverter_model(self):
+    #     reader = FronmodReader(self.URL, self.PORT, print_registers=True)
+    #     processor = FronmodProcessor()
+    #     processor.set_reader(reader)
+    #
+    #     try:
+    #         processor.open()
+    #         results = processor.process_inverter_model()
+    #         self.print_read_result('process_inverter_model', results)
+    #
+    #         print('succeed')
+    #         self.assertTrue(True)
+    #     finally:
+    #         processor.close()
+    #
+    # def test_process_storage_model(self):
+    #     reader = FronmodReader(self.URL, self.PORT, print_registers=True)
+    #     processor = FronmodProcessor()
+    #     processor.set_reader(reader)
+    #
+    #     try:
+    #         processor.open()
+    #         results = processor.process_storage_model()
+    #         self.print_read_result('process_storage_model', results)
+    #
+    #         print('succeed')
+    #         self.assertTrue(True)
+    #     finally:
+    #         processor.close()
+    #
+    # def test_process_mppt_model(self):
+    #     reader = FronmodReader(self.URL, self.PORT, print_registers=True)
+    #     processor = FronmodProcessor()
+    #     processor.set_reader(reader)
+    #
+    #     try:
+    #         processor.open()
+    #         results = processor.process_mppt_model()
+    #         self.print_read_result('process_mppt_model', results)
+    #
+    #         print('succeed')
+    #         self.assertTrue(True)
+    #     finally:
+    #         processor.close()
+    #
+    # def test_process_meter_model(self):
+    #     reader = FronmodReader(self.URL, self.PORT, print_registers=True)
+    #     processor = FronmodProcessor()
+    #     processor.set_reader(reader)
+    #
+    #     try:
+    #         processor.open()
+    #         results = processor.process_meter_model()
+    #         self.print_read_result('process_meter_model', results)
+    #
+    #         print('succeed')
+    #         self.assertTrue(True)
+    #     finally:
+    #         processor.close()
 

@@ -23,11 +23,11 @@ class FronmodConfig:
     RAW_BAT_FILL_STATE_SF = 'rawPvBatFillStateSf'
 
     # mppt
-    TEMP_MPPT_BAT_POWER = 'tempPvBatPower'
     ITEM_MPPT_BAT_STATE = 'valPvMpptBatState'
     ITEM_MPPT_MOD_POWER = 'valPvModPower'
     ITEM_MPPT_MOD_STATE = 'valPvMpptModState'
     ITEM_MPPT_MOD_VOLTAGE = 'valPvModVoltage'
+    RAW2_MPPT_BAT_POWER = 'raw2PvBatPower'
     RAW_MPPT_BAT_POWER = 'rawPvMpptBattPower'
     RAW_MPPT_MOD_POWER = 'rawPvMpptModPower'
     RAW_MPPT_MOD_VOLTAGE = 'rawPvMpptModVoltage'
@@ -35,6 +35,7 @@ class FronmodConfig:
     RAW_MPPT_VOLTAGE_SF = 'rawPvMpptVoltageSfBase'
     SHOW_MPPT_BAT_POWER = 'showPvBatPower'
     SHOW_MPPT_MOD_POWER = 'showPvModPower'
+    TEMP_MPPT_BAT_POWER = 'tempPvBatPower'
 
     # meter
     ITEM_MET_AC_FREQUENCY = 'valPvMetAcFrequency'
@@ -125,6 +126,7 @@ class FronmodConfig:
         # openhab: Number valPvMpptBatState "MPPT-Batterie-Status [MAP(pv_state_mppt.map):%s]" {modbus="<[mppt:47]"}
         MobuItem(48, MobuFlag.INT16 | MobuFlag.Q_MEDIUM, ITEM_MPPT_BAT_STATE),
 
+        MobuItem(None, MobuFlag.NONE, RAW2_MPPT_BAT_POWER),
         MobuItem(None, MobuFlag.NONE, TEMP_MPPT_BAT_POWER),
         MobuItem(None, MobuFlag.NONE, ITEM_MPPT_MOD_POWER),
         MobuItem(None, MobuFlag.Q_QUICK, ITEM_MPPT_MOD_VOLTAGE),

@@ -6,10 +6,11 @@ from pymodbus.payload import BinaryPayloadDecoder
 
 class FronmodReader:
 
-    def __init__(self, url, port):
+    def __init__(self, url, port, print_registers=False):
         self._client = None
         self._url = url
         self._port = port
+        self._print_registers = print_registers
 
     def open(self):
         self._client = ModbusClient(self._url, port=self._port)
@@ -70,7 +71,8 @@ class FronmodReader:
         if response.isError():
             raise FronmodException('read_holding_registers failed!')
 
-        #todo reactivate: print('response.registers: ', response.registers)
+        if self._print_registers:
+            print('response.registers: ', response.registers)
         return response.registers
 
     def read(self, read: MobuBatch):

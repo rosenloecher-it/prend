@@ -118,7 +118,7 @@ class FronmodRule(Rule):
             _logger.error('notify_action failed - %s', ex)
 
     def handle_cron_fetch_quick(self):
-        self._processor.process_inverter_model()
+        self._processor.process_inverter_model()  # must be first
         self._processor.process_mppt_model()
         self._processor.process_meter_model()
 
