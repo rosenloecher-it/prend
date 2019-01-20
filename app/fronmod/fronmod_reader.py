@@ -1,7 +1,15 @@
 from . import *
+import logging
 from .mobu import MobuBatch, MobuFlag, MobuItem, MobuResult
 from pymodbus.client.sync import ModbusTcpClient as ModbusClient
 from pymodbus.payload import BinaryPayloadDecoder
+
+
+_logger = logging.getLogger(__name__)
+
+
+class FronmodReadException(FronmodException):
+    pass
 
 
 class FronmodReader:
@@ -69,7 +77,8 @@ class FronmodReader:
 
         response = self._client.read_holding_registers(read.pos, read.length, unit=read.unit_id)
         if response.isError():
-            raise FronmodException('read_holding_registers failed!')
+            _logger.error('read_holding_registers failed - response: {}'.format(str(response)))
+            raise FronmodReadException('read_holding_registers failed!')
 
         if self._print_registers:
             print('response.registers: ', response.registers)

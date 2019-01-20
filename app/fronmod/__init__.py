@@ -3,7 +3,7 @@ from .mobu import MobuBatch, MobuFlag, MobuItem, MobuResult
 from .fronmod_config import FronmodConfig
 from .fronmod_exception import FronmodException
 from .fronmod_processor import FronmodProcessor
-from .fronmod_reader import FronmodReader
+from .fronmod_reader import FronmodReader, FronmodReadException
 
 
 __all__ = [
@@ -13,6 +13,7 @@ __all__ = [
     'FronmodException',
     'FronmodProcessor',
     'FronmodReader',
+    'FronmodReadException',
     'MobuBatch',
     'MobuFlag',
     'MobuItem',

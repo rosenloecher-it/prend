@@ -24,25 +24,25 @@ class FronmodRule(Rule):
         self._is_open = False
         self._processor = None
         self._reader = None
-        pass
+        self._url = None
+        self._port = None
+        self._read_error = 0
 
     def open(self):
-        url = self.get_config('fronmod', 'url')
-        if not url:
+        self._url = self.get_config('fronmod', 'url')
+        if not self._url:
             _logger.warning('no url => disable!')
             return
+
         try:
             port_text = self.get_config('fronmod', 'port')
-            port = int(port_text)
+            self._port = int(port_text)
         except (ValueError, TypeError):
             _logger.error('no port => disable!')
             return
 
-        self._reader = FronmodReader(url, port)
-        self._reader.open()
-
         self._processor = FronmodProcessor()
-        self._processor.set_reader(self._reader)
+        self._reconnect_reader()
 
         super().open()
         self._is_open = True
@@ -76,7 +76,7 @@ class FronmodRule(Rule):
         cron_job = schedule.every(60).seconds
         self.subscribe_cron_actions(self.CRON_FETCH_SLOW, cron_job)
 
-        cron_job = schedule.every(10).seconds
+        cron_job = schedule.every(15).seconds
         self.subscribe_cron_actions(self.CRON_SENT_QUICK, cron_job)
 
         cron_job = schedule.every(60).seconds
@@ -88,11 +88,25 @@ class FronmodRule(Rule):
         channel = Channel.create_startup()
         self.subscribe_channel_actions(channel)
 
+    def _reconnect_reader(self):
+        if self._reader:
+            self._reader.close()
+            _logger.info('_reconnect_reader')
+
+        self._reader = FronmodReader(self._url, self._port)
+        self._reader.open()
+        self._processor.set_reader(self._reader)
+
+        self._read_error = 0
+
     def notify_action(self, action) -> None:
         try:
             if not self._is_open:
                 _logger.debug('not opened => abort')
                 return
+
+            if self._read_error > 5:
+                self._reconnect_reader()
 
             # # check for general connection to openhab
             # if not self.is_connected():
@@ -116,6 +130,10 @@ class FronmodRule(Rule):
 
         except FronmodException as ex:
             _logger.error('notify_action failed - %s', ex)
+
+            if isinstance(ex, FronmodReadException):
+                self._read_error += 1
+
 
     def handle_cron_fetch_quick(self):
         self._processor.process_inverter_model()  # must be first
