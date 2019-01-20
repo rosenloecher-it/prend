@@ -346,13 +346,10 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
     def test_process_meter(self):
 
         self.mock_reader.set_mock_read(FronmodConfig.METER_BATCH, [
-            124, 16440, 62915, 16249, 39322, 16208, 41943, 16268, 52429, 17259, 56798, 17259, 13107, 17259, 58982,
-            17260, 32768, 17356, 17476, 17356, 0, 17356, 36045, 17356, 16384, 16968, 0, 17402, 33096, 17195, 57672,
-            17073, 51118, 17264, 15729, 17428, 16384, 17253, 20972, 17216, 16941, 17282, 4915, 50079, 11469, 49888,
-            11796, 49931, 64881, 49796, 35389, 16215, 2621, 16212, 31457, 16135, 44564, 16245, 49807, 19079, 16250,
-            32704, 0, 32704, 0, 32704, 0, 18754, 62816, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0,
-            32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704,
-            0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 0
+            16384, 16968, 0, 16528, 62915, 16967, 55050, 16831, 2621, 49802, 40632, 17298, 61932, 17197, 16187, 17236,
+            42362, 17172, 54788, 50066, 61932, 49840, 57672, 49929, 53084, 49799, 18350, 15395, 55050, 16122, 57672,
+            15918, 5243, 48949, 49807, 19079, 34320, 32704, 0, 32704, 0, 32704, 0, 18772, 13440, 32704, 0, 32704, 0,
+            32704
         ])
 
         self.processor.process_meter_model()
@@ -363,17 +360,17 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
         out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_MET_AC_FREQUENCY, 50.0)
         self.assertEqual(True, out)
 
-        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_MET_ENERGY_EXP_TOT, 4431805.0)
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_MET_ENERGY_EXP_TOT, 4440840.0)
         self.assertEqual(True, out)
-        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.SHOW_MET_ENERGY_EXP_TOT, 4431.805)
-        self.assertEqual(True, out)
-
-        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_MET_ENERGY_IMP_TOT, 798550.0)
-        self.assertEqual(True, out)
-        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.SHOW_MET_ENERGY_IMP_TOT, 798.55)
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.SHOW_MET_ENERGY_EXP_TOT, 4440.84)
         self.assertEqual(True, out)
 
-        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_MET_AC_POWER, 0.501010009765625)
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_MET_ENERGY_IMP_TOT, 869192.0)
+        self.assertEqual(True, out)
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.SHOW_MET_ENERGY_IMP_TOT, 869.192)
+        self.assertEqual(True, out)
+
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_MET_AC_POWER, 0.00453000020980835)
         self.assertEqual(True, out)
 
         out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.ITEM_SELF_CONSUMPTION, None)
@@ -382,21 +379,18 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
     def test_process_self_consumption(self):
 
         self.mock_reader.set_mock_read(FronmodConfig.INVERTER_BATCH, [
-            60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32704, 0, 32704, 0, 32704, 0,
-            19157, 42320, 32704, 0, 32704, 0, 0, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0,
+            60, 16744, 52429, 16539, 34079, 16539, 34079, 16538, 36700, 17355, 52429, 17357, 39322, 17357, 52429, 17258,
+            45875, 17261, 26214, 17262, 13107, 17751, 36864, 16967, 62915, 17751, 37126, 49576, 0, 17095, 65293, 19158,
+            64272, 32704, 0, 32704, 0, 17759, 57344, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0
         ])
 
         self.processor.process_inverter_model()
 
         self.mock_reader.set_mock_read(FronmodConfig.METER_BATCH, [
-            124, 16440, 62915, 16249, 39322, 16208, 41943, 16268, 52429, 17259, 56798, 17259, 13107, 17259, 58982,
-            17260, 32768, 17356, 17476, 17356, 0, 17356, 36045, 17356, 16384, 16968, 0, 17402, 33096, 17195, 57672,
-            17073, 51118, 17264, 15729, 17428, 16384, 17253, 20972, 17216, 16941, 17282, 4915, 50079, 11469, 49888,
-            11796, 49931, 64881, 49796, 35389, 16215, 2621, 16212, 31457, 16135, 44564, 16245, 49807, 19079, 16250,
-            32704, 0, 32704, 0, 32704, 0, 18754, 62816, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0,
-            32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704,
-            0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 32704, 0, 0
+            3277, 16968, 0, 50336, 573, 17489, 164, 50308, 49889, 50307, 49070, 17571, 49152, 17494, 1720, 17543, 25876,
+            17540, 39715, 50059, 12124, 49841, 47186, 49936, 28180, 49716, 20972, 49016, 20972, 16253, 28836, 49021,
+            28836, 49021, 28836, 19079, 35284, 32704, 0, 32704, 0, 32704, 0, 18772, 13440, 32704, 0, 32704, 0, 32704
         ])
 
         self.processor.process_meter_model()
@@ -404,9 +398,9 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
         out = self.processor.check_sent_count(5, 9, 0)
         self.assertEqual(0, out)
 
-        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_MET_AC_POWER, 0.501010009765625)
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_MET_AC_POWER, -1.2800699462890626)
         self.assertEqual(True, out)
 
-        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.ITEM_SELF_CONSUMPTION, -0.501010009765625)
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.ITEM_SELF_CONSUMPTION, -2.1689300537109375)
         self.assertEqual(True, out)
 

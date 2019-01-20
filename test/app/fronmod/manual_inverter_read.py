@@ -33,14 +33,22 @@ class TestFronmodProcessorReadReal(unittest.TestCase):
             results = processor.process_inverter_model()
             self.print_read_result('process_inverter_model', results)
 
+            processor.print_cached_values()
+
             results = processor.process_storage_model()
             self.print_read_result('process_storage_model', results)
+
+            processor.print_cached_values()
 
             results = processor.process_meter_model()
             self.print_read_result('process_meter_model', results)
 
+            processor.print_cached_values()
+
             results = processor.process_mppt_model()
             self.print_read_result('process_mppt_model', results)
+
+            processor.print_cached_values()
 
             print('succeed')
             self.assertTrue(True)

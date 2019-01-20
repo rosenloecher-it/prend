@@ -57,7 +57,6 @@ class FronmodConfig:
 
     # comprehensive
     ITEM_SELF_CONSUMPTION = 'valPvSelfConsumption'  # = -1.0 * (TEMP_INV_AC_POWER + ITEM_MET_AC_POWER)
-    MOBU_SELF_CONSUMPTION = MobuItem(None, MobuFlag.NONE | MobuFlag.Q_QUICK, ITEM_SELF_CONSUMPTION)
 
     # Common & Inverter Model (ab Seite 29)
     INVERTER_START = 40070  # start pos
@@ -83,6 +82,7 @@ class FronmodConfig:
         MobuItem(None, MobuFlag.Q_QUICK, SHOW_INV_AC_POWER),
         MobuItem(None, MobuFlag.Q_QUICK, SHOW_INV_DC_POWER),
 
+        MobuItem(None, MobuFlag.Q_QUICK, ITEM_SELF_CONSUMPTION),
     ])
 
     # Basic Storage Control Model (IC124) (ab Seite 52)
@@ -97,8 +97,6 @@ class FronmodConfig:
         # Number valPvBatState "Batterie-Status [MAP(pv_state_batt.map):%s]"
         #  {modbus = "<[storage:11:valueType=uint16]"} // 40303 + 12
         MobuItem(12, MobuFlag.UINT16 | MobuFlag.Q_QUICK, ITEM_BAT_STATE),
-
-
     ])
 
     # Multiple MPPT Inverter Extension Model (I160) (ab Seite 57)
@@ -135,8 +133,8 @@ class FronmodConfig:
     ])
 
     # Meter Model (ab Seite 62)
-    METER_START = 40070
-    METER_BATCH = MobuBatch(240, METER_START, 124, [
+    METER_START = 40094  # 40070
+    METER_BATCH = MobuBatch(240, METER_START, 50, [
         # 40096 40097 2 R 0x03 Hz float32 Hz AC Frequency value
         # Number valPvMetAcFrequency   "valPvMetAcFrequency [%.2f]"  {modbus="<[met_40096:0:valueType=float32]"}
         MobuItem(40096 - METER_START, MobuFlag.FLOAT32 | MobuFlag.Q_MEDIUM, ITEM_MET_AC_FREQUENCY),
@@ -153,6 +151,8 @@ class FronmodConfig:
         MobuItem(None, MobuFlag.Q_QUICK, SHOW_MET_AC_POWER),
         MobuItem(None, MobuFlag.Q_MEDIUM, SHOW_MET_ENERGY_EXP_TOT),
         MobuItem(None, MobuFlag.Q_MEDIUM, SHOW_MET_ENERGY_IMP_TOT),
+
+        MobuItem(None, MobuFlag.Q_QUICK, ITEM_SELF_CONSUMPTION),
     ])
 
     RESET_ITEM_LIST = [

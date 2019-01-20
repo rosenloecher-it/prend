@@ -90,7 +90,7 @@ class FronmodProcessor:
         self.value_inv_ac_power = self.get_value(results, FronmodConfig.TEMP_INV_AC_POWER)
         self.value_inv_dc_power = self.get_value(results, FronmodConfig.TEMP_INV_DC_POWER)
 
-        self.process_self_consumption()
+        self.process_self_consumption(results)
         self.process_inv_efficiency(results)
 
         return results
@@ -138,7 +138,7 @@ class FronmodProcessor:
                                   , 0.001, FronmodConfig.SHOW_MET_ENERGY_IMP_TOT),
 
         self.value_met_ac_power = self.get_value(results, FronmodConfig.ITEM_MET_AC_POWER)
-        self.process_self_consumption()
+        self.process_self_consumption(results)
 
         return results
 
@@ -175,14 +175,11 @@ class FronmodProcessor:
         target_result.ready = True
         self.queue_send(target_result)
 
-    def process_self_consumption(self):
-        mobu_item = FronmodConfig.MOBU_SELF_CONSUMPTION
-        target_result = MobuResult(mobu_item.name)
-        target_result.item = mobu_item
-        target_result.value = None
-        target_result.ready = True
+    def process_self_consumption(self, results):
+        target_result = results[FronmodConfig.ITEM_SELF_CONSUMPTION]
         if self.value_inv_ac_power is not None and self.value_met_ac_power is not None:
             target_result.value = -0.001 * (self.value_inv_ac_power + self.value_met_ac_power)
+        target_result.ready = True
         self.queue_send(target_result)
 
     def process_bat_power_sign(self, results: dict):
@@ -301,4 +298,9 @@ class FronmodProcessor:
         if result.value is not None:
             return result.value
         return default_value
+
+    def print_cached_values(self):
+        print('cached: value_inv_ac_power = ', self.value_inv_ac_power)
+        print('cached: value_inv_dc_power = ', self.value_inv_dc_power)
+        print('cached: value_met_ac_power = ', self.value_met_ac_power)
 
