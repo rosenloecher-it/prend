@@ -115,7 +115,7 @@ class RuleManager(Daemon):
             wait_check_connection_sec = 3
             last_check_connection = datetime.datetime.now()
 
-            wait_alive_message_sec = 10
+            wait_alive_message_sec = 600
             last_alive_message = datetime.datetime.now()
 
             time_usage_dispatch = 0
