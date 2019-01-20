@@ -196,13 +196,13 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
 
         self.processor.process_storage_model()
 
-        out = self.processor.check_sent_count(0, 2, 0)
+        out = self.processor.check_sent_count(2, 0, 0)
         self.assertEqual(0, out)
 
-        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_BAT_FILL_STATE, 3)
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.ITEM_BAT_FILL_STATE, 3)
         self.assertEqual(True, out)
 
-        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_BAT_STATE, 2)
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.ITEM_BAT_STATE, 2)
         self.assertEqual(True, out)
 
     def test_process_storage_discharge(self):
@@ -214,13 +214,13 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
 
         self.processor.process_storage_model()
 
-        out = self.processor.check_sent_count(0, 2, 0)
+        out = self.processor.check_sent_count(2, 0, 0)
         self.assertEqual(0, out)
 
-        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_BAT_FILL_STATE, 24)
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.ITEM_BAT_FILL_STATE, 24)
         self.assertEqual(True, out)
 
-        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_BAT_STATE, 3)
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.ITEM_BAT_STATE, 3)
         self.assertEqual(True, out)
 
     def test_process_storage_loading(self):
@@ -252,13 +252,13 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
 
         self.processor.process_storage_model()
 
-        out = self.processor.check_sent_count(0, 2, 0)
+        out = self.processor.check_sent_count(2, 0, 0)
         self.assertEqual(0, out)
 
-        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_BAT_FILL_STATE, 29)
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.ITEM_BAT_FILL_STATE, 29)
         self.assertEqual(True, out)
 
-        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_BAT_STATE, 6)
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.ITEM_BAT_STATE, 6)
         self.assertEqual(True, out)
 
     def test_process_mppt(self):
