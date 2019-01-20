@@ -159,9 +159,10 @@ class RuleManager(Daemon):
 
                     sum_all =  (datetime.datetime.now() - time_usage_start).total_seconds()
                     time_coverage = 100.0 * (time_usage_dispatch + time_usage_state + time_usage_sleep + time_usage_send) / sum_all
-                    leisure = 100.0 * (1 - time_usage_sleep / sum_all)
+                    share_free = 100.0 * (1 - time_usage_sleep / sum_all)
+                    share_dispatch = 100.0 * time_usage_dispatch / sum_all
 
-                    _logger.debug('alive (cov =%.2f%%, free=%.2f%%)', time_coverage, leisure)
+                    _logger.debug('alive + time shares: cov =%.1f%, dispatch=%.1f%%, free=%.1f%', time_coverage, share_dispatch, share_free)
                     time_usage_dispatch = 0
                     time_usage_state = 0
                     time_usage_sleep = 0
