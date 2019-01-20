@@ -34,6 +34,14 @@ class RuleManager(Daemon):
         self._observer = None
         self._con_checker = ConnectionChecker(self._oh_gateway)
 
+        self.last_status_log = None
+        self.last_check_connection = None
+        self.time_usage_dispatch = 0
+        self.time_usage_state = 0
+        self.time_usage_sleep = 0
+        self.time_usage_send = 0
+        self.time_usage_start = None
+
     def status(self):
         super().status()
         self._config.print(True)
@@ -110,41 +118,26 @@ class RuleManager(Daemon):
 
             self._open_rules()
 
-            wait_check_connection_sec = 3
-            last_check_connection = datetime.datetime.now()
+            self.last_check_connection = datetime.datetime.now()
+            self.last_status_log = datetime.datetime.now()
 
-            wait_alive_message_sec = 600
-            last_alive_message = datetime.datetime.now()
+            self._reset_time_usage()
 
             while True:
                 something_processed = False
 
-                # check observer if running
-                diff = datetime.datetime.now() - last_check_connection
-                if diff.seconds >= wait_check_connection_sec:
-                    last_check_connection = datetime.datetime.now()
-
-                    self._con_checker.check_connection_state()
-                    if self._con_checker.should_reconnect_observer():
-                        self._restart_observer()
-                        something_processed = True
-                    if self._con_checker.should_reconnect_oh_gateway():
-                        self._oh_gateway.cache_states()
-                        something_processed = True
-
-                if self._dispatcher.dispatch():
+                if self._run_dispatch():
                     something_processed = True
 
-                if self._oh_gateway.send_queued():
+                if self._run_send():
                     something_processed = True
 
-                diff = datetime.datetime.now() - last_alive_message
-                if diff.seconds >= wait_alive_message_sec:
-                    last_alive_message = datetime.datetime.now()
-                    _logger.debug('alive')
+                self._run_status_log()
 
                 if not something_processed:
-                    time.sleep(0.03)
+                    sleep_time = 0.03
+                    time.sleep(sleep_time)
+                    self.time_usage_sleep += sleep_time
 
         except KeyboardInterrupt:
             _logger.debug('KeyboardInterrupt')
@@ -153,5 +146,66 @@ class RuleManager(Daemon):
         finally:
             self.shutdown()
 
+    def _reset_time_usage(self):
+        self.time_usage_dispatch = 0
+        self.time_usage_state = 0
+        self.time_usage_sleep = 0
+        self.time_usage_send = 0
+        self.time_usage_start = datetime.datetime.now()
 
+    def _run_check_connection(self):
+        wait_check_connection_sec = 3
 
+        something_processed = False
+        # check observer if running
+        diff = datetime.datetime.now() - self.last_check_connection
+        if diff.seconds >= wait_check_connection_sec:
+            time_temp = datetime.datetime.now()
+            self.last_check_connection = datetime.datetime.now()
+
+            self._con_checker.check_connection_state()
+            if self._con_checker.should_reconnect_observer():
+                self._restart_observer()
+                something_processed = True
+            if self._con_checker.should_reconnect_oh_gateway():
+                self._oh_gateway.cache_states()
+                something_processed = True
+
+            self.time_usage_state += (datetime.datetime.now() - time_temp).total_seconds()
+
+        return something_processed
+
+    def _run_dispatch(self):
+        something_processed = False
+        time_temp = datetime.datetime.now()
+        if self._dispatcher.dispatch():
+            something_processed = True
+        self.time_usage_dispatch += (datetime.datetime.now() - time_temp).total_seconds()
+        return something_processed
+
+    def _run_send(self):
+        something_processed = False
+        time_temp = datetime.datetime.now()
+        if self._oh_gateway.send_queued():
+            something_processed = True
+        self.time_usage_send += (datetime.datetime.now() - time_temp).total_seconds()
+        return something_processed
+
+    def _run_status_log(self):
+        wait_status_log_sec = 600
+
+        diff = datetime.datetime.now() - self.last_status_log
+        if diff.seconds >= wait_status_log_sec:
+            self.last_status_log = datetime.datetime.now()
+
+            sum_all = (datetime.datetime.now() - self.time_usage_start).total_seconds()
+            time_coverage = 100.0 * (
+                    self.time_usage_dispatch + self.time_usage_state + self.time_usage_sleep + self.time_usage_send) / sum_all
+            share_dispatch = 100.0 * self.time_usage_dispatch / sum_all
+            share_send = 100.0 * self.time_usage_send / sum_all
+            share_sleep = 100.0 * self.time_usage_sleep / sum_all
+
+            _logger.debug('alive + time shares: cov=%.1f%%, send=%.1f%%, dispatch=%.1f%%, sleep=%.1f%%',
+                          time_coverage, share_send, share_dispatch, share_sleep)
+
+            self._reset_time_usage()
