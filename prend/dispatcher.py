@@ -126,7 +126,7 @@ class Dispatcher(DispatcherActionSink):
 
                 diff_seconds = (datetime.datetime.now() - time_start).total_seconds()
                 if diff_seconds > 0.3:
-                    _logger.warning('dispatch_action <%s> took %fs', action_ident, diff_seconds)
+                    _logger.warning('dispatch_action <%s> took %.3fs', action_ident, diff_seconds)
 
             except Exception as ex:
                 _logger.error('error - dispatch_action(%s) failed! - (%s: %s)', action_ident, ex.__class__.__name__, ex)

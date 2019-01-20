@@ -110,11 +110,19 @@ class RuleManager(Daemon):
 
             self._open_rules()
 
+            sleep_time = 0.03
+
             wait_check_connection_sec = 3
             last_check_connection = datetime.datetime.now()
 
             wait_alive_message_sec = 600
             last_alive_message = datetime.datetime.now()
+
+            time_usage_dispatch = 0
+            time_usage_state = 0
+            time_usage_sleep = 0
+            time_usage_send = 0
+            time_usage_start = datetime.datetime.now()
 
             while True:
                 something_processed = False
@@ -122,6 +130,7 @@ class RuleManager(Daemon):
                 # check observer if running
                 diff = datetime.datetime.now() - last_check_connection
                 if diff.seconds >= wait_check_connection_sec:
+                    time_temp = datetime.datetime.now()
                     last_check_connection = datetime.datetime.now()
 
                     self._con_checker.check_connection_state()
@@ -132,19 +141,36 @@ class RuleManager(Daemon):
                         self._oh_gateway.cache_states()
                         something_processed = True
 
+                    time_usage_state += (datetime.datetime.now() - time_temp).total_seconds()
+
+                time_temp = datetime.datetime.now()
                 if self._dispatcher.dispatch():
                     something_processed = True
+                time_usage_dispatch += (datetime.datetime.now() - time_temp).total_seconds()
 
+                time_temp = datetime.datetime.now()
                 if self._oh_gateway.send_queued():
                     something_processed = True
+                time_usage_send += (datetime.datetime.now() - time_temp).total_seconds()
 
                 diff = datetime.datetime.now() - last_alive_message
                 if diff.seconds >= wait_alive_message_sec:
                     last_alive_message = datetime.datetime.now()
-                    _logger.debug('alive')
+
+                    sum_all =  (datetime.datetime.now() - time_usage_start).total_seconds()
+                    time_coverage = 100.0 * (time_usage_dispatch + time_usage_state + time_usage_sleep + time_usage_send) / sum_all
+                    leisure = 100.0 * (1 - time_usage_sleep / sum_all)
+
+                    _logger.debug('alive (cov =%.2f%%, free=%.2f%%)', time_coverage, leisure)
+                    time_usage_dispatch = 0
+                    time_usage_state = 0
+                    time_usage_sleep = 0
+                    time_usage_send = 0
+                    time_usage_start = datetime.datetime.now()
 
                 if not something_processed:
-                    time.sleep(0.03)
+                    time.sleep(sleep_time)
+                    time_usage_sleep += sleep_time
 
         except KeyboardInterrupt:
             _logger.debug('KeyboardInterrupt')
