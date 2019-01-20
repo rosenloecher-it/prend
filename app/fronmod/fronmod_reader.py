@@ -1,4 +1,5 @@
 from . import *
+import datetime
 import logging
 from .mobu import MobuBatch, MobuFlag, MobuItem, MobuResult
 from pymodbus.client.sync import ModbusTcpClient as ModbusClient
@@ -75,7 +76,12 @@ class FronmodReader:
         if self._client is None or not self.is_open():
             raise FronmodException('ModbusClient is not open!')
 
+        time_start = datetime.datetime.now()
         response = self._client.read_holding_registers(read.pos, read.length, unit=read.unit_id)
+        diff_seconds = (datetime.datetime.now() - time_start).total_seconds()
+        if diff_seconds > 0.3:
+            _logger.debug('read_holding_registers <pos=%d, l=%d, unit=%d> took %fs', read.pos, read.length, read.unit_id, diff_seconds)
+
         if response.isError():
             _logger.error('read_holding_registers failed - response: {}'.format(str(response)))
             raise FronmodReadException('read_holding_registers failed!')
