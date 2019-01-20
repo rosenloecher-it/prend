@@ -116,7 +116,7 @@ class RuleManager(Daemon):
             wait_check_connection_sec = 3
             last_check_connection = datetime.datetime.now()
 
-            wait_alive_message_sec = 600
+            wait_alive_message_sec = 10
             last_alive_message = datetime.datetime.now()
 
             time_usage_dispatch = 0
@@ -160,10 +160,11 @@ class RuleManager(Daemon):
 
                     sum_all =  (datetime.datetime.now() - time_usage_start).total_seconds()
                     time_coverage = 100.0 * (time_usage_dispatch + time_usage_state + time_usage_sleep + time_usage_send) / sum_all
-                    share_free = 100.0 * (1 - time_usage_sleep / sum_all)
                     share_dispatch = 100.0 * time_usage_dispatch / sum_all
+                    share_send = 100.0 * time_usage_send / sum_all
+                    share_sleep = 100.0 * time_usage_sleep / sum_all
 
-                    _logger.debug('alive + time shares: cov =%.1f%, dispatch=%.1f%%, free=%.1f%', time_coverage, share_dispatch, share_free)
+                    _logger.debug('alive + time shares: cov =%.1f%%, send=%.1f%%, dispatch=%.1f%%, sleep=%.1f%%', time_coverage, share_send, share_dispatch, share_sleep)
                     time_usage_dispatch = 0
                     time_usage_state = 0
                     time_usage_sleep = 0
