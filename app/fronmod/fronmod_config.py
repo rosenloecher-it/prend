@@ -93,10 +93,10 @@ class FronmodConfig:
         # fronius: 23 23 1 R 0x03 0x06 0x10 ChaState_SF sunssf Scale factor for available energy percent.
         MobuItem(23, MobuFlag.INT16, RAW_BAT_FILL_STATE_SF),
         # openhab: Number valPvBatFillState "Batterie-Ladung [%.0f %%]" <battery> (gRawPvMod, gPers5Minutes)
-        MobuItem(None, MobuFlag.Q_MEDIUM, ITEM_BAT_FILL_STATE),
+        MobuItem(None, MobuFlag.Q_QUICK, ITEM_BAT_FILL_STATE),
         # Number valPvBatState "Batterie-Status [MAP(pv_state_batt.map):%s]"
         #  {modbus = "<[storage:11:valueType=uint16]"} // 40303 + 12
-        MobuItem(12, MobuFlag.UINT16 | MobuFlag.Q_MEDIUM, ITEM_BAT_STATE),
+        MobuItem(12, MobuFlag.UINT16 | MobuFlag.Q_QUICK, ITEM_BAT_STATE),
 
 
     ])
