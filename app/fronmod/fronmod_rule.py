@@ -67,7 +67,7 @@ class FronmodRule(Rule):
             self._oh_gateway.send_data(data)
 
     def register_actions(self) -> None:
-        cron_job = schedule.every(8).seconds
+        cron_job = schedule.every(10).seconds
         self.subscribe_cron_actions(self.CRON_FETCH_QUICK, cron_job)
 
         # cron_job = schedule.every(15).seconds
