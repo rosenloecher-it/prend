@@ -82,7 +82,8 @@ class FronmodReader:
         response = self._client.read_holding_registers(read.pos, read.length, unit=read.unit_id)
         diff_seconds = (datetime.datetime.now() - time_start).total_seconds()
         if diff_seconds > 0.3:
-            _logger.debug('read_holding_registers <pos=%d, l=%d, unit=%d> took %fs', read.pos, read.length, read.unit_id, diff_seconds)
+            _logger.debug('read_holding_registers <pos=%d, l=%d, unit=%d> took %fs'
+                          , read.pos, read.length, read.unit_id, diff_seconds)
 
         if response.isError():
             _logger.error('read_holding_registers failed - response: {}'.format(str(response)))

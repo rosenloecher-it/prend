@@ -134,7 +134,6 @@ class FronmodRule(Rule):
             if isinstance(ex, FronmodReadException):
                 self._read_error += 1
 
-
     def handle_cron_fetch_quick(self):
         self._processor.process_inverter_model()  # must be first
         self._processor.process_mppt_model()
