@@ -80,7 +80,7 @@ class OhGateway(OhGatewayEventSink):
         state = self.get_state(channel)
 
         if state is None and not send_data.is_flag(OhSendFlags.SKIP_CHANNEL_CHECK):
-            raise ValueError('no sending to not existing channels ({})!'.format(channel))
+            _logger.error('sending to not existing channels (%s)!?', str(channel))
 
         do_send = True
         if send_data.is_flag(OhSendFlags.SEND_ONLY_IF_DIFFER):
