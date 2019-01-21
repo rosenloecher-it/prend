@@ -240,8 +240,10 @@ class FronmodProcessor:
     def get_send_data(self, flags):
         send_data_list = []
         queue_dict = self._get_queue_dict(flags)
-        for key, send_data in queue_dict.items():
-            send_data_list.append(send_data)
+        if queue_dict:
+            for key, send_data in queue_dict.items():
+                send_data_list.append(send_data)
+            queue_dict.clear()
 
         if flags & MobuFlag.Q_MEDIUM:
             eflow_list = [self.eflow_inv_dc, self.eflow_inv_ac, self.eflow_bat, self.eflow_mod]
