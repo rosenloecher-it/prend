@@ -73,7 +73,9 @@ class FronmodReader:
         return result
 
     def _read_remote_registers(self, read: MobuBatch):
-        if self._client is None or not self.is_open():
+        if self._client is None:
+            raise FronmodException('ModbusClient is None!')
+        if not self.is_open():
             raise FronmodException('ModbusClient is not open!')
 
         time_start = datetime.datetime.now()

@@ -66,8 +66,7 @@ class FronmodProcessor:
             results = self._reader.read(read_conf)
         except FronmodException as ex:
             _logger.error('read_model failed ({})!'.format(read_conf))
-            _logger.exception(ex)
-            results = {}
+            raise
 
         for key, result in results.items():
             self.queue_send(result)
