@@ -11,12 +11,7 @@ class MobuFlag(IntFlag):
     Q_QUICK = 0x0010  # 10s
     Q_MEDIUM = 0x0020  # 60s
     Q_SLOW = 0x0040  # 300s
-
-    def __str__(self):
-        return self.__repr__()
-
-    def __repr__(self) -> str:
-        return self.name
+    Q_ALL = Q_QUICK | Q_MEDIUM | Q_SLOW
 
 
 class MobuItem:

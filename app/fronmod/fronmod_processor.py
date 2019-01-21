@@ -64,7 +64,7 @@ class FronmodProcessor:
     def process_model(self, read_conf: MobuBatch):
         try:
             results = self._reader.read(read_conf)
-        except FronmodException as ex:
+        except Exception:
             _logger.error('read_model failed ({})!'.format(read_conf))
             raise
 
@@ -73,73 +73,102 @@ class FronmodProcessor:
 
         return results  # used for loading and analysing real values from test context
 
+    def reset_items(self, read_conf: MobuBatch):
+        for item in read_conf.items:
+            if not item.flags & MobuFlag.Q_ALL:
+                continue
+            result = MobuResult(item.name)
+            result.item = item
+            result.ready = True
+            self.queue_send(result)
+
     def process_inverter_model(self):
-        results = self.process_model(FronmodConfig.INVERTER_BATCH)
+        batch = FronmodConfig.INVERTER_BATCH
+        try:
+            results = self.process_model(batch)
 
-        self.process_factor_scale(results, FronmodConfig.ITEM_INV_AC_ENERGY_TOT
-                                  , 0.001, FronmodConfig.SHOW_INV_AC_ENERGY_TOT),
-        self.process_factor_scale(results, FronmodConfig.TEMP_INV_AC_POWER
-                                  , 0.001, FronmodConfig.SHOW_INV_AC_POWER),
-        self.process_factor_scale(results, FronmodConfig.TEMP_INV_DC_POWER
-                                  , 0.001, FronmodConfig.SHOW_INV_DC_POWER),
+            self.process_factor_scale(results, FronmodConfig.ITEM_INV_AC_ENERGY_TOT
+                                      , 0.001, FronmodConfig.SHOW_INV_AC_ENERGY_TOT),
+            self.process_factor_scale(results, FronmodConfig.TEMP_INV_AC_POWER
+                                      , 0.001, FronmodConfig.SHOW_INV_AC_POWER),
+            self.process_factor_scale(results, FronmodConfig.TEMP_INV_DC_POWER
+                                      , 0.001, FronmodConfig.SHOW_INV_DC_POWER),
 
-        self.push_eflow(results, FronmodConfig.TEMP_INV_DC_POWER, self.eflow_inv_dc)
-        self.push_eflow(results, FronmodConfig.TEMP_INV_AC_POWER, self.eflow_inv_ac)
+            self.push_eflow(results, FronmodConfig.TEMP_INV_DC_POWER, self.eflow_inv_dc)
+            self.push_eflow(results, FronmodConfig.TEMP_INV_AC_POWER, self.eflow_inv_ac)
 
-        self.value_inv_ac_power = self.get_value(results, FronmodConfig.TEMP_INV_AC_POWER)
-        self.value_inv_dc_power = self.get_value(results, FronmodConfig.TEMP_INV_DC_POWER)
+            self.value_inv_ac_power = self.get_value(results, FronmodConfig.TEMP_INV_AC_POWER)
+            self.value_inv_dc_power = self.get_value(results, FronmodConfig.TEMP_INV_DC_POWER)
 
-        self.process_self_consumption(results)
-        self.process_inv_efficiency(results)
+            self.process_self_consumption(results)
+            self.process_inv_efficiency(results)
 
-        return results
+            return results
+        except Exception:
+            self.reset_items(batch)
+            raise
 
     def process_storage_model(self):
-        results = self.process_model(FronmodConfig.STORAGE_BATCH)
+        batch = FronmodConfig.STORAGE_BATCH
+        try:
+            results = self.process_model(batch)
 
-        self.process_modbus_scale(results, FronmodConfig.RAW_BAT_FILL_STATE, FronmodConfig.RAW_BAT_FILL_STATE_SF
-                                  , FronmodConfig.ITEM_BAT_FILL_STATE)
-        return results
+            self.process_modbus_scale(results, FronmodConfig.RAW_BAT_FILL_STATE, FronmodConfig.RAW_BAT_FILL_STATE_SF
+                                      , FronmodConfig.ITEM_BAT_FILL_STATE)
+            return results
+        except Exception:
+            self.reset_items(batch)
+            raise
 
     def process_mppt_model(self):
-        results = self.process_model(FronmodConfig.MPPT_BATCH)
+        batch = FronmodConfig.MPPT_BATCH
+        try:
+            results = self.process_model(batch)
 
-        self.process_modbus_scale(results, FronmodConfig.RAW_MPPT_MOD_VOLTAGE, FronmodConfig.RAW_MPPT_VOLTAGE_SF
-                                  , FronmodConfig.ITEM_MPPT_MOD_VOLTAGE)
+            self.process_modbus_scale(results, FronmodConfig.RAW_MPPT_MOD_VOLTAGE, FronmodConfig.RAW_MPPT_VOLTAGE_SF
+                                      , FronmodConfig.ITEM_MPPT_MOD_VOLTAGE)
 
-        self.process_modbus_scale(results, FronmodConfig.RAW_MPPT_MOD_POWER, FronmodConfig.RAW_MPPT_POWER_SF
-                                  , FronmodConfig.ITEM_MPPT_MOD_POWER)
+            self.process_modbus_scale(results, FronmodConfig.RAW_MPPT_MOD_POWER, FronmodConfig.RAW_MPPT_POWER_SF
+                                      , FronmodConfig.ITEM_MPPT_MOD_POWER)
 
-        self.process_modbus_scale(results, FronmodConfig.RAW_MPPT_BAT_POWER, FronmodConfig.RAW_MPPT_POWER_SF
-                                  , FronmodConfig.RAW2_MPPT_BAT_POWER)
+            self.process_modbus_scale(results, FronmodConfig.RAW_MPPT_BAT_POWER, FronmodConfig.RAW_MPPT_POWER_SF
+                                      , FronmodConfig.RAW2_MPPT_BAT_POWER)
 
-        self.process_bat_power_sign(results)  # RAW2_MPPT_BAT_POWER => TEMP_MPPT_BAT_POWER
+            self.process_bat_power_sign(results)  # RAW2_MPPT_BAT_POWER => TEMP_MPPT_BAT_POWER
 
-        self.process_factor_scale(results, FronmodConfig.TEMP_MPPT_BAT_POWER
-                                  , 0.001, FronmodConfig.SHOW_MPPT_BAT_POWER),
+            self.process_factor_scale(results, FronmodConfig.TEMP_MPPT_BAT_POWER
+                                      , 0.001, FronmodConfig.SHOW_MPPT_BAT_POWER),
 
-        self.process_factor_scale(results, FronmodConfig.ITEM_MPPT_MOD_POWER
-                                  , 0.001, FronmodConfig.SHOW_MPPT_MOD_POWER),
+            self.process_factor_scale(results, FronmodConfig.ITEM_MPPT_MOD_POWER
+                                      , 0.001, FronmodConfig.SHOW_MPPT_MOD_POWER),
 
-        self.push_eflow(results, FronmodConfig.TEMP_MPPT_BAT_POWER, self.eflow_bat)
-        self.push_eflow(results, FronmodConfig.ITEM_MPPT_MOD_POWER, self.eflow_mod)
+            self.push_eflow(results, FronmodConfig.TEMP_MPPT_BAT_POWER, self.eflow_bat)
+            self.push_eflow(results, FronmodConfig.ITEM_MPPT_MOD_POWER, self.eflow_mod)
 
-        return results
+            return results
+        except Exception:
+            self.reset_items(batch)
+            raise
 
     def process_meter_model(self):
-        results = self.process_model(FronmodConfig.METER_BATCH)
+        batch = FronmodConfig.METER_BATCH
+        try:
+            results = self.process_model(FronmodConfig.METER_BATCH)
 
-        self.process_factor_scale(results, FronmodConfig.ITEM_MET_AC_POWER
-                                  , 0.001, FronmodConfig.SHOW_MET_AC_POWER),
-        self.process_factor_scale(results, FronmodConfig.ITEM_MET_ENERGY_EXP_TOT
-                                  , 0.001, FronmodConfig.SHOW_MET_ENERGY_EXP_TOT),
-        self.process_factor_scale(results, FronmodConfig.ITEM_MET_ENERGY_IMP_TOT
-                                  , 0.001, FronmodConfig.SHOW_MET_ENERGY_IMP_TOT),
+            self.process_factor_scale(results, FronmodConfig.ITEM_MET_AC_POWER
+                                      , 0.001, FronmodConfig.SHOW_MET_AC_POWER),
+            self.process_factor_scale(results, FronmodConfig.ITEM_MET_ENERGY_EXP_TOT
+                                      , 0.001, FronmodConfig.SHOW_MET_ENERGY_EXP_TOT),
+            self.process_factor_scale(results, FronmodConfig.ITEM_MET_ENERGY_IMP_TOT
+                                      , 0.001, FronmodConfig.SHOW_MET_ENERGY_IMP_TOT),
 
-        self.value_met_ac_power = self.get_value(results, FronmodConfig.ITEM_MET_AC_POWER)
-        self.process_self_consumption(results)
+            self.value_met_ac_power = self.get_value(results, FronmodConfig.ITEM_MET_AC_POWER)
+            self.process_self_consumption(results)
 
-        return results
+            return results
+        except Exception:
+            self.reset_items(batch)
+            raise
 
     def process_modbus_scale(self, results: dict, value_name: str, scale_name: str, target_name: str):
 

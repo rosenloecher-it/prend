@@ -404,3 +404,48 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
         out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.ITEM_SELF_CONSUMPTION, -2.1689300537109375)
         self.assertEqual(True, out)
 
+    def test_error_reset_items(self):
+
+        self.mock_reader.clear_mock_reads()  # has to fail => ValueError by MockReader
+
+        try:
+            self.processor.process_meter_model()
+            self.assertEqual(True, False)
+        except Exception as ex:
+            print('exception: ', ex)
+            pass
+
+        out = self.processor.check_sent_count(2, 5, 0)
+        self.assertEqual(0, out)
+
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_MET_AC_FREQUENCY, None)
+        self.assertEqual(True, out)
+
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_MET_ENERGY_EXP_TOT, None)
+        self.assertEqual(True, out)
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.SHOW_MET_ENERGY_EXP_TOT, None)
+        self.assertEqual(True, out)
+
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.ITEM_MET_ENERGY_IMP_TOT, None)
+        self.assertEqual(True, out)
+        out = self.processor.exist_sent(MobuFlag.Q_MEDIUM, FronmodConfig.SHOW_MET_ENERGY_IMP_TOT, None)
+        self.assertEqual(True, out)
+
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.SHOW_MET_AC_POWER, None)
+        self.assertEqual(True, out)
+
+        out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.ITEM_SELF_CONSUMPTION, None)
+        self.assertEqual(True, out)
+
+        list = self.processor.get_send_data(MobuFlag.Q_QUICK)
+        self.assertEqual(2, len(list))
+        # reseted !?
+        list = self.processor.get_send_data(MobuFlag.Q_QUICK)
+        self.assertEqual(0, len(list))
+
+        # eflow should/must be 0!!!
+        list = self.processor.get_send_data(MobuFlag.Q_MEDIUM)
+        self.assertEqual(5, len(list))
+        # reseted !?
+        list = self.processor.get_send_data(MobuFlag.Q_MEDIUM)
+        self.assertEqual(0, len(list))
