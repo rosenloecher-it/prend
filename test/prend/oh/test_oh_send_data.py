@@ -89,3 +89,15 @@ class TestOhSendData(unittest.TestCase):
         out = data.does_state_value_differ(state_differ)
         self.assertEqual(True, out)
 
+    def test_does_state_value_differ_none(self):
+
+        channel = Channel.create_item('abc')
+        state = None
+        state_differ = State.create(StateType.DECIMAL, 1.21)
+
+        data = OhSendData(OhSendFlags.COMMAND | OhSendFlags.SEND_ONLY_IF_DIFFER, channel, state)
+        data.check()  # no raise
+        out = data.does_state_value_differ(state)
+        self.assertEqual(False, out)
+        out = data.does_state_value_differ(state_differ)
+        self.assertEqual(True, out)
