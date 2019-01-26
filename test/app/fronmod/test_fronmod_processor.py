@@ -437,15 +437,15 @@ class TestFronmodProcessorProcessing(unittest.TestCase):
         out = self.processor.exist_sent(MobuFlag.Q_QUICK, FronmodConfig.ITEM_SELF_CONSUMPTION, None)
         self.assertEqual(True, out)
 
-        list = self.processor.get_send_data(MobuFlag.Q_QUICK)
-        self.assertEqual(2, len(list))
+        send_list = self.processor.get_send_data(MobuFlag.Q_QUICK)
+        self.assertEqual(2, len(send_list))
         # reseted !?
-        list = self.processor.get_send_data(MobuFlag.Q_QUICK)
-        self.assertEqual(0, len(list))
+        send_list = self.processor.get_send_data(MobuFlag.Q_QUICK)
+        self.assertEqual(0, len(send_list))
 
         # eflow should/must be 0!!!
-        list = self.processor.get_send_data(MobuFlag.Q_MEDIUM)
-        self.assertEqual(5, len(list))
+        send_list = self.processor.get_send_data(MobuFlag.Q_MEDIUM)
+        self.assertEqual(5, len(send_list))
         # reseted !?
-        list = self.processor.get_send_data(MobuFlag.Q_MEDIUM)
-        self.assertEqual(0, len(list))
+        send_list = self.processor.get_send_data(MobuFlag.Q_MEDIUM)
+        self.assertEqual(0, len(send_list))
