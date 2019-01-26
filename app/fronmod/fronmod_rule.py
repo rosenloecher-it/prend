@@ -15,7 +15,6 @@ class FronmodRule(Rule):
     CRON_FETCH_MEDIUM = 'CRON_FETCH_MEDIUM'
     CRON_FETCH_SLOW = 'CRON_FETCH_SLOW'
 
-    CRON_SENT_QUICK = 'CRON_SENT_QUICK'
     CRON_SENT_MEDIUM = 'CRON_SENT_MEDIUM'
     CRON_SENT_SLOW = 'CRON_SENT_SLOW'
 
@@ -27,6 +26,7 @@ class FronmodRule(Rule):
         self._url = None
         self._port = None
         self._read_error = 0
+        self._quick_mode = 0
 
     def open(self):
         self._url = self.get_config('fronmod', 'url')
@@ -67,7 +67,7 @@ class FronmodRule(Rule):
             self._oh_gateway.send_data(data)
 
     def register_actions(self) -> None:
-        cron_job = schedule.every(10).seconds
+        cron_job = schedule.every(2).seconds
         self.subscribe_cron_actions(self.CRON_FETCH_QUICK, cron_job)
 
         # cron_job = schedule.every(15).seconds
@@ -75,9 +75,6 @@ class FronmodRule(Rule):
 
         cron_job = schedule.every(60).to(65).seconds
         self.subscribe_cron_actions(self.CRON_FETCH_SLOW, cron_job)
-
-        cron_job = schedule.every(15).seconds
-        self.subscribe_cron_actions(self.CRON_SENT_QUICK, cron_job)
 
         cron_job = schedule.every(55).to(65).seconds
         self.subscribe_cron_actions(self.CRON_SENT_MEDIUM, cron_job)
@@ -118,8 +115,6 @@ class FronmodRule(Rule):
                     self.handle_cron_fetch_quick()
                 elif self.CRON_FETCH_SLOW == action.channel.name:
                     self.handle_cron_fetch_slow()
-                elif self.CRON_SENT_QUICK == action.channel.name:
-                    self.handle_cron_send(MobuFlag.Q_QUICK)
                 elif self.CRON_SENT_MEDIUM == action.channel.name:
                     self.handle_cron_send(MobuFlag.Q_MEDIUM)
                 elif self.CRON_SENT_SLOW == action.channel.name:
@@ -135,9 +130,19 @@ class FronmodRule(Rule):
                 self._read_error += 1
 
     def handle_cron_fetch_quick(self):
-        self._processor.process_inverter_model()  # must be first
-        self._processor.process_mppt_model()
-        self._processor.process_meter_model()
+
+        if self._quick_mode == 1:  # :4s
+            self._processor.process_inverter_model()  # must be first
+        elif self._quick_mode == 2:  # :6s
+            self._processor.process_mppt_model()
+        elif self._quick_mode == 3:  # :8s
+            self._processor.process_meter_model()
+        elif self._quick_mode == 4:  # :10s
+            self.handle_cron_send(MobuFlag.Q_QUICK)
+
+        self._quick_mode += 1
+        if self._quick_mode >= 5:
+            self._quick_mode = 0
 
     def handle_cron_fetch_medium(self):
         pass
