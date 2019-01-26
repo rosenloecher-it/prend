@@ -79,8 +79,14 @@ class OhSendData:
 
     def does_state_value_differ(self, comp: State):
         if type(self.state) is State:
-            value = self.state.value
+            value_self = self.state.value
         else:
-            value = self.state
-        return value != comp.value
+            value_self = self.state
+
+        if type(comp) is State:
+            value_comp = comp.value
+        else:
+            value_comp = comp
+
+        return value_self != value_comp
 
