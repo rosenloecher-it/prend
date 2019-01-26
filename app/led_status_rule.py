@@ -129,7 +129,7 @@ class LedStatusRule(Rule):
                 self._child_to_eval[eval_item.item_name] = eval_set
 
     def register_actions(self) -> None:
-        cron_job = schedule.every(5).minutes
+        cron_job = schedule.every(290).to(310).seconds
         self.subscribe_cron_actions(self.__class__.__name__, cron_job)
 
         channel = Channel.create_startup()

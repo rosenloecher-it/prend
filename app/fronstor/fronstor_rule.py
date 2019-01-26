@@ -44,7 +44,7 @@ class FronstorRule(Rule):
         self._is_open = True
 
     def register_actions(self) -> None:
-        cron_job = schedule.every(5).minutes
+        cron_job = schedule.every(290).to(310).seconds
         self.subscribe_cron_actions(self.__class__.__name__, cron_job)
 
         channel = Channel.create_startup()

@@ -73,16 +73,16 @@ class FronmodRule(Rule):
         # cron_job = schedule.every(15).seconds
         # self.subscribe_cron_actions(self.CRON_FETCH_MEDIUM, cron_job)
 
-        cron_job = schedule.every(60).seconds
+        cron_job = schedule.every(60).to(65).seconds
         self.subscribe_cron_actions(self.CRON_FETCH_SLOW, cron_job)
 
         cron_job = schedule.every(15).seconds
         self.subscribe_cron_actions(self.CRON_SENT_QUICK, cron_job)
 
-        cron_job = schedule.every(60).seconds
+        cron_job = schedule.every(55).to(65).seconds
         self.subscribe_cron_actions(self.CRON_SENT_MEDIUM, cron_job)
 
-        cron_job = schedule.every(300).seconds
+        cron_job = schedule.every(290).to(310).seconds
         self.subscribe_cron_actions(self.CRON_SENT_SLOW, cron_job)
 
         channel = Channel.create_startup()

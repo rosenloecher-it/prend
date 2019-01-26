@@ -40,7 +40,8 @@ class TehuFormRule(Rule):
     def register_actions(self) -> None:
         _logger.debug('register_actions')
 
-        cron_job = schedule.every(15).minutes
+        # 15 min
+        cron_job = schedule.every(14 * 60).to(16 * 60).seconds
         self.subscribe_cron_actions(self.__class__.__name__, cron_job)
 
         channel = Channel.create_startup()
