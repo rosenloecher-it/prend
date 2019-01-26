@@ -130,11 +130,13 @@ class FronmodProcessor:
 
             self.process_modbus_scale(results, FronmodConfig.RAW_MPPT_MOD_POWER, FronmodConfig.RAW_MPPT_POWER_SF
                                       , FronmodConfig.ITEM_MPPT_MOD_POWER)
+            self.log_mobu_registers_when_value_larger_than(results, FronmodConfig.ITEM_MPPT_MOD_POWER, 5500)
 
             self.process_modbus_scale(results, FronmodConfig.RAW_MPPT_BAT_POWER, FronmodConfig.RAW_MPPT_POWER_SF
                                       , FronmodConfig.RAW2_MPPT_BAT_POWER)
 
             self.process_bat_power_sign(results)  # RAW2_MPPT_BAT_POWER => TEMP_MPPT_BAT_POWER
+            self.log_mobu_registers_when_value_larger_than(results, FronmodConfig.TEMP_MPPT_BAT_POWER, 3300)
 
             self.process_factor_scale(results, FronmodConfig.TEMP_MPPT_BAT_POWER
                                       , 0.001, FronmodConfig.SHOW_MPPT_BAT_POWER),
@@ -333,4 +335,14 @@ class FronmodProcessor:
         print('cached: value_inv_ac_power = ', self.value_inv_ac_power)
         print('cached: value_inv_dc_power = ', self.value_inv_dc_power)
         print('cached: value_met_ac_power = ', self.value_met_ac_power)
+
+    def log_mobu_registers_when_value_larger_than(self, results, item_name, limit):
+        if limit is None or self._reader is None:
+            return
+        result = results.get(item_name)
+        if result is None or result.value is None:
+            return
+
+        if result.value >= limit:
+            self._reader.log_last_registers()
 

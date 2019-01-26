@@ -21,6 +21,10 @@ class FronmodReader:
         self._port = port
         self._print_registers = print_registers
 
+        self._last_read = None
+        self._last_register = None
+        self._last_logged = False
+
     def open(self):
         self._client = ModbusClient(self._url, port=self._port)
         self._client.connect()
@@ -73,6 +77,10 @@ class FronmodReader:
         return result
 
     def _read_remote_registers(self, read: MobuBatch):
+        self._last_read = None
+        self._last_register = None
+        self._last_logged = False
+
         if self._client is None:
             raise FronmodException('ModbusClient is None!')
         if not self.is_open():
@@ -88,6 +96,9 @@ class FronmodReader:
         if response.isError():
             _logger.error('read_holding_registers failed - response: {}'.format(str(response)))
             raise FronmodReadException('read_holding_registers failed!')
+
+        self._last_read = read
+        self._last_register = response.registers
 
         if self._print_registers:
             print('response.registers: ', response.registers)
@@ -109,6 +120,11 @@ class FronmodReader:
             results[item.name] = result
 
         return results
+
+    def log_last_registers(self):
+        if not self._last_logged:
+            _logger.warning('log_last_registers ({}): {}', self._last_read, self._last_register)
+            self._last_logged = True
 
 
 
