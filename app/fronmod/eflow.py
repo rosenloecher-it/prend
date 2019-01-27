@@ -27,12 +27,12 @@ class EflowChannel:
     def __repr__(self) -> str:
         return '{}({},+{},-{})'.format(self.__class__.__name__, self.source_name, self.plus, self.minus)
 
-    def _get_time(self):
+    def get_current_time(self):
         # overwrite and mock time calculation
         return datetime.datetime.now()
 
     def push_value(self, value_curr):
-        curr_time = self._get_time()
+        curr_time = self.get_current_time()
         if self.last_time is not None and self.last_value is not None:
             self.calc(curr_time, value_curr)
 

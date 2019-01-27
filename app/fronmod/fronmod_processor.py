@@ -27,7 +27,7 @@ class FronmodProcessor:
         self.eflow_inv_ac = EflowChannel(FronmodConfig.TEMP_INV_AC_POWER,
                                          EflowAggregate(FronmodConfig.EFLOW_INV_AC_OUT),
                                          EflowAggregate(FronmodConfig.EFLOW_INV_AC_IN))
-        self.eflow_bat = EflowChannel(FronmodConfig.RAW2_MPPT_BAT_POWER,
+        self.eflow_bat = EflowChannel(FronmodConfig.TEMP_MPPT_BAT_POWER,
                                       EflowAggregate(FronmodConfig.EFLOW_BAT_OUT),
                                       EflowAggregate(FronmodConfig.EFLOW_BAT_IN))
         self.eflow_mod = EflowChannel(FronmodConfig.ITEM_MPPT_MOD_POWER,
@@ -94,8 +94,8 @@ class FronmodProcessor:
             self.process_factor_scale(results, FronmodConfig.TEMP_INV_DC_POWER
                                       , 0.001, FronmodConfig.SHOW_INV_DC_POWER),
 
-            self.push_eflow(results, FronmodConfig.TEMP_INV_DC_POWER, self.eflow_inv_dc)
-            self.push_eflow(results, FronmodConfig.TEMP_INV_AC_POWER, self.eflow_inv_ac)
+            self.push_eflow(results, self.eflow_inv_dc)
+            self.push_eflow(results, self.eflow_inv_ac)
 
             self.value_inv_ac_power = self.get_value(results, FronmodConfig.TEMP_INV_AC_POWER)
             self.value_inv_dc_power = self.get_value(results, FronmodConfig.TEMP_INV_DC_POWER)
@@ -144,8 +144,8 @@ class FronmodProcessor:
             self.process_factor_scale(results, FronmodConfig.ITEM_MPPT_MOD_POWER
                                       , 0.001, FronmodConfig.SHOW_MPPT_MOD_POWER),
 
-            self.push_eflow(results, FronmodConfig.TEMP_MPPT_BAT_POWER, self.eflow_bat)
-            self.push_eflow(results, FronmodConfig.ITEM_MPPT_MOD_POWER, self.eflow_mod)
+            self.push_eflow(results, self.eflow_bat)
+            self.push_eflow(results, self.eflow_mod)
 
             return results
         except Exception:
@@ -261,8 +261,8 @@ class FronmodProcessor:
         self.queue_send(target_result)
 
     @classmethod
-    def push_eflow(cls, results, value_name, eflow):
-        result = results[value_name]
+    def push_eflow(cls, results, eflow):
+        result = results[eflow.source_name]
         if not result.ready:
             raise FronmodException('can only push ready values!')
         eflow.push_value(result.value)

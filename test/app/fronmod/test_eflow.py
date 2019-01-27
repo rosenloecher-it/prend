@@ -1,6 +1,17 @@
 import datetime
+import math
 import unittest
 from app.fronmod import *
+
+
+class MockEflowChannel(EflowChannel):
+
+    def __init__(self, source_name, agg_plus, agg_minus):
+        super().__init__(source_name, agg_plus, agg_minus)
+        self.mock_time = None
+
+    def get_current_time(self):
+        return self.mock_time
 
 
 class TestEflow(unittest.TestCase):
@@ -22,15 +33,6 @@ class TestEflow(unittest.TestCase):
         item = 'item'
         plus = 'plus'
         minus = 'minus'
-
-        class MockEflowChannel(EflowChannel):
-
-            def __init__(self, source_name, agg_plus, agg_minus):
-                super().__init__(source_name, agg_plus, agg_minus)
-                self.mock_time = None
-
-            def _get_time(self):
-                return self.mock_time
 
         eflow = MockEflowChannel(item, EflowAggregate(plus), EflowAggregate(minus))
         print(eflow)
@@ -156,3 +158,32 @@ class TestEflow(unittest.TestCase):
 
         self.assertEqual(0, eflow.plus.value_agg)
         self.assertEqual(0, eflow.minus.value_agg)
+
+    def test_realistic_times(self):
+
+        item = 'item'
+        plus = 'plus'
+        minus = 'minus'
+
+        eflow = MockEflowChannel(item, EflowAggregate(plus), EflowAggregate(minus))
+        print(eflow)
+
+        eflow.mock_time = datetime.datetime.now()
+
+        value_plus = 800.0
+        eflow.push_value(value_plus)
+
+        self.assertEqual(eflow.mock_time, eflow.last_time)
+        self.assertEqual(value_plus, eflow.last_value)
+        self.assertEqual(0, eflow.plus.value_agg)
+        self.assertEqual(0, eflow.minus.value_agg)
+
+        offset_seconds = 10
+        for i in range(0, 6):
+            eflow.mock_time = eflow.mock_time + datetime.timedelta(seconds=offset_seconds)
+            eflow.push_value(value_plus)
+
+        self.assertEqual(0, eflow.minus.value_agg)
+        self.assertTrue(math.isclose(value_plus / 60.0, eflow.plus.value_agg, rel_tol=1e-6))
+
+        pass
