@@ -126,6 +126,9 @@ class RuleManager(Daemon):
             while True:
                 something_processed = False
 
+                if self._run_check_connection():
+                    something_processed = True
+
                 if self._run_dispatch():
                     something_processed = True
 
