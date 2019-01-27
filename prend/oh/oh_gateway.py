@@ -150,21 +150,29 @@ class OhGateway(OhGatewayEventSink):
                 time_start = datetime.datetime.now()
                 existing_channels = {}
                 events = self._rest.fetch_all()
+                stat_sum_events = len(events)
                 for event in events:
                     self.push_event(event)
                     existing_channels[event.channel] = event.state
 
+                stat_deleted = 0
                 all_states = self.get_states()  # don't lock all time
                 for channel in all_states:
                     existing_state = existing_channels.get(channel)
                     if not existing_state:
                         with self._lock_state:
                             del self._states[channel]
+                            stat_deleted += 1
 
                 self._cache_states_notified_reload = None
                 self._last_connection_error = None
                 self._cache_states_last_fetch = datetime.datetime.now()
-                _logger.debug('item cache loaded (%fs)', (self._cache_states_last_fetch - time_start).total_seconds())
+
+                with self._lock_state:
+                    stat_sum_new = len(self._states)
+                _logger.info('cache_states: item cache reloaded (read=%d, deleted=%d, count=%d, time=%fs)'
+                             , stat_sum_events, stat_deleted, stat_sum_new
+                             , (self._cache_states_last_fetch - time_start).total_seconds())
 
         except Exception as ex:
             _logger.error('cache_states failed (%s: %s)!', ex.__class__.__name__, ex)
@@ -191,7 +199,7 @@ class OhGateway(OhGatewayEventSink):
     def push_event(self, event: OhEvent) -> None:
         if not event or not event.is_valid():
             raise OhIllegalEventException(event)
-        # _logger.debug('queue event: %s', event)
+        # _logger.debug('push_event - in: %s', event)
 
         if event.notification_type == OhNotificationType.RELOAD:
             self._cache_states_notified_reload = datetime.datetime.now()
