@@ -4,9 +4,9 @@ from prend.constants import Constants
 
 class ConnectionChecker:
 
-    def __init__(self, oh_gateway=None):
+    def __init__(self):
         self._observer = None
-        self._oh_gateway = oh_gateway
+        self._oh_gateway = None
 
         self._reconnect_observer = False
         self._reconnect_observer_after = None
@@ -24,7 +24,7 @@ class ConnectionChecker:
         self._oh_gateway = oh_gateway
 
     # noinspection PyMethodMayBeStatic
-    def _time_now(self):
+    def get_current_time(self):
         # overwrite for tests
         return datetime.datetime.now()
 
@@ -41,7 +41,7 @@ class ConnectionChecker:
         self._reconnect_oh_gateway = False
 
         paralyse_gateway_connection = False
-        time_now = self._time_now()
+        time_now = self.get_current_time()
 
         # check observer
         if self._observer.is_connected():
@@ -67,7 +67,8 @@ class ConnectionChecker:
         # check gateway
         if self._oh_gateway.is_connected() and not paralyse_gateway_connection:
             self._reconnect_oh_gateway_after = None
-            last_cache_time = self._oh_gateway.get_last_cache_time() or (time_now - datetime.timedelta(days=1))
+            last_cache_timegateway = self._oh_gateway.get_last_cache_time()
+            last_cache_time = last_cache_timegateway or (time_now - datetime.timedelta(days=1))
             if last_cache_time < (time_now - datetime.timedelta(seconds=self._time_reload_gateway_cache)):
                 self._reconnect_oh_gateway = True
             else:
