@@ -227,5 +227,6 @@ class TestEflow(unittest.TestCase):
         # print(eflow)
 
         self.assertTrue(math.isclose(1.3889047789481912, eflow.plus.value_agg, rel_tol=1e-6))
+        self.assertTrue(math.isclose(-0.002154778948191209, eflow.minus.value_agg, rel_tol=1e-6))
 
 
