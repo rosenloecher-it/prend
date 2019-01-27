@@ -20,8 +20,8 @@ class TestFronmodProcessorReadReal(unittest.TestCase):
             for key, val in results.items():
                 print('    {} = {}'.format(key, val))
 
-    def test_print_read_result(self):
-        self.print_read_result('test', None)
+    # def test_print_read_result(self):
+    #     self.print_read_result('test', None)
 
     def test_process_all(self):
         reader = FronmodReader(self.URL, self.PORT, print_registers=True)
