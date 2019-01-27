@@ -32,7 +32,8 @@ class RuleManager(Daemon):
         self._oh_gateway.set_dispatcher(self._dispatcher)
         self._oh_gateway.set_rest(self._rest)
         self._observer = None
-        self._con_checker = ConnectionChecker(self._oh_gateway)
+        self._con_checker = ConnectionChecker()
+        self._con_checker.set_oh_gateway(self._oh_gateway)
 
         self.last_status_log = None
         self.last_check_connection = None
