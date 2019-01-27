@@ -144,7 +144,14 @@ class FronmodProcessor:
             self.process_factor_scale(results, FronmodConfig.ITEM_MPPT_MOD_POWER
                                       , 0.001, FronmodConfig.SHOW_MPPT_MOD_POWER),
 
+            _logger.debug('process_mppt_model - 1.1 - %s', self.eflow_bat)
+            bat_power = results[FronmodConfig.TEMP_MPPT_BAT_POWER]
+            _logger.debug('process_mppt_model - 1.2 - %s', bat_power)
+
             self.push_eflow(results, self.eflow_bat)
+
+            _logger.debug('process_mppt_model - 2.1 - %s', self.eflow_bat)
+
             self.push_eflow(results, self.eflow_mod)
 
             return results
