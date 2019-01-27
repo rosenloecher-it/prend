@@ -17,17 +17,23 @@ class MockEflowChannel(EflowChannel):
 class TestEflow(unittest.TestCase):
 
     def test_get_normed_intercept(self):
-        intercept1 = EflowChannel.get_normed_intercept(-1, 1)
-        self.assertEqual(0.5, intercept1)
+        intercept = EflowChannel.get_normed_intercept(-1, 1)
+        self.assertEqual(0.5, intercept)
 
-        intercept1 = EflowChannel.get_normed_intercept(1, -1)
-        self.assertEqual(0.5, intercept1)
+        intercept = EflowChannel.get_normed_intercept(1, -1)
+        self.assertEqual(0.5, intercept)
 
-        intercept1 = EflowChannel.get_normed_intercept(1, -3)
-        self.assertEqual(0.25, intercept1)
+        intercept = EflowChannel.get_normed_intercept(1, -3)
+        self.assertEqual(0.25, intercept)
 
-        intercept1 = EflowChannel.get_normed_intercept(3, -1)
-        self.assertEqual(0.75, intercept1)
+        intercept = EflowChannel.get_normed_intercept(3, -1)
+        self.assertEqual(0.75, intercept)
+
+        intercept = EflowChannel.get_normed_intercept(1000, 0)
+        self.assertEqual(1, intercept)
+
+        intercept = EflowChannel.get_normed_intercept(0, 1000)
+        self.assertEqual(0, intercept)
 
     def test_complete(self):
         item = 'item'
@@ -159,31 +165,67 @@ class TestEflow(unittest.TestCase):
         self.assertEqual(0, eflow.plus.value_agg)
         self.assertEqual(0, eflow.minus.value_agg)
 
+    def check_test_realistic_times(self, value):
+        item = 'item'
+        plus = 'plus'
+        minus = 'minus'
+
+        eflow = MockEflowChannel(item, EflowAggregate(plus), EflowAggregate(minus))
+
+        eflow.mock_time = datetime.datetime.now()
+
+        eflow.push_value(value)
+
+        self.assertEqual(eflow.mock_time, eflow.last_time)
+        self.assertEqual(value, eflow.last_value)
+        self.assertEqual(0, eflow.plus.value_agg)
+        self.assertEqual(0, eflow.minus.value_agg)
+
+        # print(eflow)
+
+        offset_seconds = 10
+        for i in range(0, 6):
+            eflow.mock_time = eflow.mock_time + datetime.timedelta(seconds=offset_seconds)
+            eflow.push_value(value)
+            # print(eflow)
+
+        if value > 0:
+            self.assertEqual(0, eflow.minus.value_agg)
+            self.assertTrue(math.isclose(value / 60.0, eflow.plus.value_agg, rel_tol=1e-6))
+        else:
+            self.assertEqual(0, eflow.plus.value_agg)
+            self.assertTrue(math.isclose(value / 60.0, eflow.minus.value_agg, rel_tol=1e-6))
+
     def test_realistic_times(self):
+
+        self.check_test_realistic_times(-800)
+        self.check_test_realistic_times(800)
+
+
+    def test_realistic_numbers(self):
 
         item = 'item'
         plus = 'plus'
         minus = 'minus'
 
         eflow = MockEflowChannel(item, EflowAggregate(plus), EflowAggregate(minus))
-        print(eflow)
 
         eflow.mock_time = datetime.datetime.now()
 
-        value_plus = 800.0
-        eflow.push_value(value_plus)
+        # 1039.4 | 1039.4 => 2.887222222222222
+        # 1039.4 | 0 => 1.443611111111111
 
-        self.assertEqual(eflow.mock_time, eflow.last_time)
-        self.assertEqual(value_plus, eflow.last_value)
-        self.assertEqual(0, eflow.plus.value_agg)
-        self.assertEqual(0, eflow.minus.value_agg)
+        value1 = 1039.4
+        eflow.push_value(value1)
+        # print(eflow)
 
         offset_seconds = 10
-        for i in range(0, 6):
-            eflow.mock_time = eflow.mock_time + datetime.timedelta(seconds=offset_seconds)
-            eflow.push_value(value_plus)
+        eflow.mock_time = eflow.mock_time + datetime.timedelta(seconds=offset_seconds)
 
-        self.assertEqual(0, eflow.minus.value_agg)
-        self.assertTrue(math.isclose(value_plus / 60.0, eflow.plus.value_agg, rel_tol=1e-6))
+        value2 = -40.94
+        eflow.push_value(value2)
+        # print(eflow)
 
-        pass
+        self.assertTrue(math.isclose(1.3889047789481912, eflow.plus.value_agg, rel_tol=1e-6))
+
+

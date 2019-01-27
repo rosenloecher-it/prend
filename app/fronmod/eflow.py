@@ -50,11 +50,12 @@ class EflowChannel:
     def calc(self, curr_time, curr_value):
         last_bias = self.get_bias(self.last_value)
         curr_bias = self.get_bias(curr_value)
-        factor_full = (curr_time - self.last_time).total_seconds() / 60.0 / 60.0
+        elapsed_time = (curr_time - self.last_time).total_seconds()
+        factor_full = elapsed_time / 60.0 / 60.0
 
         if factor_full > 0:
             if last_bias + curr_bias == 0 and last_bias != curr_bias:
-                factor_last = self.get_normed_intercept(self.last_value, curr_value)
+                factor_last = factor_full * self.get_normed_intercept(self.last_value, curr_value)
                 factor_curr = factor_full - factor_last
 
                 agg_last = self.last_value * factor_last / 2.0
@@ -89,5 +90,9 @@ class EflowChannel:
 
     @staticmethod
     def get_normed_intercept(last_value, curr_value):
-        intercept = 1.0 / (1 + abs(curr_value) / abs(last_value))
+        abs_last_value = abs(last_value)
+        if abs_last_value == 0:
+            return 0  # condition: bias != ... !
+        else:
+            intercept = 1.0 / (1 + abs(curr_value) / abs_last_value)
         return intercept
