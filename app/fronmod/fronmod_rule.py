@@ -18,6 +18,8 @@ class FronmodRule(Rule):
     CRON_SENT_MEDIUM = 'CRON_SENT_MEDIUM'
     CRON_SENT_SLOW = 'CRON_SENT_SLOW'
 
+    CRON_RECONNECT = 'CRON_RECONNECT'
+
     def __init__(self):
         super().__init__()
         self._is_open = False
@@ -25,7 +27,6 @@ class FronmodRule(Rule):
         self._reader = None
         self._url = None
         self._port = None
-        self._read_error = 0
         self._quick_mode = 0
 
     def open(self):
@@ -82,28 +83,27 @@ class FronmodRule(Rule):
         cron_job = schedule.every(290).to(310).seconds
         self.subscribe_cron_actions(self.CRON_SENT_SLOW, cron_job)
 
+        cron_job = schedule.every(290).to(310).seconds
+        self.subscribe_cron_actions(self.CRON_RECONNECT, cron_job)
+
         channel = Channel.create_startup()
         self.subscribe_channel_actions(channel)
 
     def _reconnect_reader(self):
         if self._reader:
             self._reader.close()
-            _logger.info('_reconnect_reader')
+            self._reader = None
+            _logger.debug('_reconnect_reader')
 
         self._reader = FronmodReader(self._url, self._port)
         self._reader.open()
         self._processor.set_reader(self._reader)
-
-        self._read_error = 0
 
     def notify_action(self, action) -> None:
         try:
             if not self._is_open:
                 _logger.debug('not opened => abort')
                 return
-
-            if self._read_error > 5:
-                self._reconnect_reader()
 
             # # check for general connection to openhab
             # if not self.is_connected():
@@ -119,15 +119,14 @@ class FronmodRule(Rule):
                     self.handle_cron_send(MobuFlag.Q_MEDIUM)
                 elif self.CRON_SENT_SLOW == action.channel.name:
                     self.handle_cron_send(MobuFlag.Q_SLOW)
+                elif self.CRON_RECONNECT == action.channel.name:
+                    self._reconnect_reader()
 
             # _logger.debug('notify_action - %s', action)
             # self._start_processor()
 
         except FronmodException as ex:
             _logger.error('notify_action failed - %s', ex)
-
-            if isinstance(ex, FronmodReadException):
-                self._read_error += 1
 
     def handle_cron_fetch_quick(self):
 
