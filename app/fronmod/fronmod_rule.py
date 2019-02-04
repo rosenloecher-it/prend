@@ -28,6 +28,7 @@ class FronmodRule(Rule):
         self._url = None
         self._port = None
         self._quick_mode = 0
+        self._error_counter = 0
 
     def open(self):
         self._url = self.get_config('fronmod', 'url')
@@ -83,7 +84,7 @@ class FronmodRule(Rule):
         cron_job = schedule.every(290).to(310).seconds
         self.subscribe_cron_actions(self.CRON_SENT_SLOW, cron_job)
 
-        cron_job = schedule.every(290).to(310).seconds
+        cron_job = schedule.every(390).to(410).seconds
         self.subscribe_cron_actions(self.CRON_RECONNECT, cron_job)
 
         channel = Channel.create_startup()
@@ -98,6 +99,10 @@ class FronmodRule(Rule):
         self._reader = FronmodReader(self._url, self._port)
         self._reader.open()
         self._processor.set_reader(self._reader)
+
+        self._show_errors = True
+        self._error_counter = 0
+        self._processor.set_show_errors(self._show_errors)
 
     def notify_action(self, action) -> None:
         try:
@@ -126,7 +131,14 @@ class FronmodRule(Rule):
             # self._start_processor()
 
         except FronmodException as ex:
-            _logger.error('notify_action failed - %s', ex)
+            if self._show_errors:
+                _logger.error('notify_action failed - %s', ex)
+
+            self._error_counter += 1
+            if self._error_counter > 12:
+                _logger.error('notify_action - suppress following errors until reconnect!')
+                self._show_errors = False
+                self._processor.set_show_errors(self._show_errors)
 
     def handle_cron_fetch_quick(self):
 

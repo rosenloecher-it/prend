@@ -38,6 +38,11 @@ class FronmodProcessor:
         self.value_inv_dc_power = None
         self.value_met_ac_power = None
 
+        self._show_errors = True
+
+    def set_show_errors(self, show_errors):
+        self._show_errors = show_errors
+
     def set_reader(self, reader):
         self._reader = reader
 
@@ -65,7 +70,8 @@ class FronmodProcessor:
         try:
             results = self._reader.read(read_conf)
         except Exception:
-            _logger.error('read_model failed ({})!'.format(read_conf))
+            if self._show_errors:
+                _logger.error('read_model failed ({})!'.format(read_conf))
             raise
 
         for key, result in results.items():
@@ -179,8 +185,9 @@ class FronmodProcessor:
             scale_temp = results[scale_name]
             value_target = self.scale_item(value_temp, scale_temp)
         except (FronmodException, TypeError, ValueError) as ex:
-            _logger.error('process_modbus_scale failed (%s + %s => %s)!', value_name, scale_name, target_name)
-            _logger.exception(ex)
+            if self._show_errors:
+                _logger.error('process_modbus_scale failed (%s + %s => %s)!', value_name, scale_name, target_name)
+                _logger.exception(ex)
             value_target = None
 
         target_result = results[target_name]
@@ -196,8 +203,9 @@ class FronmodProcessor:
             if result:
                 value_target = result.value * scale_factor
         except (TypeError, ValueError) as ex:
-            _logger.error('process_factor_scale failed (%s + %s => %s)!', value_name, scale_factor, target_name)
-            _logger.exception(ex)
+            if self._show_errors:
+                _logger.error('process_factor_scale failed (%s + %s => %s)!', value_name, scale_factor, target_name)
+                _logger.exception(ex)
             value_target = None
 
         target_result = results[target_name]
@@ -232,8 +240,9 @@ class FronmodProcessor:
                     value_target = raw_bat_power.value * charge_factor
 
         except (TypeError, ValueError) as ex:
-            _logger.error('process_bat_power_sign failed!')
-            _logger.exception(ex)
+            if self._show_errors:
+                _logger.error('process_bat_power_sign failed!')
+                _logger.exception(ex)
             value_target = None
 
         target_result = results[FronmodConfig.TEMP_MPPT_BAT_POWER]
@@ -251,8 +260,9 @@ class FronmodProcessor:
                     value_target = 100.0 * self.value_inv_ac_power / self.value_inv_dc_power
 
         except (TypeError, ValueError) as ex:
-            _logger.error('process_inv_efficiency failed!')
-            _logger.exception(ex)
+            if self._show_errors:
+                _logger.error('process_inv_efficiency failed!')
+                _logger.exception(ex)
             value_target = None
 
         target_result = results[FronmodConfig.ITEM_INV_EFFICIENCY]
