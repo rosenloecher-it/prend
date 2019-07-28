@@ -38,10 +38,13 @@ class MockOhGateway(OhGateway):
         channel = Channel.create_item(channel_name)
         self.set_state(channel, state)
 
-    def clear(self):
+    def clear_sent_actions(self):
         self._send_queue.empty()
         self.sent_actions_list.clear()
         self.sent_actions_dict.clear()
+
+    def clear(self):
+        self.clear_sent_actions()
         with self._lock_state:
             self._states.clear()
 

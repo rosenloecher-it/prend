@@ -1,6 +1,6 @@
 import schedule
 from abc import ABC, abstractmethod
-from prend.channel import Channel, ChannelType
+from prend.channel import Channel
 from prend.oh.oh_send_data import OhSendFlags
 from prend.state import State
 from prend.tools.convert import Convert
@@ -75,36 +75,25 @@ class Rule(ABC):
         return value
 
     def get_channels(self) -> list:
-        states = self.get_states()
-        channels = [*states]
-        return channels
+        return self._oh_gateway.get_channels()
 
     def get_states(self) -> dict:
         return self._oh_gateway.get_states()
 
     # convenience function for get_state
     def get_item_state(self, channel_name: str) -> State:
-        channel = Channel.create(ChannelType.ITEM, channel_name)
-        state = self.get_state(channel)
-        return state
+        return self._oh_gateway.get_item_state(channel_name)
 
     # convenience function for get_state
     def get_item_state_value(self, channel_name: str):
-        channel = Channel.create(ChannelType.ITEM, channel_name)
-        state = self.get_state(channel)
-        if state:
-            return state.value
-        return None
+        return self._oh_gateway.get_item_state_value(channel_name)
 
     def get_state(self, channel: Channel) -> State:
         return self._oh_gateway.get_state(channel)
 
     # convenience function for get_state
     def get_state_value(self, channel: Channel):
-        state = self.get_state(channel)
-        if state:
-            return state.value
-        return None
+        return self._oh_gateway.get_state_value(channel)
 
     def send(self, flags: OhSendFlags, channel, state):
         self._oh_gateway.send(flags, channel, state)
