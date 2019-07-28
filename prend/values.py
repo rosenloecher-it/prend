@@ -37,6 +37,14 @@ class OnOffValue(Enum):
                     return e
         raise ValueError()
 
+    @classmethod
+    def is_on(cls, value):
+        return value == cls.ON or value == 'ON'
+
+    @classmethod
+    def is_off(cls, value):
+        return value == cls.OFF or value == 'OFF'
+
 
 class ThingStatusValue(Enum):
 
