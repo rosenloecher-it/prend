@@ -2,7 +2,7 @@ import copy
 from prend.channel import Channel
 from prend.oh.oh_gateway import OhGateway
 from prend.oh.oh_send_data import OhSendData, OhSendFlags
-from prend.state import State
+from prend.state import State, StateType
 
 
 class MockOhGateway(OhGateway):
@@ -27,6 +27,8 @@ class MockOhGateway(OhGateway):
         return self.mock_is_connected
 
     def set_state(self, channel_in: Channel, state_in: State):
+        if state_in is None:
+            state_in = State.create(StateType.UNDEF, None)
         if not isinstance(state_in, State):
             raise TypeError()
         channel = copy.deepcopy(channel_in)
@@ -34,9 +36,18 @@ class MockOhGateway(OhGateway):
         with self._lock_state:
             self._states[channel] = state
 
+    def clear_state(self, channel: Channel):
+        if channel:
+            with self._lock_state:
+                del self._states[channel]
+
     def set_item_state(self, channel_name, state: State):
         channel = Channel.create_item(channel_name)
         self.set_state(channel, state)
+
+    def clear_item_state(self, channel_name):
+        channel = Channel.create_item(channel_name)
+        self.clear_state(channel)
 
     def clear_sent_actions(self):
         self._send_queue.empty()
