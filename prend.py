@@ -3,7 +3,6 @@ from prend.process import Process
 from app.sample_rule import SampleRule
 
 
-
 def main():
     process = Process()
 
