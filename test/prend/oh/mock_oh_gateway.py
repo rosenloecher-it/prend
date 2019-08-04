@@ -11,7 +11,7 @@ class MockOhGateway(OhGateway):
         super().__init__()
 
         self.sent_actions_list = []
-        self.sent_actions_dict = {}
+        self.sent_actions_channel_dict = {}
         self.mock_is_connected = True
 
     def send(self, flags: OhSendFlags, channel, state):
@@ -19,7 +19,7 @@ class MockOhGateway(OhGateway):
         send_data.check()
 
         self.sent_actions_list.append(send_data)
-        self.sent_actions_dict[send_data.get_channel()] = send_data
+        self.sent_actions_channel_dict[send_data.get_channel()] = send_data
 
         super().send(flags, channel, state)
 
@@ -52,7 +52,7 @@ class MockOhGateway(OhGateway):
     def clear_sent_actions(self):
         self._send_queue.empty()
         self.sent_actions_list.clear()
-        self.sent_actions_dict.clear()
+        self.sent_actions_channel_dict.clear()
 
     def clear(self):
         self.clear_sent_actions()
@@ -63,8 +63,8 @@ class MockOhGateway(OhGateway):
         # prepare chache in test setup
         pass
 
-    def get_sent_data(self, channel):
-        sent_data = self.sent_actions_dict.get(channel)
+    def get_last_channel_data(self, channel):
+        sent_data = self.sent_actions_channel_dict.get(channel)
         if sent_data is None:
             return None
         return sent_data.state
@@ -77,20 +77,20 @@ class MockOhGateway(OhGateway):
         else:
             raise TypeError()
 
-        sent_data = self.sent_actions_dict.get(channel)
-        if sent_data is None:
-            return False
+        for sent_data in self.sent_actions_list:
+            if isinstance(sent_data.state, State):
+                sent_value = sent_data.state.value
+            else:
+                sent_value = sent_data.state
 
-        if isinstance(sent_data.state, State):
-            sent_value = sent_data.state.value
-        else:
-            sent_value = sent_data.state
+            if isinstance(data_compare, State):
+                comp_value = data_compare.value
+            else:
+                comp_value = data_compare
 
-        if isinstance(data_compare, State):
-            comp_value = data_compare.value
-        else:
-            comp_value = data_compare
+            if sent_value == comp_value:
+                return True
 
-        return sent_value == comp_value
+        return False
 
 

@@ -32,10 +32,10 @@ class TestSampleRule(unittest.TestCase):
         self.rule.notify_action(action)
 
         self.assertEqual(2, len(self.mock_gateway.sent_actions_list))
-        self.assertEqual(2, len(self.mock_gateway.sent_actions_dict))
+        self.assertEqual(2, len(self.mock_gateway.sent_actions_channel_dict))
 
-        value_str = self.mock_gateway.get_sent_data(Channel.create_item(SampleRule.ITEM_STRING))
-        value_num = self.mock_gateway.get_sent_data(Channel.create_item(SampleRule.ITEM_DUMMY_2))
+        value_str = self.mock_gateway.get_last_channel_data(Channel.create_item(SampleRule.ITEM_STRING))
+        value_num = self.mock_gateway.get_last_channel_data(Channel.create_item(SampleRule.ITEM_DUMMY_2))
 
         self.assertTrue(value_str is not None)
         self.assertEqual(expected_num, value_num)
@@ -51,7 +51,7 @@ class TestSampleRule(unittest.TestCase):
         self.rule.notify_action(action)
 
         self.assertEqual(0, len(self.mock_gateway.sent_actions_list))
-        self.assertEqual(0, len(self.mock_gateway.sent_actions_dict))
+        self.assertEqual(0, len(self.mock_gateway.sent_actions_channel_dict))
 
     def test_dummy(self):
         print('dummy')
