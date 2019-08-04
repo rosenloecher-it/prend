@@ -3,6 +3,7 @@ from prend.channel import Channel
 from prend.oh.oh_gateway import OhGateway
 from prend.oh.oh_send_data import OhSendData, OhSendFlags
 from prend.state import State, StateType
+from typing import Optional
 
 
 class MockOhGateway(OhGateway):
@@ -41,7 +42,7 @@ class MockOhGateway(OhGateway):
             with self._lock_state:
                 del self._states[channel]
 
-    def set_item_state(self, channel_name, state: State):
+    def set_item_state(self, channel_name, state: Optional[State]):
         channel = Channel.create_item(channel_name)
         self.set_state(channel, state)
 

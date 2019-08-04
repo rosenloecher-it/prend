@@ -46,6 +46,7 @@ class TestConnectionChecker(unittest.TestCase):
         self.con_check.set_oh_gateway(self.gateway)
         self.con_check.set_observer(self.observer)
 
+    # noinspection PyBroadException
     def test_no_gateway(self):
         try:
             self.con_check.set_oh_gateway(None)
@@ -54,6 +55,7 @@ class TestConnectionChecker(unittest.TestCase):
         except Exception:
             self.assertTrue(True)
 
+    # noinspection PyBroadException
     def test_no_observer(self):
         try:
             self.con_check.set_oh_gateway(None)
