@@ -126,16 +126,6 @@ class Daemon:
         """
         pass
 
-    def start_foreground(self):
-        """
-        Start as foreground process
-        """
-        _logger.debug('starting foreground...')
-
-        self.check_pidfile_and_exit()
-        # don't write pid, because it doesn't get deleted when aborting
-        self.run()
-
     def start(self):
         """
         Start the daemon

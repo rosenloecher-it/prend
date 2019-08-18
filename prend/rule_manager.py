@@ -110,7 +110,20 @@ class RuleManager(Daemon):
         startup_action = Action.create_startup_action()
         self._dispatcher.push_action(startup_action)
 
+    def start_foreground(self):
+        """
+        Start as foreground process
+        """
+        _logger.debug('starting foreground...')
+
+        self.check_pidfile_and_exit()
+        # don't write pid, because it doesn't get deleted when aborting
+        self.loop_events()
+
     def run(self):
+        self.loop_events()
+
+    def loop_events(self):
 
         try:
             self._rest.open()
@@ -145,6 +158,37 @@ class RuleManager(Daemon):
 
         except KeyboardInterrupt:
             _logger.debug('KeyboardInterrupt')
+        except Exception as ex:
+            _logger.exception(ex)
+        finally:
+            self.shutdown()
+
+    def print_channels(self):
+        """
+        Prints all openhab channels
+        """
+
+        try:
+            print('print openhab channels')
+
+            self._rules = []  # don't process any rule
+
+            self._rest.open()
+            self._oh_gateway.cache_states()
+
+            lines = []
+
+            states = self._oh_gateway.get_states()  # don't lock all time
+
+            for channel, state in states.items():
+                line = "{}: {}".format(channel, state)
+                lines.append(line)
+
+            lines.sort()
+
+            for line in lines:
+                print(line)
+
         except Exception as ex:
             _logger.exception(ex)
         finally:

@@ -71,6 +71,11 @@ class CliParser(argparse.ArgumentParser):
             help='mode: toogle deamon'
         )
         parser.add_argument(
+            '--print_channels', '-p',
+            action='store_true',
+            help='mode: print currently loaded openhab channels with states and exit'
+        )
+        parser.add_argument(
             '--help', '-h',
             action='store_true',
             help='show this help message and exit'
@@ -346,6 +351,8 @@ class ConfigLoader:
             if config.parsed.foreground:
                 counter += 1
             if config.parsed.ensure:
+                counter += 1
+            if config.parsed.print_channels:
                 counter += 1
 
         if counter > 1:

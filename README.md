@@ -116,11 +116,12 @@ $ ./venv/bin/activate
 # show command line options
 $ python prend.py --help
 
-$ python prend.py --status         # check settings
-$ python prend.py --foreground     # for debugging
-$ python prend.py --start          # start daemon
-$ python prend.py --ensure         # ensure that the daemon is running (e.g. call from cron)
-$ python prend.py --stop           # stop daemon
+$ python prend.py --status          # check settings
+$ python prend.py --foreground      # for debugging
+$ python prend.py --start           # start daemon
+$ python prend.py --ensure          # ensure that the daemon is running (e.g. call from cron)
+$ python prend.py --stop            # stop daemon
+$ python prend.py --print_channels  # print currently loaded openhab channels with states and exit
 ```
 
 

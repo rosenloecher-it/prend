@@ -83,6 +83,9 @@ class Process:
             elif self._config.parsed.ensure:
                 logger.debug('run(ensure)')
                 self._rule_manager.ensure_started()
+            elif self._config.parsed.print_channels:
+                logger.debug('run(print channels)')
+                self._rule_manager.print_channels()
 
             return 0
         except Exception as ex:
