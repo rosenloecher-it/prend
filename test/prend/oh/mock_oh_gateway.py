@@ -79,7 +79,7 @@ class MockOhGateway(OhGateway):
             raise TypeError()
 
         for sent_data in self.sent_actions_list:
-            if sent_data.channel != channel:
+            if sent_data.get_channel() != channel:
                 continue
 
             if isinstance(sent_data.state, State):
