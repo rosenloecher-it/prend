@@ -110,7 +110,6 @@ class TestConnectionChecker(unittest.TestCase):
         # newer cached but connected
         self.con_check._current_time = datetime.datetime.now()
         self.gateway._is_connected = True
-        offset_seconds = -1 * Constants.WAIT_FORCE_FULL_RELOAD_SEC / 2
 
         self.con_check.check_connection_state()
         out = self.con_check.should_reconnect_oh_gateway()

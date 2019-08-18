@@ -7,25 +7,6 @@ from prend.state import State
 from typing import Optional
 
 
-class MockOhGateway(OhGateway):
-
-    def __init__(self):
-        super().__init__()
-        self.last_channel = None
-        self.last_state = None
-
-    def send(self, send_command: bool, channel: Channel, state):
-        self.last_channel = channel
-        self.last_state = state
-
-    def get_states(self):
-        pass
-
-    def get_state(self, channel: Channel) -> Optional[State]:
-        self.last_channel = channel
-        return self.last_state
-
-
 class MockRule(Rule):
 
     def __init__(self):
@@ -99,45 +80,6 @@ class TestRule(unittest.TestCase):
 
         out = rule.get_config_float('section_should_not_exists', value_name, 123)
         self.assertEqual(out, 123)
-
-    # def test_send_and_get_state(self):
-    #     rule = MockRule()
-    #     gateway = MockOhGateway()
-    #     rule.set_oh_gateway(gateway)
-    #
-    #     channel = Channel.create(ChannelType.ITEM, 'test')
-    #     state = State()
-    #     state.type = StateType.DECIMAL
-    #     state.value = 123
-    #     state.update_last_change()
-    #
-    #     rule.send_command(channel, state)
-    #     self.assertEqual(gateway.last_channel, channel)
-    #     self.assertEqual(gateway.last_state, state)
-    #
-    #     rule.send_update(channel, state)
-    #     self.assertEqual(gateway.last_channel, channel)
-    #     self.assertEqual(gateway.last_state, state)
-    #
-    #     out = rule.get_state(channel)
-    #     self.assertEqual(out, state)
-    #
-    #     out = rule.get_item_state(channel.name)
-    #     self.assertEqual(out, state)
-    #
-    #     out = rule.get_state_value(channel)
-    #     self.assertEqual(out, state.value)
-    #
-    #     out = rule.get_item_state_value(channel.name)
-    #     self.assertEqual(out, state.value)
-    #
-    #     rule.send(OhSendFlags.COMMAND | OhSendFlags.CHANNEL_AS_ITEM, channel.name, state)
-    #     self.assertEqual(gateway.last_channel, channel)
-    #     self.assertEqual(gateway.last_state, state)
-    #
-    #     rule.send(OhSendFlags.UPDATE | OhSendFlags.CHANNEL_AS_ITEM, channel.name, state)
-    #     self.assertEqual(gateway.last_channel, channel)
-    #     self.assertEqual(gateway.last_state, state)
 
 
 if __name__ == '__main__':

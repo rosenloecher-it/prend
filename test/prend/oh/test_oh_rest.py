@@ -2,7 +2,6 @@ import datetime
 import requests
 import unittest
 from prend.channel import Channel, ChannelType
-from prend.config import Config
 from prend.oh.oh_event import OhEvent, OhNotificationType
 from prend.oh.oh_gateway import OhGatewayEventSink
 from prend.oh.oh_rest import OhRest
