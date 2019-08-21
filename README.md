@@ -23,7 +23,7 @@ Write your own [OpenHAB] rules with Python 3. Use your favorite editor, debug yo
 - No service script is provided so far to run it as system daemon.
 - Python programming skills required.
 - HTTP authenification (username/password) is not tested.
-- Tested with OpenHAB 2.3 Release (only)
+- Tested with OpenHAB 2.3 and 2.4 (Release only)
 
 
 ## Motivation
@@ -97,6 +97,10 @@ pid_file=./__work__/prend.pid
 loglevel=debug
 logfile=./__work__/prod.log
 log_config_file=
+
+[rules]
+app.sample_rule.SampleRule=app.sample_rule.SampleRule
+# Use any unique key. the value is used a path to class!
 ```
 
 Via *log_config_file* you can configure a Python logging ini file - [see the Hitchhiker's guide](https://docs.python-guide.org/writing/logging/#example-configuration-via-an-ini-file).
@@ -143,11 +147,25 @@ def main():
     ...
 
     # todo - register your rule classes
-    process.register_rule(SampleRule())
+    process.register_rule_instance(SampleRule())
 
     # run endless loop
     return process.run()
 ```
+
+Or config rule classes via config file:
+```python
+def main():
+    process = Process()
+    ...
+
+    process.register_rules_from_config()
+
+    # run endless loop
+    return process.run()
+```
+
+The config file must contain a "rules" section (see above).
 
 
 ## Maintainer & License

@@ -4,13 +4,18 @@ import traceback
 import typing
 from prend.config import ConfigLoader
 from prend.logging_helper import LoggingHelper
-
+from prend.rule import Rule
+from prend.rule_manager import RuleManager
 
 # pylint: disable=broad-except
 class Process:
-    _config = None
-    _rule_manager = None
-    _exit_code = None
+
+    CONFIG_SECTION_RULES = "rules"
+
+    def __init__(self):
+        self._config = None
+        self._rule_manager = None
+        self._exit_code = None
 
     def _print_and_return(self, exit_code):
         if self._config:
@@ -32,7 +37,6 @@ class Process:
 
             LoggingHelper.set_explicit_module_loglevels(self._config)
 
-            from prend.rule_manager import RuleManager
             self._rule_manager = RuleManager(self._config)
 
             self._init_locale(self._config.locale)
@@ -93,9 +97,60 @@ class Process:
             print(traceback.format_exc())
             return 1
 
-    def register_rule(self, rule):
+    def _check_class(self, rule):
+        if not isinstance(rule, Rule):
+            if rule:
+                class_info = rule.__class__.__module__ + '.' + rule.__class__.__name__
+            else:
+                class_info = 'None'
+            class_target = Rule.__module__ + '.' + Rule.__name__
+            raise TypeError("{} is not of type {}!".format(class_info, class_target))
+
+    @classmethod
+    def resolve_import(cls, name:str) -> Rule.__class__:
+        components = name.split('.')
+        mod = __import__(components[0])
+        for comp in components[1:]:
+            mod = getattr(mod, comp)
+        return mod
+
+        # module_name, member_name = target.split(":")
+        # module = __import__(module_name)
+        # member = getattr(module, member_name)
+        # return member
+
+    def register_rule_instance(self, rule:Rule):
         try:
+            self._check_class(rule)
             self._rule_manager.register_rule(rule)
         except Exception as ex:
             print('error: {}'.format(ex))
             self._exit_code = 1
+
+    def register_rule_path(self, name:str):
+        try:
+            rule_class = self.resolve_import(name)
+            rule = rule_class()
+            self._check_class(rule)
+            self._rule_manager.register_rule(rule)
+        except Exception as ex:
+            print('error: {}'.format(ex))
+            self._exit_code = 1
+
+    def register_rules_from_config(self):
+        try:
+            section = self._config.rule_config.get(self.CONFIG_SECTION_RULES)
+            if section is None:
+                raise RuntimeError('config section "{}" not found!'.format(self.CONFIG_SECTION_RULES))
+            pathes = section.values()
+            for path in pathes:
+                if path:
+                    self.register_rule_path(path)
+
+            if self._exit_code is not None:
+                raise RuntimeError('some entries could not be loaded!')
+
+        except Exception as ex:
+            print('error config rules via config files: {}'.format(ex))
+            self._exit_code = 1
+

@@ -10,8 +10,7 @@ def main():
     if exit_code is not None:
         sys.exit(exit_code)
 
-    # todo - register your rule classes
-    process.register_rule(SampleRule())
+    process.register_rules_from_config()
 
     # run endless loop
     return process.run()
