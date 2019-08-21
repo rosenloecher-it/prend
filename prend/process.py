@@ -107,17 +107,11 @@ class Process:
             raise TypeError("{} is not of type {}!".format(class_info, class_target))
 
     @classmethod
-    def resolve_import(cls, name:str) -> Rule.__class__:
-        components = name.split('.')
-        mod = __import__(components[0])
-        for comp in components[1:]:
-            mod = getattr(mod, comp)
-        return mod
-
-        # module_name, member_name = target.split(":")
-        # module = __import__(module_name)
-        # member = getattr(module, member_name)
-        # return member
+    def resolve_import(cls, path:str) -> Rule.__class__:
+        delimiter = path.rfind(".")
+        classname = path[delimiter + 1:len(path)]
+        mod = __import__(path[0:delimiter], globals(), locals(), [classname])
+        return getattr(mod, classname)
 
     def register_rule_instance(self, rule:Rule):
         try:
