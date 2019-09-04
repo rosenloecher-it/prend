@@ -98,4 +98,3 @@ class ConnectionChecker:
         if self._reconnect_oh_gateway:
             self._reconnect_oh_gateway_after = None
         return self._reconnect_oh_gateway
-

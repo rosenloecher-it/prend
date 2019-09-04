@@ -42,8 +42,8 @@ class Action:
             return '{}({})'.format(self.__class__.__name__, self.channel)
         else:
             return '{}({} | {} => {}; | {} (old: {}))'\
-                .format(self.__class__.__name__, self.notification_type, self.channel
-                        , self.listener, self.state_new, self.state_old)
+                .format(self.__class__.__name__, self.notification_type, self.channel,
+                        self.listener, self.state_new, self.state_old)
 
     def is_valid(self) -> bool:
         if not self.channel:
@@ -79,7 +79,7 @@ class Action:
         return action
 
     @staticmethod
-    def create_from_event(event: OhEvent)-> 'Action':
+    def create_from_event(event: OhEvent) -> 'Action':
         if not event or not event.is_valid():
             raise ActionException('invalid action ({})'.format(str(event) if event else 'None'))
 
@@ -89,5 +89,3 @@ class Action:
         action.notification_type = event.notification_type
 
         return action
-
-

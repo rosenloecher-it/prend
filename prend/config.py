@@ -37,8 +37,8 @@ class CliParser(argparse.ArgumentParser):
         parser.add_argument(
             '--config', '-c',
             # type=argparse.FileType('r'),
-            help='config file (search {}, {})'.format(ConfigLoader.get_def_config_file1()
-                                                      , ConfigLoader.get_def_config_file2())
+            help='config file (search {}, {})'.format(ConfigLoader.get_def_config_file1(),
+                                                      ConfigLoader.get_def_config_file2())
         )
         parser.add_argument(
             '--foreground', '-f',
@@ -111,9 +111,9 @@ class Config:
         self.rule_config = {}
 
     def __repr__(self) -> str:
-        return '{}(exit={}; conffile={}; rest={}; log={}:{}; parsed=<{}>)'\
-            .format(self.__class__.__name__, self.exit_code, self.config_file, self.oh_rest_base_url
-                    , self.loglevel, self.logfile, self.parsed)
+        t = '{}(exit={}; conffile={}; rest={}; log={}:{}; parsed=<{}>)'
+        return t.format(self.__class__.__name__, self.exit_code, self.config_file, self.oh_rest_base_url,
+                        self.loglevel, self.logfile, self.parsed)
 
     def print(self, print_all=False):
         lines = []
@@ -361,4 +361,3 @@ class ConfigLoader:
         elif counter == 0:
             print('\nerror: missing mode!')
             config.exit_code = 2
-

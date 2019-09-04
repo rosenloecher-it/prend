@@ -71,4 +71,3 @@ class SampleRule(Rule):
             self.send(OhSendFlags.COMMAND | OhSendFlags.CHANNEL_AS_ITEM, self.ITEM_STRING, text)
 
         # in general: see "State" for values and "Channel" for channels of items + things
-

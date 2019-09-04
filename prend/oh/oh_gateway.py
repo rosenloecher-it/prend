@@ -170,9 +170,9 @@ class OhGateway(OhGatewayEventSink):
 
                 with self._lock_state:
                     stat_sum_new = len(self._states)
-                _logger.info('cache_states: item cache reloaded (read=%d, deleted=%d, count=%d, time=%fs)'
-                             , stat_sum_events, stat_deleted, stat_sum_new
-                             , (self._cache_states_last_fetch - time_start).total_seconds())
+                _logger.info('cache_states: item cache reloaded (read=%d, deleted=%d, count=%d, time=%fs)',
+                             stat_sum_events, stat_deleted, stat_sum_new,
+                             (self._cache_states_last_fetch - time_start).total_seconds())
 
         except Exception as ex:
             _logger.error('cache_states failed (%s: %s)!', ex.__class__.__name__, ex)

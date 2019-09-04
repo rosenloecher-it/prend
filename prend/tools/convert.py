@@ -4,7 +4,7 @@ from typing import Optional
 class Convert:
 
     @staticmethod
-    def convert_to_bool(text_in: Optional[str], fallback: Optional[bool]=None) -> bool:
+    def convert_to_bool(text_in: Optional[str], fallback: Optional[bool] = None) -> bool:
         if not text_in:
             return fallback
         text_in = text_in.strip().lower()
@@ -15,7 +15,7 @@ class Convert:
         return fallback
 
     @staticmethod
-    def convert_to_int(text_in: Optional[str], fallback: Optional[int]=None) -> int:
+    def convert_to_int(text_in: Optional[str], fallback: Optional[int] = None) -> int:
         if text_in is None:
             return fallback
         try:

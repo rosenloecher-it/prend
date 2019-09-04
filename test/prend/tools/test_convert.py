@@ -37,4 +37,3 @@ class TestConvert(unittest.TestCase):
         self.assertEqual(Convert.convert_to_float('  ', 1.1), 1.1)
         self.assertEqual(Convert.convert_to_float(' abc ', 1.1), 1.1)
         self.assertEqual(Convert.convert_to_float(None, 1.1), 1.1)
-

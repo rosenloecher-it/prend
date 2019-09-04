@@ -7,6 +7,7 @@ from prend.logging_helper import LoggingHelper
 from prend.rule import Rule
 from prend.rule_manager import RuleManager
 
+
 # pylint: disable=broad-except
 class Process:
 

@@ -44,8 +44,8 @@ class TestSampleRule(unittest.TestCase):
         self.mock_gateway.mock_is_connected = False
 
         expected_num = 2
-        self.mock_gateway.set_state(Channel.create_item(SampleRule.ITEM_DUMMY_1)
-                                    , State.create(StateType.DECIMAL, expected_num))
+        self.mock_gateway.set_state(Channel.create_item(SampleRule.ITEM_DUMMY_1),
+                                    State.create(StateType.DECIMAL, expected_num))
 
         action = Action.create_cron_action(SampleRule.CRON_NAME)
         self.rule.notify_action(action)

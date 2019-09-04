@@ -34,13 +34,10 @@ class TestOhNotificationType(unittest.TestCase):
 
         self.check_parse(OhNotificationType.ITEM_COMMAND, ['ItemCommandEvent'])
 
-        self.check_parse(OhNotificationType.THING_CHANGE
-                         , ['ThingStatusInfoEvent', 'ThingStatusInfoChangedEvent'])
+        self.check_parse(OhNotificationType.THING_CHANGE, ['ThingStatusInfoEvent', 'ThingStatusInfoChangedEvent'])
 
-        reload_types = [
-            'ItemAddedEvent', 'ItemRemovedEvent', 'ItemUpdatedEvent'
-            , 'ThingAddedEvent', 'ThingRemovedEvent', 'ThingUpdatedEvent'
-        ]
+        reload_types = ['ItemAddedEvent', 'ItemRemovedEvent', 'ItemUpdatedEvent', 'ThingAddedEvent',
+                        'ThingRemovedEvent', 'ThingUpdatedEvent']
         self.check_parse(OhNotificationType.RELOAD, reload_types)
 
     def test_str(self):

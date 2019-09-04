@@ -84,4 +84,3 @@ class SetupTest:
         config.loglevel = 'debug'
         config.oh_rest_base_url = 'dummy_url'
         return config
-

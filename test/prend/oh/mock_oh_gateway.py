@@ -96,5 +96,3 @@ class MockOhGateway(OhGateway):
                 return True
 
         return False
-
-

@@ -28,8 +28,8 @@ class OhSendData:
             self.state = copy.deepcopy(state)
 
     def __repr__(self) -> str:
-        return '{}({},{},{})'.format(self.__class__.__name__, hex(self.flags) if self.flags is not None else 'None'
-                                     , self.channel, self.state)
+        return '{}({},{},{})'.format(self.__class__.__name__, hex(self.flags) if self.flags is not None else 'None',
+                                     self.channel, self.state)
 
     def check(self):
         channel = self.get_channel()

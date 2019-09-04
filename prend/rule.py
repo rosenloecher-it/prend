@@ -50,7 +50,7 @@ class Rule(ABC):
     def subscribe_cron_actions(self, cron_key: str, job: schedule.Job) -> None:
         self._dispatcher.register_cron_listener(cron_key, job, self)
 
-    def get_config(self, section_name: str, value_name: str, fallback: Optional[str]=None):
+    def get_config(self, section_name: str, value_name: str, fallback: Optional[str] = None):
         section = self._config.get(section_name)
         if not section:
             return fallback
@@ -59,17 +59,17 @@ class Rule(ABC):
             return fallback
         return value
 
-    def get_config_bool(self, section_name: str, value_name: str, fallback: Optional[bool]=None):
+    def get_config_bool(self, section_name: str, value_name: str, fallback: Optional[bool] = None):
         value_str = self.get_config(section_name, value_name, None)
         value = Convert.convert_to_bool(value_str, fallback)
         return value
 
-    def get_config_int(self, section_name: str, value_name: str, fallback: Optional[int]=None):
+    def get_config_int(self, section_name: str, value_name: str, fallback: Optional[int] = None):
         value_str = self.get_config(section_name, value_name, None)
         value = Convert.convert_to_int(value_str, fallback)
         return value
 
-    def get_config_float(self, section_name: str, value_name: str, fallback: Optional[float]=None):
+    def get_config_float(self, section_name: str, value_name: str, fallback: Optional[float] = None):
         value_str = self.get_config(section_name, value_name, None)
         value = Convert.convert_to_float(value_str, fallback)
         return value
@@ -112,5 +112,3 @@ class Rule(ABC):
         :param action: notification data
         """
         pass
-
-

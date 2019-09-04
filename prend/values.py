@@ -169,4 +169,3 @@ class OpeningValue(Enum):
                 if e.name == text:
                     return e
         raise ValueError()
-

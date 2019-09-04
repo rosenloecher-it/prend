@@ -13,4 +13,3 @@ class Constants:
     # OhGateway
     WAIT_AFTER_CONNECTION_ERROR_SEC = 20
     WAIT_FORCE_FULL_RELOAD_SEC = 15 * 60
-
