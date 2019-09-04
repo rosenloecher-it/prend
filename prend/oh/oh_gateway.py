@@ -211,5 +211,3 @@ class OhGateway(OhGatewayEventSink):
 
             if action.should_be_published():
                 self._dispatcher.push_action(action)
-
-

@@ -89,4 +89,3 @@ class OhSendData:
             value_comp = comp
 
         return value_self != value_comp
-

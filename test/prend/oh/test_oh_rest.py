@@ -81,7 +81,7 @@ class TestOhRest(unittest.TestCase):
 
         # test item
         # noinspection PyPep8
-        json_data = {'link': 'http://127.0.0.1:8080/rest/items/dummySwitch', 'state': 'ON', 'editable': False, 'type': 'Switch', 'name': 'dummySwitch', 'category': 'settings', 'tags': [], 'groupNames': []}
+        json_data = {'link': 'http://127.0.0.1:8080/rest/items/dummySwitch', 'state': 'ON', 'editable': False, 'type': 'Switch', 'name': 'dummySwitch', 'category': 'settings', 'tags': [], 'groupNames': []}  # noqa
         ev_out = rest._fetch_item(time_start_loading, json_data)
         channel = Channel.create(ChannelType.ITEM, 'dummySwitch')
         state = State.create(StateType.SWITCH, OnOffValue.ON)
@@ -90,7 +90,7 @@ class TestOhRest(unittest.TestCase):
 
         # test groups
         # noinspection PyPep8
-        json_data = {'members': [], 'link': 'http://homeserver:8080/rest/items/gMarc', 'state': 'NULL', 'editable': False, 'type': 'Group', 'name': 'gMarc', 'label': 'Zimmer Marc', 'category': 'boy_1', 'tags': [], 'groupNames': []}
+        json_data = {'members': [], 'link': 'http://homeserver:8080/rest/items/gMarc', 'state': 'NULL', 'editable': False, 'type': 'Group', 'name': 'gMarc', 'label': 'Zimmer Marc', 'category': 'boy_1', 'tags': [], 'groupNames': []}  # noqa
         ev_out = rest._fetch_item(time_start_loading, json_data)
         channel = Channel.create(ChannelType.GROUP, 'gMarc')
         state = State.create(StateType.GROUP, None)
@@ -98,7 +98,7 @@ class TestOhRest(unittest.TestCase):
         self.check_fetch_event(ev_out, ev_cmp)
 
         # noinspection PyPep8
-        json_data = {'members': [], 'groupType': 'Rollershutter', 'function': {'name': 'EQUALITY'}, 'link': 'http://homeserver:8080/rest/items/gShutter', 'state': '0', 'editable': False, 'type': 'Group', 'name': 'gShutter', 'label': 'Alle Rollläden', 'category': 'rollershutter-50', 'tags': [], 'groupNames': []}
+        json_data = {'members': [], 'groupType': 'Rollershutter', 'function': {'name': 'EQUALITY'}, 'link': 'http://homeserver:8080/rest/items/gShutter', 'state': '0', 'editable': False, 'type': 'Group', 'name': 'gShutter', 'label': 'Alle Rollläden', 'category': 'rollershutter-50', 'tags': [], 'groupNames': []}  # noqa
         ev_out = rest._fetch_item(time_start_loading, json_data)
         channel = Channel.create(ChannelType.GROUP, 'gShutter')
         state = State.create(StateType.GROUP, '0')
@@ -110,7 +110,7 @@ class TestOhRest(unittest.TestCase):
         time_start_loading = datetime.datetime.now()
 
         # noinspection PyPep8
-        json_data = {'statusInfo': {'status': 'ONLINE', 'statusDetail': 'NONE'}, 'editable': False, 'label': 'Homematic Bridge', 'configuration': {'cuxdPort': 8701, 'socketMaxAlive': 900, 'installModeDuration': 60, 'reconnectInterval': 3600, 'timeout': 15, 'hmIpPort': 2010, 'discoveryTimeToLive': -1, 'wiredPort': 2000, 'gatewayType': 'ccu', 'callbackHost': '127.0.0.1', 'groupPort': 9292, 'gatewayAddress': '127.0.0.1', 'unpairOnDeletion': False, 'rfPort': 2001}, 'properties': {'serialNumber': 'NEQ1327832', 'firmwareVersion': '2.29.23.20171118', 'modelId': 'CCU2'}, 'UID': 'homematic:bridge:rhm', 'thingTypeUID': 'homematic:bridge', 'channels': []}
+        json_data = {'statusInfo': {'status': 'ONLINE', 'statusDetail': 'NONE'}, 'editable': False, 'label': 'Homematic Bridge', 'configuration': {'cuxdPort': 8701, 'socketMaxAlive': 900, 'installModeDuration': 60, 'reconnectInterval': 3600, 'timeout': 15, 'hmIpPort': 2010, 'discoveryTimeToLive': -1, 'wiredPort': 2000, 'gatewayType': 'ccu', 'callbackHost': '127.0.0.1', 'groupPort': 9292, 'gatewayAddress': '127.0.0.1', 'unpairOnDeletion': False, 'rfPort': 2001}, 'properties': {'serialNumber': 'NEQ1327832', 'firmwareVersion': '2.29.23.20171118', 'modelId': 'CCU2'}, 'UID': 'homematic:bridge:rhm', 'thingTypeUID': 'homematic:bridge', 'channels': []}  # noqa
         ev_out = rest._fetch_thing(time_start_loading, json_data)
         channel = Channel.create(ChannelType.THING, 'homematic:bridge:rhm')
         state = State.create(StateType.THING_STATUS, ThingStatusValue.ONLINE)
@@ -167,5 +167,3 @@ class TestOhRest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
-

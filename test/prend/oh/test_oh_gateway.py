@@ -47,26 +47,29 @@ class TestOhGateway(unittest.TestCase):
         gateway.set_rest(rest)
 
         # prepare rest
-        ev_update = OhEvent.create(OhNotificationType.ITEM_CHANGE
-                                   , Channel.create(ChannelType.ITEM, 'dummySwitch')
-                                   , State.create(StateType.SWITCH, OnOffValue.ON))
+        ev_update = OhEvent.create(OhNotificationType.ITEM_CHANGE,
+                                   Channel.create(ChannelType.ITEM, 'dummySwitch'),
+                                   State.create(StateType.SWITCH, OnOffValue.ON))
         rest.dummy_events.append(ev_update)
-        ev_dummy = OhEvent.create(OhNotificationType.GROUP_CHANGE
-                                  , Channel.create(ChannelType.GROUP, 'gMarc')
-                                  , State.create(StateType.GROUP, None))
-        rest.dummy_events.append(ev_dummy)
-        ev_dummy = OhEvent.create(OhNotificationType.GROUP_CHANGE
-                                  , Channel.create(ChannelType.GROUP, 'gShutter')
-                                  , State.create(StateType.GROUP, '0'))
-        rest.dummy_events.append(ev_dummy)
-        ev_dummy = OhEvent.create(OhNotificationType.THING_CHANGE
-                                  , Channel.create(ChannelType.THING, 'homematic:bridge:rhm')
-                                  , State.create(StateType.THING_STATUS, ThingStatusValue.ONLINE))
+
+        ev_dummy = OhEvent.create(OhNotificationType.GROUP_CHANGE,
+                                  Channel.create(ChannelType.GROUP, 'gMarc'),
+                                  State.create(StateType.GROUP, None))
         rest.dummy_events.append(ev_dummy)
 
-        ev_dummy = OhEvent.create(OhNotificationType.ITEM_CHANGE
-                                  , Channel.create(ChannelType.ITEM, 'to_be_remove')
-                                  , State.create(StateType.SWITCH, OnOffValue.ON))
+        ev_dummy = OhEvent.create(OhNotificationType.GROUP_CHANGE,
+                                  Channel.create(ChannelType.GROUP, 'gShutter'),
+                                  State.create(StateType.GROUP, '0'))
+        rest.dummy_events.append(ev_dummy)
+
+        ev_dummy = OhEvent.create(OhNotificationType.THING_CHANGE,
+                                  Channel.create(ChannelType.THING, 'homematic:bridge:rhm'),
+                                  State.create(StateType.THING_STATUS, ThingStatusValue.ONLINE))
+        rest.dummy_events.append(ev_dummy)
+
+        ev_dummy = OhEvent.create(OhNotificationType.ITEM_CHANGE,
+                                  Channel.create(ChannelType.ITEM, 'to_be_remove'),
+                                  State.create(StateType.SWITCH, OnOffValue.ON))
         gateway.push_event(ev_dummy)
 
         states_comp = gateway.get_states()

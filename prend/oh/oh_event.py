@@ -47,8 +47,8 @@ class OhNotificationType(Enum):
             elif text in ('ThingStatusInfoEvent', 'ThingStatusInfoChangedEvent'):
                 result = OhNotificationType.THING_CHANGE
 
-            elif text in ('ItemAddedEvent', 'ItemRemovedEvent', 'ItemUpdatedEvent'
-                          , 'ThingAddedEvent', 'ThingRemovedEvent', 'ThingUpdatedEvent'):
+            elif text in ('ItemAddedEvent', 'ItemRemovedEvent', 'ItemUpdatedEvent', 'ThingAddedEvent',
+                          'ThingRemovedEvent', 'ThingUpdatedEvent'):
                 result = OhNotificationType.RELOAD
             else:
                 result = OhNotificationType.IGNORE

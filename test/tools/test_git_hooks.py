@@ -55,4 +55,3 @@ class TestSampleRule(unittest.TestCase):
         test_env['GITHOOK_PREPUSH_LOCAL_REF'] = 'refs/heads/private'
         test_env['GITHOOK_PREPUSH_REMOTE_REF'] = 'refs/heads/private'
         self.check_run_hook(hook_script, test_env, 0)
-

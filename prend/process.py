@@ -107,13 +107,13 @@ class Process:
             raise TypeError("{} is not of type {}!".format(class_info, class_target))
 
     @classmethod
-    def resolve_import(cls, path:str) -> Rule.__class__:
+    def resolve_import(cls, path: str) -> Rule.__class__:
         delimiter = path.rfind(".")
         classname = path[delimiter + 1:len(path)]
         mod = __import__(path[0:delimiter], globals(), locals(), [classname])
         return getattr(mod, classname)
 
-    def register_rule_instance(self, rule:Rule):
+    def register_rule_instance(self, rule: Rule):
         try:
             self._check_class(rule)
             self._rule_manager.register_rule(rule)
@@ -121,7 +121,7 @@ class Process:
             print('error: {}'.format(ex))
             self._exit_code = 1
 
-    def register_rule_path(self, name:str):
+    def register_rule_path(self, name: str):
         try:
             rule_class = self.resolve_import(name)
             rule = rule_class()
@@ -147,4 +147,3 @@ class Process:
         except Exception as ex:
             print('error config rules via config files: {}'.format(ex))
             self._exit_code = 1
-

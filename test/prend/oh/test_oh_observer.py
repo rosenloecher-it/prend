@@ -43,7 +43,7 @@ class TestOhObserver(unittest.TestCase):
 
         # {"topic":"smarthome/items/valSockMeasPower/state","payload":"{\"type\":\"Decimal\",\"value\":\"109.01\"}","type":"ItemStateEvent"}
         # noinspection PyPep8
-        str_in = '{"topic":"smarthome/items/valSockMeasPower/state","payload":"{\\\"type\\\":\\\"Decimal\\\",\\\"value\\\":\\\"109.01\\\"}","type":"ItemStateEvent"}'
+        str_in = '{"topic":"smarthome/items/valSockMeasPower/state","payload":"{\\\"type\\\":\\\"Decimal\\\",\\\"value\\\":\\\"109.01\\\"}","type":"ItemStateEvent"}'  # noqa
         oh_channel = Channel.create(ChannelType.ITEM, 'valSockMeasPower')
         oh_state = State.create(StateType.DECIMAL, 109.01)
         ev_cmp = OhEvent.create(OhNotificationType.ITEM_CHANGE, oh_channel, oh_state)

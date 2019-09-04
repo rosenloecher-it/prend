@@ -1,10 +1,6 @@
 import unittest
-from prend.channel import Channel
 from prend.config import ConfigLoader
-from prend.oh.oh_gateway import OhGateway
 from prend.rule import Rule
-from prend.state import State
-from typing import Optional
 
 
 class MockRule(Rule):

@@ -153,6 +153,3 @@ class OhObserver(threading.Thread):
         finally:
             if event_loop:
                 event_loop.close()
-
-
-
