@@ -70,15 +70,21 @@ class TestDispatcher(unittest.TestCase):
 
         process2 = MockRegisterProcess()
         path = MockRegisterProcess.__module__ + '.' + MockRegisterProcess.__name__
-        process2.register_rule_path(path)
-        self.assertEqual(process2._exit_code, 1)
-        self.assertEqual(process2._rule_manager.rule, None)
+        try:
+            process2.register_rule_path(path)
+            self.assertTrue(False)
+        except Exception:
+            self.assertEqual(process2._exit_code, 1)
+            self.assertEqual(process2._rule_manager.rule, None)
 
         process3 = MockRegisterProcess()
         path = 'asdfdqfg.does.not.Exists!'
-        process3.register_rule_path(path)
-        self.assertEqual(process3._exit_code, 1)
-        self.assertEqual(process3._rule_manager.rule, None)
+        try:
+            process3.register_rule_path(path)
+            self.assertTrue(False)
+        except Exception:
+            self.assertEqual(process3._exit_code, 1)
+            self.assertEqual(process3._rule_manager.rule, None)
 
 
 if __name__ == '__main__':

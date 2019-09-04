@@ -17,6 +17,7 @@ class Process:
         self._config = None
         self._rule_manager = None
         self._exit_code = None
+        self._register_rules_from_config = False
 
     def _print_and_return(self, exit_code):
         if self._config:
@@ -69,6 +70,11 @@ class Process:
                 return self._exit_code
             if not self._config or not self._rule_manager:
                 return 1
+
+            if self._register_rules_from_config:
+                if self._config.parsed.start or self._config.parsed.toogle or \
+                        self._config.parsed.foreground or self._config.parsed.ensure:
+                    self._register_rules_from_config_delayed()
 
             if self._config.parsed.stop:
                 logger.debug('run(stop)')
@@ -129,22 +135,26 @@ class Process:
             self._check_class(rule)
             self._rule_manager.register_rule(rule)
         except Exception as ex:
-            print('error: {}'.format(ex))
+            print('could not load module ''{}''!'.format(name))
             self._exit_code = 1
+            raise
 
     def register_rules_from_config(self):
+        self._register_rules_from_config = True
+
+    def _register_rules_from_config_delayed(self):
         try:
             section = self._config.rule_config.get(self.CONFIG_SECTION_RULES)
             if section is None:
-                raise RuntimeError('config section "{}" not found!'.format(self.CONFIG_SECTION_RULES))
+                raise RuntimeError('config section ''{}'' not found!'.format(self.CONFIG_SECTION_RULES))
             pathes = section.values()
             for path in pathes:
                 if path:
                     self.register_rule_path(path)
 
             if self._exit_code is not None:
-                raise RuntimeError('some entries could not be loaded!')
+                raise RuntimeError('some entries could not be loaded!?')
 
         except Exception as ex:
-            print('error config rules via config files: {}'.format(ex))
-            self._exit_code = 1
+            # print('error config rules via config files: {}'.format(ex))
+            raise
