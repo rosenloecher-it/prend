@@ -135,7 +135,7 @@ class Process:
             self._check_class(rule)
             self._rule_manager.register_rule(rule)
         except Exception as ex:
-            print('could not load module ''{}''!'.format(name))
+            print('could not load module "{}"! {}'.format(name, ex))
             self._exit_code = 1
             raise
 
@@ -155,6 +155,5 @@ class Process:
             if self._exit_code is not None:
                 raise RuntimeError('some entries could not be loaded!?')
 
-        except Exception as ex:
-            # print('error config rules via config files: {}'.format(ex))
+        except Exception:
             raise
