@@ -120,7 +120,7 @@ class LoggingHelper:
         # (for debugging in foreground mode, but not useful within a deamon)
         root_logger = logging.getLogger()
         for handler in root_logger.handlers:
-            if type(handler) is logging.StreamHandler:
+            if isinstance(handler, logging.StreamHandler):
                 root_logger.removeHandler(handler)
                 break
 

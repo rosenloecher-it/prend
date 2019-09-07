@@ -72,6 +72,7 @@ class RuleManager(Daemon):
                 except Exception as ex:
                     _logger.exception(ex)
             self._rules.clear()
+        # pylint: disable=broad-except
         except Exception as ex:
             _logger.exception(ex)
 

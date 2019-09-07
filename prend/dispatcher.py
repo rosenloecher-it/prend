@@ -20,6 +20,7 @@ class ActionListener:
     def __init__(self):
         self.channel: Channel = None
         self.listener = None
+        self.type = None
 
 
 class DispatcherActionSink:

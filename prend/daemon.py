@@ -124,7 +124,6 @@ class Daemon:
         """
         Shutdown in process - notify derived classes
         """
-        pass
 
     def start(self):
         """

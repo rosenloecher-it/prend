@@ -9,11 +9,9 @@ from prend.oh.oh_event import OhEvent, OhNotificationType
 from random import randint
 
 
-"""
-aiosseclient for for OpenHAB notifications
-    Asynchronous Server Side Events (SSE) Client
-    https://github.com/ebraminio/aiosseclient
-"""
+# aiosseclient for OpenHAB notifications
+#     Asynchronous Server Side Events (SSE) Client
+#     https://github.com/ebraminio/aiosseclient
 
 
 _logger = logging.getLogger(__name__)
