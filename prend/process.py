@@ -6,6 +6,7 @@ from prend.config import ConfigLoader
 from prend.logging_helper import LoggingHelper
 from prend.rule import Rule
 from prend.rule_manager import RuleManager
+from prend.tools.persister import TypePersister
 
 
 # pylint: disable=broad-except
@@ -38,6 +39,8 @@ class Process:
                 return self._print_and_return(self._config.exit_code)
 
             LoggingHelper.set_explicit_module_loglevels(self._config)
+
+            TypePersister.set_storage_path(self._config.persist_dir)
 
             self._rule_manager = RuleManager(self._config)
 

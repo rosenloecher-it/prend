@@ -106,6 +106,7 @@ class Config:
         self.oh_simulate_sending = False
         self.parsed = None
         self.pid_file = None
+        self.persist_dir = None
         self.work_dir = None
         self.timeout = None
         self.rule_config = {}
@@ -128,6 +129,8 @@ class Config:
             lines.append('simulate send = {}'.format(self.oh_simulate_sending))
         if self.pid_file or print_all:
             lines.append('pid file      = {}'.format(self.pid_file))
+        if self.work_dir or print_all:
+            lines.append('persist dir   = {}'.format(self.work_dir))
         if self.work_dir or print_all:
             lines.append('work dir      = {}'.format(self.work_dir))
         if self.log_config_file or print_all:
@@ -276,6 +279,9 @@ class ConfigLoader:
             config.locale = cls._read_from_config_parser(file_reader, section_system, 'locale')
             config.pid_file = cls._read_from_config_parser(file_reader, section_system, 'pid_file')
             config.work_dir = cls._read_from_config_parser(file_reader, section_system, 'work_dir')
+            config.persist_dir = cls._read_from_config_parser(file_reader, section_system, 'persist_dir')
+            if not config.persist_dir:
+                config.persist_dir = config.work_dir
 
             app_name = cls.get_app_name()
 

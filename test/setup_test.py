@@ -28,6 +28,8 @@ class SetupTest:
         if not exists:
             os.makedirs(work_dir)
 
+        return work_dir
+
     @classmethod
     def ensure_clean_work_dir(cls):
         work_dir = cls.get_work_dir()
@@ -38,6 +40,8 @@ class SetupTest:
             cls.ensure_work_dir()
         else:
             cls.clean_dir_recursively(work_dir)
+
+        return work_dir
 
     # endregion
 
