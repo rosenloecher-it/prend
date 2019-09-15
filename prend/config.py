@@ -280,8 +280,6 @@ class ConfigLoader:
             config.pid_file = cls._read_from_config_parser(file_reader, section_system, 'pid_file')
             config.work_dir = cls._read_from_config_parser(file_reader, section_system, 'work_dir')
             config.persist_dir = cls._read_from_config_parser(file_reader, section_system, 'persist_dir')
-            if not config.persist_dir:
-                config.persist_dir = config.work_dir
 
             app_name = cls.get_app_name()
 
@@ -302,6 +300,11 @@ class ConfigLoader:
                 config.work_dir = '/var/lib/{}'.format(app_name)
             else:
                 config.work_dir = cls._ensure_abs_path_to_config(config.config_file, config.work_dir)
+
+            if not config.persist_dir:
+                config.persist_dir = config.work_dir
+            else:
+                config.persist_dir = cls._ensure_abs_path_to_config(config.config_file, config.persist_dir)
 
             if not config.pid_file:
                 config.pid_file = '/var/run/{}.pid'.format(app_name)
