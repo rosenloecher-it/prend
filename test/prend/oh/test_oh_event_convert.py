@@ -1,3 +1,6 @@
+# flake8: noqa: E501
+# noinspection PyPep8,Pylint
+
 import unittest
 import datetime
 from dateutil.tz import tzoffset
@@ -8,7 +11,6 @@ from prend.state import State
 from prend.channel import Channel, ChannelType
 
 
-# noinspection PyPep8,Pylint
 class TestOhEventNotify(unittest.TestCase):
 
     def check_notify_event(self, str_in, ev_cmp):
