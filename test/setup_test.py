@@ -68,7 +68,7 @@ class SetupTest:
 
     @classmethod
     def get_project_dir(cls):
-        file_path = os.path.dirname(os.path.realpath(__file__))
+        file_path = os.path.dirname(__file__)
         # go up one time
         out = os.path.dirname(file_path)
         return out

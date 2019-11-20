@@ -94,11 +94,6 @@ class TestCliArgs(unittest.TestCase):
                 self.assertTrue(args_out.exit_code is not None)
                 self.assertTrue(args_out.exit_code != 0)
 
-    # pylint: disable=protected-access
-    def test_ensure_abs_path_to_config(self):
-        out = ConfigLoader._ensure_abs_path_to_config('/home/xxx/prend/prend.conf', './__test__')
-        self.assertEqual('/home/xxx/prend/__test__', out)
-
 
 class TestConfig(unittest.TestCase):
 

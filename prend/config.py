@@ -335,7 +335,7 @@ class ConfigLoader:
     def _ensure_abs_path_to_config(cls, config_file, path_in):
         if not os.path.isabs(path_in):
             dirname = os.path.dirname(config_file)
-            path_out = os.path.realpath(os.path.join(dirname, path_in))
+            path_out = os.path.join(dirname, path_in)
             return path_out
         return path_in
 
