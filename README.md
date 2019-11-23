@@ -50,7 +50,7 @@ $ git clone --depth=1
 $ cd prend
 
 # create virtual environment (make sure, that python3 and virtualenv are installed)
-$ virtualenv -p $(type -p python3) venv
+$ virtualenv -p python3 venv
 # activate venv
 $ source ./venv/bin/activate
 # check python version => 3.6 and above
