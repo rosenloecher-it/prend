@@ -1,13 +1,14 @@
-import aiohttp
 import asyncio
 import json
 import logging
 import threading
-from aiosseclient import Event
-from prend.config import Config
-from prend.oh.oh_event import OhEvent, OhNotificationType
 from random import randint
 
+import aiohttp
+
+from prend.config import Config
+from prend.oh.aiosseclient import Event
+from prend.oh.oh_event import OhEvent, OhNotificationType
 
 # aiosseclient for OpenHAB notifications
 #     Asynchronous Server Side Events (SSE) Client

@@ -1,7 +1,5 @@
-aiohttp >= 3.4.4
-git+https://github.com/ebraminio/aiosseclient
-multiprocessing-logging >= 0.2.6
-py-dateutil >= 2.2
-pylint
-requests >= 2.20.1
+aiohttp >= 3.6.2
+multiprocessing-logging == 0.3
+py-dateutil == 2.2
+requests == 2.22
 schedule == 0.6.0
