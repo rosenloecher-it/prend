@@ -1,5 +1,8 @@
+import logging
 import os
 import pathlib
+import sys
+
 from prend.config import ConfigLoader
 from prend.constants import Constants
 
@@ -9,6 +12,19 @@ class SetupTestException(Exception):
 
 
 class SetupTest:
+
+    _logging_inited = False
+
+    @classmethod
+    def init_logging(cls):
+        if not cls._logging_inited:
+            cls._logging_inited = True
+
+            logging.basicConfig(
+                format='[%(levelname)8s] %(name)s: %(message)s',
+                level=logging.DEBUG,
+                handlers=[logging.StreamHandler(sys.stdout)]
+            )
 
     # region folded: work dir
     @classmethod
