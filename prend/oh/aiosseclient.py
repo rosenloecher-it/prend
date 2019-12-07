@@ -3,6 +3,8 @@ source https://github.com/ebraminio/aiosseclient
 """
 
 import re
+import warnings
+
 import aiohttp
 
 
@@ -15,10 +17,10 @@ async def aiosseclient(url, last_id=None, **kwargs):
 
     # The 'Accept' header is not required, but explicit > implicit
     kwargs['headers']['Accept'] = 'text/event-stream'
-    
+
     if last_id:
         kwargs['headers']['Last-Event-ID'] = last_id
-    
+
     async with aiohttp.ClientSession() as session:
         response = await session.get(url, **kwargs)
         lines = []
@@ -101,4 +103,3 @@ class Event(object):
 
     def __str__(self):
         return self.data
-    
