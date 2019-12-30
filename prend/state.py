@@ -239,7 +239,7 @@ class State:
             elif OnOffValue.ON == self.value:
                 return True
             raise ValueError()
-        elif StateType.DIMMER == self.type:
+        elif self.type in [StateType.DIMMER, StateType.DECIMAL, StateType.PERCENT]:
             conv = int(self.value)
             if conv == 0:
                 return False

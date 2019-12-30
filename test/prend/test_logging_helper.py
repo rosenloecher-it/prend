@@ -94,6 +94,26 @@ class TestLoggingHelper(unittest.TestCase):
         LoggingHelper.set_explicit_module_loglevels(None)
         LoggingHelper.set_explicit_module_loglevels({})
 
+    def test_get_logname(self):
+        path = self.__module__
+        name = self.__class__.__name__
+        full_path = "{}.{}".format(path, name)
+
+        ln = LoggingHelper.get_logname(self, "Xtra")
+        self.assertEqual(ln, full_path + "(xtra)")
+
+        ln = LoggingHelper.get_logname(self, name)
+        self.assertEqual(ln, full_path)
+
+        ln = LoggingHelper.get_logname(self, name.upper())
+        self.assertEqual(ln, full_path)
+
+        ln = LoggingHelper.get_logname(self, full_path)
+        self.assertEqual(ln, full_path)
+
+        ln = LoggingHelper.get_logname(self, full_path.upper())
+        self.assertEqual(ln, full_path)
+
 
 if __name__ == '__main__':
     unittest.main()

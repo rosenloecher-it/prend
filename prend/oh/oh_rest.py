@@ -137,7 +137,7 @@ class OhRest:
 
         send_command = data.is_send()
         if data.is_send() and value_state is None:
-            _logger.warning('cannot send None/UNDEF via COMMAND => use UPDATE instead!')
+            _logger.debug('cannot send None/UNDEF via COMMAND (%s) => use UPDATE instead!', str(channel))
             # noinspection PyUnusedLocal
             send_command = False
 

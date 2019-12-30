@@ -92,7 +92,11 @@ class MockOhGateway(OhGateway):
             else:
                 comp_value = data_compare
 
-            if sent_value == comp_value:
-                return True
+            if type(sent_value) == float and type(comp_value) == float:
+                if abs(sent_value - comp_value) <= 0.000001:
+                    return True
+            else:
+                if sent_value == comp_value:
+                    return True
 
         return False

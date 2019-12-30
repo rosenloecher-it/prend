@@ -1,5 +1,6 @@
 import copy
 import unittest
+
 from prend.action import Action
 from prend.channel import Channel, ChannelType
 from prend.dispatcher import DispatcherActionSink
@@ -34,6 +35,12 @@ class MockDispatcher(DispatcherActionSink):
 
     def push_action(self, root_action: Action) -> None:
         self.queued_actions[root_action.channel] = root_action
+
+    def register_cron_listener(self, cron_key: str, job, listener):
+        pass
+
+    def register_oh_listener(self, channel, listeners) -> None:
+        pass
 
 
 class TestOhGateway(unittest.TestCase):

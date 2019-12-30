@@ -79,6 +79,7 @@ class RuleManager(Daemon):
     def shutdown_rest(self):
         try:
             if self._rest:
+                self._oh_gateway.send_queued()
                 self._rest.close()
                 self._rest = None
         except Exception as ex:
@@ -248,13 +249,13 @@ class RuleManager(Daemon):
             self.last_status_log = datetime.datetime.now()
 
             sum_all = (datetime.datetime.now() - self.time_usage_start).total_seconds()
-            time_coverage = 100.0 * (self.time_usage_dispatch + self.time_usage_state
-                                     + self.time_usage_sleep + self.time_usage_send) / sum_all
+            time_coverage = 100.0 * (self.time_usage_dispatch + self.time_usage_state +
+                                     self.time_usage_sleep + self.time_usage_send) / sum_all
             share_dispatch = 100.0 * self.time_usage_dispatch / sum_all
             share_send = 100.0 * self.time_usage_send / sum_all
             share_sleep = 100.0 * self.time_usage_sleep / sum_all
 
-            _logger.debug('alive + time shares: cov=%.1f%%, send=%.1f%%, dispatch=%.1f%%, sleep=%.1f%%',
-                          time_coverage, share_send, share_dispatch, share_sleep)
+            _logger.info('alive + time shares: cov=%.1f%%, send=%.1f%%, dispatch=%.1f%%, sleep=%.1f%%',
+                         time_coverage, share_send, share_dispatch, share_sleep)
 
             self._reset_time_usage()

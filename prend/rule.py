@@ -1,6 +1,9 @@
+import logging
+
 import schedule
 from abc import ABC, abstractmethod
 from prend.channel import Channel
+from prend.logging_helper import LoggingHelper
 from prend.oh.oh_send_data import OhSendFlags
 from prend.state import State
 from prend.tools.convert import Convert
@@ -17,9 +20,24 @@ class Rule(ABC):
         self._dispatcher = None
         self._oh_gateway = None
         self._config = None
+        self._instance_name = None
+        self._logger = None
 
     def __repr__(self) -> str:
-        return '{}()'.format(self.__class__.__name__)
+        return '{}({})'.format(self.__class__.__name__, self._instance_name)
+
+    def _get_logger(self):
+        if self._logger is None:
+            log_name = LoggingHelper.get_logname(self, self._instance_name)
+            self._logger = logging.getLogger(log_name)
+        return self._logger
+
+    def set_instance_name(self, instance_name: str):
+        if not self._instance_name:
+            self._instance_name = instance_name
+
+    def get_instance_name(self):
+        return self._instance_name
 
     def set_config(self, config):
         self._config = config

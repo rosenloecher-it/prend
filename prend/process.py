@@ -107,7 +107,8 @@ class Process:
             print(traceback.format_exc())
             return 1
 
-    def _check_class(self, rule):
+    @classmethod
+    def _check_class(cls, rule):
         if not isinstance(rule, Rule):
             if rule:
                 class_info = rule.__class__.__module__ + '.' + rule.__class__.__name__
@@ -131,14 +132,15 @@ class Process:
             print('error: {}'.format(ex))
             self._exit_code = 1
 
-    def register_rule_path(self, name: str):
+    def register_rule_path(self, rule_instance_name: str, rule_path: str):
         try:
-            rule_class = self.resolve_import(name)
+            rule_class = self.resolve_import(rule_path)
             rule = rule_class()
             self._check_class(rule)
+            rule.set_instance_name(rule_instance_name)
             self._rule_manager.register_rule(rule)
         except Exception as ex:
-            print('could not load module "{}"! {}'.format(name, ex))
+            print('could not load module "{}"! {}'.format(rule_path, ex))
             self._exit_code = 1
             raise
 
@@ -149,14 +151,15 @@ class Process:
         try:
             section = self._config.rule_config.get(self.CONFIG_SECTION_RULES)
             if section is None:
-                raise RuntimeError('config section ''{}'' not found!'.format(self.CONFIG_SECTION_RULES))
-            pathes = section.values()
-            for path in pathes:
-                if path:
-                    self.register_rule_path(path)
+                raise RuntimeError('config section "{}" not found!'.format(self.CONFIG_SECTION_RULES))
+
+            for rule_instance_name, rule_path in section.items():
+                if rule_path:
+                    self.register_rule_path(rule_instance_name, rule_path)
 
             if self._exit_code is not None:
                 raise RuntimeError('some entries could not be loaded!?')
 
         except Exception:
+            # print('error config rules via config files: {}'.format(ex))
             raise

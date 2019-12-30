@@ -45,62 +45,68 @@ class Persister:
             self._data[key] = value
         self.save(True)
 
-    def get_value(self, key):
+    def get_value(self, key, default_value=None):
         clone = None
         with self._lock:
             value = self._data.get(key)
             if value:
                 clone = copy.deepcopy(value)
 
-        return clone
+        if clone is None:
+            return default_value
+        else:
+            return clone
 
-    def get_str(self, key):
+    def get_str(self, key, default_value=None):
         raw = self.get_value(key)
-        return str(raw)
+        if raw is None:
+            return default_value
+        else:
+            return str(raw)
 
-    def get_float(self, key):
+    def get_float(self, key, default_value=None):
         raw = self.get_value(key)
-        return self.parse_float(raw)
+        return self.parse_float(raw, default_value)
 
     @staticmethod
-    def parse_float(raw):
+    def parse_float(raw, default_value=None):
         if raw is None:
-            return None
+            return default_value
         try:
             return float(raw)
         except ValueError:
-            return None
+            return default_value
 
-    def get_int(self, key):
+    def get_int(self, key, default_value=None):
         raw = self.get_value(key)
-        return self.parse_int(raw)
+        return self.parse_int(raw, default_value)
 
     @staticmethod
-    def parse_int(raw):
+    def parse_int(raw, default_value=None):
         if raw is None:
-            return None
+            return default_value
         try:
             return int(round(float(raw)))
         except ValueError:
-            return None
+            return default_value
 
-    def get_datetime(self, key):
+    def get_datetime(self, key, default_value=None):
         raw = self.get_value(key)
-        return self.parse_datetime(raw)
+        return self.parse_datetime(raw, default_value)
 
     @staticmethod
-    def parse_datetime(raw):
+    def parse_datetime(raw, default_value=None):
         if raw is None:
-            return None
+            return default_value
         if not isinstance(raw, str):
             return None
         raw = raw.strip()
         if not raw:
-            return None
+            return default_value
         try:
             return dateutil.parser.parse(raw)
         except (ValueError, TypeError):
-            return None
+            return default_value
 
     def get_all(self):
         clone = None

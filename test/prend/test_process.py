@@ -64,14 +64,14 @@ class TestDispatcher(unittest.TestCase):
         self.assertEqual(process1._exit_code, None)
         self.assertEqual(process1._rule_manager.rule, None)
         path = SampleRule.__module__ + '.' + SampleRule.__name__
-        process1.register_rule_path(path)
+        process1.register_rule_path(SampleRule.__name__, path)
         self.assertEqual(process1._exit_code, None)
         self.assertTrue(isinstance(process1._rule_manager.rule, SampleRule))
 
         process2 = MockRegisterProcess()
         path = MockRegisterProcess.__module__ + '.' + MockRegisterProcess.__name__
         try:
-            process2.register_rule_path(path)
+            process2.register_rule_path(MockRegisterProcess.__name__, path)
             self.assertTrue(False)
         except Exception:
             self.assertEqual(process2._exit_code, 1)
@@ -80,7 +80,7 @@ class TestDispatcher(unittest.TestCase):
         process3 = MockRegisterProcess()
         path = 'asdfdqfg.does.not.Exists!'
         try:
-            process3.register_rule_path(path)
+            process3.register_rule_path("???", path)
             self.assertTrue(False)
         except Exception:
             self.assertEqual(process3._exit_code, 1)

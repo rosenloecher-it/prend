@@ -69,7 +69,7 @@ class OhObserver(threading.Thread):
         if last_id:
             kwargs['headers']['Last-Event-ID'] = last_id
 
-        one_year_in_seconds = 365*24*60*60
+        one_year_in_seconds = 365 * 24 * 60 * 60
 
         try:
             async with aiohttp.ClientSession(read_timeout=one_year_in_seconds) as session:

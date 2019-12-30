@@ -1,9 +1,9 @@
-import prend
+from prend.constants import Constants
 from setuptools import setup
 
 setup(name='prend',
-      version=prend.Constants.app_version,
-      description=prend.Constants.app_desc,
+      version=Constants.app_version,
+      description=Constants.app_desc,
       long_description=open('README.md').read(),
       keywords='openhab rule engine daemon rest',
       url='https://github.com/rosenloecher-it/prend',
