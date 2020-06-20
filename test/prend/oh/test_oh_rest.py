@@ -1,4 +1,6 @@
 import datetime
+
+import pytz
 import requests
 import unittest
 from prend.channel import Channel, ChannelType
@@ -118,6 +120,10 @@ class TestOhRest(unittest.TestCase):
         self.check_fetch_event(ev_out, ev_cmp)
 
     def test_format_for_request(self):
+        test_time = datetime.datetime(2020, 8, 9, 15, 5, 1, 234111, tzinfo=pytz.utc)
+        out = OhRest.format_for_request(test_time)
+        print(out)
+        self.assertEqual(b'2020-08-09T15:05:01.234+0000', out)
 
         out = OhRest.format_for_request(123)
         print(out)

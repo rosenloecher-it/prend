@@ -1,5 +1,6 @@
 from prend.channel import Channel, ChannelType
 from prend.oh.oh_event import OhEvent, OhNotificationType
+from prend.state import State
 
 
 class ActionException(Exception):
@@ -16,9 +17,9 @@ class Action:
     def __init__(self):
         self.channel = None
         self.listener = None
-        self.state_old = None    # type OhValue
-        self.state_new = None    # type OhValue
-        self.notification_type = None
+        self.state_old = None    # type: State
+        self.state_new = None    # type: State
+        self.notification_type = None  # type: OhNotificationType
 
     def __eq__(self, other) -> bool:
         if not other:

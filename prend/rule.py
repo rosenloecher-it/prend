@@ -2,8 +2,12 @@ import logging
 
 import schedule
 from abc import ABC, abstractmethod
+
+from prend.action import Action
 from prend.channel import Channel
+from prend.dispatcher import Dispatcher
 from prend.logging_helper import LoggingHelper
+from prend.oh.oh_gateway import OhGateway
 from prend.oh.oh_send_data import OhSendFlags
 from prend.state import State
 from prend.tools.convert import Convert
@@ -17,14 +21,17 @@ class RuleException(Exception):
 class Rule(ABC):
 
     def __init__(self):
-        self._dispatcher = None
-        self._oh_gateway = None
+        self._dispatcher = None  # type: Dispatcher
+        self._oh_gateway = None  # type: OhGateway
         self._config = None
         self._instance_name = None
         self._logger = None
 
     def __repr__(self) -> str:
-        return '{}({})'.format(self.__class__.__name__, self._instance_name)
+        if not self._instance_name or self.__class__.__name__.lower() == self._instance_name.lower():
+            return self.__class__.__name__
+        else:
+            return '{}({})'.format(self.__class__.__name__, self._instance_name)
 
     def _get_logger(self):
         if self._logger is None:
@@ -124,7 +131,7 @@ class Rule(ABC):
         pass
 
     @abstractmethod
-    def notify_action(self, action) -> None:
+    def notify_action(self, action: Action) -> None:
         """
         overwrite and handle notifications
         :param action: notification data

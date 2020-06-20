@@ -120,9 +120,9 @@ class Process:
     @classmethod
     def resolve_import(cls, path: str) -> Rule.__class__:
         delimiter = path.rfind(".")
-        classname = path[delimiter + 1:len(path)]
-        mod = __import__(path[0:delimiter], globals(), locals(), [classname])
-        return getattr(mod, classname)
+        class_name = path[delimiter + 1:len(path)]
+        module_name = __import__(path[0:delimiter], globals(), locals(), [class_name])
+        return getattr(module_name, class_name)
 
     def register_rule_instance(self, rule: Rule):
         try:

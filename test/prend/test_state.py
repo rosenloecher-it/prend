@@ -63,7 +63,7 @@ class TestState(unittest.TestCase):
     def test_convert_to_json(self):
 
         out = State.convert_to_json(datetime.datetime(2018, 12, 3, 13, 7, 45, tzinfo=tzoffset(None, 3600)))
-        self.assertEqual(out, '2018-12-03T13:07:45+01:00')
+        self.assertEqual(out, '2018-12-03T13:07:45.000+0100')
 
         out = State.convert_to_json(-0.123)
         self.assertEqual(out, '-0.123')

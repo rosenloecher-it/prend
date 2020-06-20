@@ -1,5 +1,5 @@
 import unittest
-from prend.values import HsbValue
+from prend.values import HsbValue, OpeningValue, OnOffValue
 
 
 class TestHsbValue(unittest.TestCase):
@@ -28,5 +28,22 @@ class TestHsbValue(unittest.TestCase):
             self.assertTrue(True)
 
 
-if __name__ == '__main__':
-    unittest.main()
+class TestOpeningValue(unittest.TestCase):
+
+    def test_parse(self):
+
+        out = OpeningValue.parse(' closed ')
+        self.assertEqual(out, OpeningValue.CLOSED)
+
+        out = OpeningValue.parse(' tilted ')
+        self.assertEqual(out, OpeningValue.TILTED)
+
+        out = OpeningValue.parse(' Open ')
+        self.assertEqual(out, OpeningValue.OPEN)
+
+
+class TestOnOffValue(unittest.TestCase):
+
+    def test_falsy(self):
+        self.assertEqual(bool(OnOffValue.OFF), False)
+        self.assertEqual(bool(OnOffValue.ON), True)

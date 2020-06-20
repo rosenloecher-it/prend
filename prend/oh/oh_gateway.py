@@ -103,7 +103,7 @@ class OhGateway(OhGatewayEventSink):
         return channels
 
     # convenience function for get_state
-    def get_item_state(self, channel_name: str):
+    def get_item_state(self, channel_name: str) -> State:
         channel = Channel.create(ChannelType.ITEM, channel_name)
         state = self.get_state(channel)
         return state

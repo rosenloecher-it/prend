@@ -78,13 +78,21 @@ class Dispatcher(DispatcherActionSink):
             raise DispatcherException('max queued actions exceeded ({} > {})!'
                                       .format(count_queued_actions, max_queued_actions))
 
-        with self._lock_channel_listeners:
-            listeners = self._channel_listeners.get(root_action.channel)
-            if listeners:
-                for listener in listeners:
-                    action = copy.deepcopy(root_action)
-                    action.listener = listener.listener
-                    self._action_queue.put(action)
+        if root_action.listener is None:
+            with self._lock_channel_listeners:
+                listeners = self._channel_listeners.get(root_action.channel)
+                if listeners:
+                    for listener in listeners:
+                        action = copy.deepcopy(root_action)
+                        action.listener = listener.listener
+                        self._action_queue.put(action)
+        else:
+            listener = root_action.listener
+            root_action.listener = None
+            action = copy.deepcopy(root_action)
+            action.listener = listener
+            root_action.listener = listener
+            self._action_queue.put(action)
 
     def dispatch(self) -> bool:
         return self.dispatch_skip_cron(800)

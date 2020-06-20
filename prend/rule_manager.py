@@ -159,7 +159,7 @@ class RuleManager(Daemon):
                     self.time_usage_sleep += sleep_time
 
         except KeyboardInterrupt:
-            _logger.debug('KeyboardInterrupt')
+            _logger.info('KeyboardInterrupt => abort')
         except Exception as ex:
             _logger.exception(ex)
         finally:

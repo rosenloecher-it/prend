@@ -63,7 +63,7 @@ class StateType(Enum):
 class State:
 
     def __init__(self) -> None:
-        self.type = None
+        self.type = None  # type: StateType
         self.value = None
         self.last_change = None
 
@@ -219,7 +219,10 @@ class State:
         elif isinstance(value_in, FormatToJson):
             value_out = value_in.format_to_json()
         elif isinstance(value_in, datetime.datetime):
-            value_out = value_in.isoformat()
+            t1 = value_in.strftime("%Y-%m-%dT%H:%M:")
+            t2 = "{:06.3f}".format(value_in.second + value_in.microsecond / 1e6)
+            t3 = value_in.strftime("%z")
+            value_out = "{}{}{}".format(t1, t2, t3)
         elif isinstance(value_in, Enum):
             value_out = value_in.name
         else:

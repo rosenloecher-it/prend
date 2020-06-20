@@ -16,14 +16,17 @@ class FormatToJson(ABC):
 
 class OnOffValue(Enum):
 
+    OFF = 0
     ON = 1
-    OFF = 2
 
     def __str__(self):
         return self.__repr__()
 
     def __repr__(self) -> str:
         return '{}.{}'.format(self.__class__.__name__, self.name)
+
+    def __bool__(self):
+        return self.value > 0
 
     def format_to_json(self) -> str:
         return self.name
@@ -39,6 +42,8 @@ class OnOffValue(Enum):
 
     @classmethod
     def is_on(cls, value):
+        if value is None:
+            return False
         return value == cls.ON or value == 'ON'
 
     @classmethod
@@ -156,7 +161,7 @@ class OpeningValue(Enum):
         return self.__repr__()
 
     def __repr__(self) -> str:
-        return '{}.{}'.format(self.__class__.__name__, self.name)
+        return self.name
 
     def format_to_json(self) -> str:
         return self.name
