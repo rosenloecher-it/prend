@@ -1,9 +1,14 @@
-# prend
+# prend (discontinued)
 
 **P**ython **R**ule **En**gine **D**aemon - an external rule engine for [OpenHAB]
 
 Write your own [OpenHAB] rules with Python 3. Use your favorite editor, debug your code and write unittests!
 
+**Discontinued**: The code worked fine for some years, but meanwhile I'm using an alternative rule engine 
+based on [WorkerBunch].
+[WorkerBunch] uses [MQTT] to decouple the different aspects like data storage, 
+rule engine or linking of external systems.
+In my setup [OpenHAB] is now a pure GUI frontend which gets updated via [MQTT]. 
 
 ## Features
 
@@ -35,11 +40,12 @@ There were some issues about
 - (But) try-finally constructs got unreliable too. There were situations were the "finally"-branch was not called and let the system in a locked state. (A related issue: https://github.com/eclipse/smarthome/issues/6218)
 
 
-Issues were filed as bug, but the immediate solution was to change my code, even if it took some time. I had difficulties to find the problems without proper tooling (debugger, unittests). Some of the strange situations occured only during startup of OpenHAB.
+Issues were filed as bug, but the immediate solution was to change my code, even if it took some time. I had difficulties to find the problems without proper tooling (debugger, unittests). 
+Some of the strange situations occured only during startup of OpenHAB.
 
-The alternative [JSR 223](https://www.openhab.org/docs/configuration/jsr223-js.html) supports only Python 2.7 and that Javascript was also quite of cumbersome (no ES6). Both implementations base on a the (Java) Oracle Nashorn engine which is announced as deprecated.
+The alternative [JSR 223](https://www.openhab.org/docs/configuration/jsr223-js.html) supports only Python 2.7 and that Javascript was also quite of cumbersome (no ES6). Both implementations base on the (Java) Oracle Nashorn engine which is announced as deprecated.
 
-So the question was, how to make my code future proof and easy to handle...
+So the question was, how to make my code future-proof and easy to handle...
 
 
 ## Startup
@@ -177,5 +183,7 @@ The code is available at [GitHub][home].
 
 [home]: https://github.com/rosenloecher-it/prend
 [OpenHAB]: https://www.openhab.org/
+[MQTT]: https://mqtt.org/
 [sample_rule.py]: https://github.com/rosenloecher-it/prend/blob/master/app/sample_rule.py
+[WorkerBunch]: https://github.com/rosenloecher-it/worker-bunch
 
