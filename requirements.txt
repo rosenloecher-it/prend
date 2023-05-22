@@ -1,5 +1,5 @@
 aiohttp == 3.6
 multiprocessing-logging == 0.3
 py-dateutil == 2.2
-requests == 2.22
+requests == 2.31.0
 schedule == 0.6
